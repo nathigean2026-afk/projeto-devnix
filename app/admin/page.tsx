@@ -4,28 +4,59 @@ import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { authClient } from "@/lib/auth-client"
-import { getLeads, markLeadRead, updateLeadStatus, deleteLead } from "@/app/actions/leads"
+import { getLeads, updateLeadStatus, deleteLead } from "@/app/actions/leads"
 import type { Lead } from "@/lib/db/schema"
 import {
   Mail, Phone, MessageSquare, Trash2, CheckCircle2,
-  LogOut, Clock, TrendingUp, Users, Inbox,
-  ChevronDown, Search, Sun, Moon,
+  LogOut, Clock, TrendingUp, Inbox, Search, Sun, Moon,
+  ThumbsUp, ArrowUpRight, RefreshCw, Filter, User,
 } from "lucide-react"
 import { useTheme } from "next-themes"
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  novo:       { label: "Novo",       color: "bg-blue-500/15 text-blue-400 border-blue-500/25" },
-  lido:       { label: "Lido",       color: "bg-zinc-500/15 text-zinc-400 border-zinc-500/25" },
-  contatado:  { label: "Contatado",  color: "bg-amber-500/15 text-amber-400 border-amber-500/25" },
-  convertido: { label: "Convertido", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25" },
-  arquivado:  { label: "Arquivado",  color: "bg-zinc-700/30 text-zinc-500 border-zinc-600/25" },
+const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string }> = {
+  novo:        { label: "Novo",        color: "bg-blue-500/10 text-blue-400 border-blue-500/20",     dot: "bg-blue-400" },
+  lido:        { label: "Lido",        color: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",     dot: "bg-zinc-400" },
+  pendente:    { label: "Pendente",    color: "bg-amber-500/10 text-amber-400 border-amber-500/20",  dot: "bg-amber-400" },
+  respondido:  { label: "Respondido",  color: "bg-green-500/10 text-green-400 border-green-500/20",  dot: "bg-green-400" },
+  aprovado:    { label: "Aprovado",    color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", dot: "bg-emerald-400" },
 }
 
-function formatDate(d: Date | string) {
-  return new Date(d).toLocaleDateString("pt-BR", {
+const TABS = [
+  { key: "todos",      label: "Todos",       icon: Inbox },
+  { key: "novo",       label: "Novos",       icon: Mail },
+  { key: "pendente",   label: "Pendentes",   icon: Clock },
+  { key: "respondido", label: "Respondidos", icon: CheckCircle2 },
+  { key: "aprovado",   label: "Aprovados",   icon: ThumbsUp },
+] as const
+
+function fmtDate(d: Date | string) {
+  return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit", month: "short", year: "numeric",
     hour: "2-digit", minute: "2-digit",
-  })
+  }).format(new Date(d))
+}
+
+function Initials({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg" }) {
+  const letters = name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()
+  const cls = size === "sm" ? "size-8 text-xs" : size === "lg" ? "size-12 text-base" : "size-10 text-sm"
+  return (
+    <div
+      className={`${cls} rounded-full flex items-center justify-center font-bold shrink-0`}
+      style={{ background: "var(--foreground)", color: "var(--background)" }}
+    >
+      {letters}
+    </div>
+  )
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const s = STATUS_CONFIG[status] ?? STATUS_CONFIG["lido"]
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${s.color}`}>
+      <span className={`size-1.5 rounded-full ${s.dot}`} />
+      {s.label}
+    </span>
+  )
 }
 
 export default function AdminDashboard() {
@@ -35,48 +66,44 @@ export default function AdminDashboard() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [leadsLoaded, setLeadsLoaded] = useState(false)
   const [selected, setSelected] = useState<Lead | null>(null)
+  const [activeTab, setActiveTab] = useState("todos")
   const [search, setSearch] = useState("")
-  const [filterStatus, setFilterStatus] = useState("todos")
-  const [isPending, startTransition] = useTransition()
+  const [refreshing, setRefreshing] = useState(false)
+  const [, startTransition] = useTransition()
 
-  // Reactive session hook — no race condition after login redirect
   const { data: session, isPending: sessionLoading } = authClient.useSession()
+  const isDark = resolvedTheme === "dark"
 
   useEffect(() => { setMounted(true) }, [])
 
-  // Load leads only once session is confirmed
   useEffect(() => {
     if (sessionLoading) return
-    if (!session?.user) {
-      router.push("/sign-in")
-      return
-    }
-    if (!leadsLoaded) {
-      getLeads()
-        .then(data => { setLeads(data); setLeadsLoaded(true) })
-        .catch(() => router.push("/sign-in"))
-    }
-  }, [session, sessionLoading]) // eslint-disable-line react-hooks/exhaustive-deps
+    if (!session?.user) { router.push("/sign-in"); return }
+    if (!leadsLoaded) loadLeads()
+  }, [session, sessionLoading]) // eslint-disable-line
 
-  async function handleSignOut() {
-    await authClient.signOut()
-    router.push("/sign-in")
+  async function loadLeads() {
+    try {
+      const data = await getLeads()
+      setLeads(data as Lead[])
+      setLeadsLoaded(true)
+    } catch {
+      router.push("/sign-in")
+    }
   }
 
-  function openLead(lead: Lead) {
-    setSelected(lead)
-    if (lead.status === "novo") {
-      startTransition(async () => {
-        await markLeadRead(lead.id)
-        setLeads(prev => prev.map(l => l.id === lead.id ? { ...l, status: "lido", readAt: new Date() } : l))
-      })
-    }
+  async function handleRefresh() {
+    setRefreshing(true)
+    await loadLeads()
+    setTimeout(() => setRefreshing(false), 500)
   }
 
   async function handleStatus(id: number, status: string) {
-    await updateLeadStatus(id, status)
-    setLeads(prev => prev.map(l => l.id === id ? { ...l, status } : l))
-    if (selected?.id === id) setSelected(prev => prev ? { ...prev, status } : prev)
+    startTransition(async () => {
+      await updateLeadStatus(id, status)
+      setLeads(prev => prev.map(l => l.id === id ? { ...l, status } : l))
+      if (selected?.id === id) setSelected(prev => prev ? { ...prev, status } : null)
+    })
   }
 
   async function handleDelete(id: number) {
@@ -86,276 +113,368 @@ export default function AdminDashboard() {
     if (selected?.id === id) setSelected(null)
   }
 
-  const filtered = leads.filter(l => {
-    const matchSearch =
-      l.name.toLowerCase().includes(search.toLowerCase()) ||
-      l.email.toLowerCase().includes(search.toLowerCase()) ||
-      (l.subject?.toLowerCase().includes(search.toLowerCase()) ?? false)
-    const matchStatus = filterStatus === "todos" || l.status === filterStatus
-    return matchSearch && matchStatus
-  })
-
-  const stats = {
-    total: leads.length,
-    novos: leads.filter(l => l.status === "novo").length,
-    convertidos: leads.filter(l => l.status === "convertido").length,
+  async function handleSignOut() {
+    await authClient.signOut()
+    router.push("/sign-in")
   }
 
-  // While session is being loaded, show a spinner — prevents false redirect
-  if (sessionLoading) {
+  const filtered = leads.filter(l => {
+    const matchTab = activeTab === "todos" || l.status === activeTab
+    const q = search.toLowerCase()
+    const matchSearch = !q || l.name.toLowerCase().includes(q) || l.email.toLowerCase().includes(q) || (l.subject ?? "").toLowerCase().includes(q)
+    return matchTab && matchSearch
+  })
+
+  const counts = {
+    todos:      leads.length,
+    novo:       leads.filter(l => l.status === "novo").length,
+    pendente:   leads.filter(l => l.status === "pendente").length,
+    respondido: leads.filter(l => l.status === "respondido").length,
+    aprovado:   leads.filter(l => l.status === "aprovado").length,
+  }
+
+  if (sessionLoading || !leadsLoaded) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4 text-muted-foreground">
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
           <div className="size-8 border-2 border-border border-t-foreground rounded-full animate-spin" />
-          <p className="text-sm">Verificando sessão...</p>
+          <p className="text-sm text-muted-foreground">Carregando...</p>
         </div>
       </div>
     )
   }
 
-  // If session is definitely absent, render nothing (useEffect will redirect)
   if (!session?.user) return null
 
-  const leadsLoading = !leadsLoaded
-
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Admin navbar */}
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/logo-icon.png"
-              alt="Devnix"
-              width={32}
-              height={32}
-              className={`object-contain transition-all duration-300${mounted && resolvedTheme !== "dark" ? " brightness-0" : ""}`}
-              style={{ width: "auto" }}
-            />
-            <div>
-              <span className="font-bold text-sm text-foreground">Devnix</span>
-              <span className="text-muted-foreground text-xs ml-1.5">/ Admin</span>
-            </div>
+    <div className="h-screen flex flex-col overflow-hidden bg-background text-foreground">
+
+      {/* ── Navbar ── */}
+      <header className="h-14 shrink-0 border-b border-border flex items-center justify-between px-5 gap-4"
+        style={{ background: "var(--background)" }}>
+
+        {/* Logo compacta */}
+        <a href="/" className="flex items-center gap-2.5 group">
+          <Image
+            src="/logo-icon.png"
+            alt="Devnix"
+            width={26}
+            height={26}
+            className={`object-contain transition-all${mounted && !isDark ? " brightness-0" : ""}`}
+            style={{ width: "auto" }}
+          />
+          <span className="text-sm font-bold">Devnix</span>
+          <span className="text-xs text-muted-foreground hidden sm:inline">/ Painel Admin</span>
+        </a>
+
+        <div className="flex items-center gap-2">
+          {/* User badge */}
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border text-xs">
+            <User className="size-3 text-muted-foreground" />
+            <span className="text-muted-foreground font-medium truncate max-w-[140px]">
+              {session.user.name ?? session.user.email}
+            </span>
           </div>
-          <div className="flex items-center gap-2">
+
+          {mounted && (
             <button
-              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-              className="size-9 rounded-lg border border-border hover:bg-secondary flex items-center justify-center transition"
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+              className="size-8 rounded-lg border border-border flex items-center justify-center hover:bg-secondary transition"
               aria-label="Alternar tema"
             >
-              {mounted && resolvedTheme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+              {isDark ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
             </button>
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg border border-border transition"
-            >
-              <LogOut className="size-4" />
-              Sair
-            </button>
-          </div>
+          )}
+
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-1.5 px-3 h-8 rounded-lg border border-border text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition"
+          >
+            <LogOut className="size-3.5" />
+            Sair
+          </button>
         </div>
       </header>
 
-      <div className="max-w-screen-xl mx-auto w-full px-6 py-8 flex-1">
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          {[
-            { icon: Inbox,      label: "Total de Leads",    value: stats.total,       color: "text-foreground" },
-            { icon: Clock,      label: "Novos (não lidos)", value: stats.novos,        color: "text-blue-400" },
-            { icon: TrendingUp, label: "Convertidos",       value: stats.convertidos,  color: "text-emerald-400" },
-          ].map(({ icon: Icon, label, value, color }) => (
-            <div key={label} className="rounded-2xl border border-border bg-card p-5 flex items-center gap-4">
-              <div className={`size-12 rounded-xl border border-border flex items-center justify-center ${color}`}>
-                <Icon className="size-5" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{value}</p>
-                <p className="text-xs text-muted-foreground">{label}</p>
-              </div>
-            </div>
-          ))}
+      {/* ── Stats strip ── */}
+      <div className="shrink-0 border-b border-border px-5 py-3 flex items-center gap-8 overflow-x-auto"
+        style={{ background: "var(--secondary)" }}>
+        <div className="flex items-center gap-2 shrink-0">
+          <Inbox className="size-4 text-muted-foreground" />
+          <span className="text-xl font-black">{counts.todos}</span>
+          <span className="text-xs text-muted-foreground">Total</span>
         </div>
+        <div className="w-px h-5 bg-border shrink-0" />
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="size-2 rounded-full bg-blue-400" />
+          <span className="text-xl font-black text-blue-400">{counts.novo}</span>
+          <span className="text-xs text-muted-foreground">Novos</span>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="size-2 rounded-full bg-amber-400" />
+          <span className="text-xl font-black text-amber-400">{counts.pendente}</span>
+          <span className="text-xs text-muted-foreground">Pendentes</span>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="size-2 rounded-full bg-green-400" />
+          <span className="text-xl font-black text-green-400">{counts.respondido}</span>
+          <span className="text-xs text-muted-foreground">Respondidos</span>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="size-2 rounded-full bg-emerald-400" />
+          <span className="text-xl font-black text-emerald-400">{counts.aprovado}</span>
+          <span className="text-xs text-muted-foreground">Aprovados</span>
+        </div>
+        <div className="ml-auto flex items-center gap-2 shrink-0">
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="size-7 rounded-md border border-border flex items-center justify-center hover:bg-background transition"
+            aria-label="Atualizar"
+          >
+            <RefreshCw className={`size-3 text-muted-foreground ${refreshing ? "animate-spin" : ""}`} />
+          </button>
+        </div>
+      </div>
 
-        {/* Main grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          {/* Lead list */}
-          <div className="lg:col-span-2 flex flex-col gap-3">
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Buscar leads..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-card pl-9 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/15 transition"
-                />
-              </div>
-              <select
-                value={filterStatus}
-                onChange={e => setFilterStatus(e.target.value)}
-                className="rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-foreground/15 transition cursor-pointer"
-              >
-                <option value="todos">Todos</option>
-                {Object.entries(STATUS_LABELS).map(([k, v]) => (
-                  <option key={k} value={k}>{v.label}</option>
-                ))}
-              </select>
-            </div>
+      {/* ── Main: list + detail ── */}
+      <div className="flex flex-1 overflow-hidden min-h-0">
 
-            <div className="flex flex-col gap-2 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
-              {leadsLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="h-20 rounded-xl bg-card border border-border animate-pulse" />
-                ))
-              ) : filtered.length === 0 ? (
-                <div className="text-center py-16 text-muted-foreground">
-                  <Users className="size-8 mx-auto mb-3 opacity-40" />
-                  <p className="text-sm">Nenhum lead encontrado.</p>
-                </div>
-              ) : filtered.map(lead => (
+        {/* ── Left: list panel ── */}
+        <div className="w-80 lg:w-96 shrink-0 flex flex-col border-r border-border overflow-hidden">
+
+          {/* Tabs */}
+          <div className="px-3 pt-3 pb-2 flex items-center gap-1 overflow-x-auto shrink-0">
+            {TABS.map(tab => {
+              const count = counts[tab.key as keyof typeof counts]
+              const active = activeTab === tab.key
+              return (
                 <button
-                  key={lead.id}
-                  onClick={() => openLead(lead)}
-                  className={`w-full text-left rounded-xl border p-4 transition-all hover:border-foreground/20 ${selected?.id === lead.id ? "border-foreground/30 bg-secondary" : "border-border bg-card"}`}
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                    active
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  }`}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        {lead.status === "novo" && <span className="size-2 rounded-full bg-blue-400 flex-shrink-0" />}
-                        <span className="font-medium text-sm text-foreground truncate">{lead.name}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground truncate">{lead.email}</p>
-                      {lead.subject && <p className="text-xs text-muted-foreground truncate mt-0.5">{lead.subject}</p>}
-                    </div>
-                    <span className={`text-xs border rounded-full px-2 py-0.5 flex-shrink-0 ${STATUS_LABELS[lead.status]?.color ?? ""}`}>
-                      {STATUS_LABELS[lead.status]?.label ?? lead.status}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">{formatDate(lead.createdAt)}</p>
+                  <tab.icon className="size-3" />
+                  {tab.label}
+                  {count > 0 && !active && (
+                    <span className={`font-bold tabular-nums ${
+                      tab.key === "novo" ? "text-blue-400" :
+                      tab.key === "pendente" ? "text-amber-400" :
+                      tab.key === "aprovado" ? "text-emerald-400" : "text-muted-foreground"
+                    }`}>{count}</span>
+                  )}
                 </button>
-              ))}
+              )
+            })}
+          </div>
+
+          {/* Search */}
+          <div className="px-3 pb-2 shrink-0">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-secondary text-xs">
+              <Search className="size-3.5 text-muted-foreground shrink-0" />
+              <input
+                type="text"
+                placeholder="Buscar nome, email, assunto..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="bg-transparent outline-none w-full placeholder:text-muted-foreground"
+              />
+              {search && (
+                <button onClick={() => setSearch("")} className="text-muted-foreground hover:text-foreground">
+                  <Filter className="size-3" />
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Lead detail */}
-          <div className="lg:col-span-3">
-            {!selected ? (
-              <div className="rounded-2xl border border-border bg-card h-full min-h-80 flex flex-col items-center justify-center text-muted-foreground gap-3">
-                <Inbox className="size-10 opacity-30" />
-                <p className="text-sm">Selecione um lead para ver os detalhes</p>
+          {/* Lead list */}
+          <div className="flex-1 overflow-y-auto">
+            {filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-48 gap-2 text-muted-foreground">
+                <Inbox className="size-8 opacity-25" />
+                <p className="text-xs">Nenhum lead encontrado</p>
               </div>
             ) : (
-              <div className="rounded-2xl border border-border bg-card p-6 flex flex-col gap-5">
-                {/* Header */}
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-bold text-foreground">{selected.name}</h2>
-                    <p className="text-sm text-muted-foreground">{formatDate(selected.createdAt)}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="relative">
-                      <select
-                        value={selected.status}
-                        onChange={e => handleStatus(selected.id, e.target.value)}
-                        className={`appearance-none text-xs border rounded-full pl-3 pr-7 py-1.5 font-medium cursor-pointer focus:outline-none transition bg-transparent ${STATUS_LABELS[selected.status]?.color ?? ""}`}
-                      >
-                        {Object.entries(STATUS_LABELS).map(([k, v]) => (
-                          <option key={k} value={k} className="bg-background text-foreground">{v.label}</option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 size-3 pointer-events-none" />
+              filtered.map(lead => (
+                <button
+                  key={lead.id}
+                  onClick={() => setSelected(lead)}
+                  className={`w-full text-left px-4 py-3.5 border-b border-border transition-colors hover:bg-secondary flex gap-3 items-start ${
+                    selected?.id === lead.id ? "bg-secondary" : ""
+                  }`}
+                >
+                  <Initials name={lead.name} size="sm" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-0.5">
+                      <span className="text-sm font-semibold truncate">{lead.name}</span>
+                      <StatusBadge status={lead.status} />
                     </div>
-                    <button
-                      onClick={() => handleDelete(selected.id)}
-                      className="size-8 rounded-lg border border-border text-muted-foreground hover:text-red-400 hover:border-red-400/30 flex items-center justify-center transition"
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
+                    <p className="text-xs text-muted-foreground truncate">{lead.email}</p>
+                    {lead.subject && (
+                      <p className="text-xs text-muted-foreground truncate mt-0.5 opacity-70">{lead.subject}</p>
+                    )}
+                    <p className="text-[10px] text-muted-foreground opacity-50 mt-1.5">{fmtDate(lead.createdAt)}</p>
                   </div>
-                </div>
-
-                {/* Contact info */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <a href={`mailto:${selected.email}`} className="flex items-center gap-3 p-3 rounded-xl border border-border hover:bg-secondary transition group">
-                    <Mail className="size-4 text-muted-foreground group-hover:text-foreground" />
-                    <div className="min-w-0">
-                      <p className="text-xs text-muted-foreground">E-mail</p>
-                      <p className="text-sm font-medium text-foreground truncate">{selected.email}</p>
-                    </div>
-                  </a>
-                  {selected.phone && (
-                    <a href={`tel:${selected.phone}`} className="flex items-center gap-3 p-3 rounded-xl border border-border hover:bg-secondary transition group">
-                      <Phone className="size-4 text-muted-foreground group-hover:text-foreground" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Telefone</p>
-                        <p className="text-sm font-medium text-foreground">{selected.phone}</p>
-                      </div>
-                    </a>
-                  )}
-                  {selected.whatsapp && (
-                    <a
-                      href={`https://wa.me/${selected.whatsapp.replace(/\D/g, "")}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-xl border border-border hover:bg-secondary transition group"
-                    >
-                      <MessageSquare className="size-4 text-muted-foreground group-hover:text-foreground" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">WhatsApp</p>
-                        <p className="text-sm font-medium text-foreground">{selected.whatsapp}</p>
-                      </div>
-                    </a>
-                  )}
-                  {selected.plan && (
-                    <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/50">
-                      <CheckCircle2 className="size-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Plano de interesse</p>
-                        <p className="text-sm font-medium text-foreground">{selected.plan}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Subject + Message */}
-                {selected.subject && (
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Assunto</p>
-                    <p className="text-sm text-foreground font-medium">{selected.subject}</p>
-                  </div>
-                )}
-                <div>
-                  <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Mensagem</p>
-                  <div className="rounded-xl border border-border bg-secondary/50 p-4 text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                    {selected.message}
-                  </div>
-                </div>
-
-                {/* Quick actions */}
-                <div className="flex gap-2 flex-wrap pt-1">
-                  <a
-                    href={`mailto:${selected.email}?subject=Re: ${encodeURIComponent(selected.subject ?? "Seu projeto")}`}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-foreground text-background text-sm font-medium hover:opacity-90 transition"
-                  >
-                    <Mail className="size-4" />
-                    Responder por e-mail
-                  </a>
-                  {selected.whatsapp && (
-                    <a
-                      href={`https://wa.me/${selected.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent("Olá! Vi sua mensagem na Devnix e gostaria de conversar sobre seu projeto.")}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-foreground text-sm font-medium hover:bg-secondary transition"
-                    >
-                      <MessageSquare className="size-4" />
-                      Responder WhatsApp
-                    </a>
-                  )}
-                </div>
-              </div>
+                </button>
+              ))
             )}
           </div>
+        </div>
+
+        {/* ── Right: detail panel ── */}
+        <div className="flex-1 overflow-y-auto">
+          {!selected ? (
+            <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground p-8">
+              <div className="size-14 rounded-2xl border border-border flex items-center justify-center bg-secondary">
+                <Inbox className="size-6 opacity-30" />
+              </div>
+              <p className="text-sm">Selecione um lead para ver os detalhes</p>
+            </div>
+          ) : (
+            <div className="max-w-2xl mx-auto p-6 space-y-5">
+
+              {/* Header */}
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <Initials name={selected.name} size="lg" />
+                  <div>
+                    <h2 className="text-xl font-bold leading-tight">{selected.name}</h2>
+                    <p className="text-sm text-muted-foreground">{selected.email}</p>
+                    <p className="text-xs text-muted-foreground opacity-60 mt-0.5">{fmtDate(selected.createdAt)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <StatusBadge status={selected.status} />
+                  <button
+                    onClick={() => handleDelete(selected.id)}
+                    className="size-8 rounded-lg border border-border text-muted-foreground hover:text-red-400 hover:border-red-400/20 flex items-center justify-center transition"
+                    aria-label="Excluir"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick action buttons */}
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={`mailto:${selected.email}?subject=Re: ${encodeURIComponent(selected.subject ?? "Sua solicitação — Devnix")}`}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 active:scale-95"
+                  style={{ background: "var(--foreground)", color: "var(--background)" }}
+                >
+                  <Mail className="size-4" />
+                  Responder por E-mail
+                  <ArrowUpRight className="size-3.5 opacity-60" />
+                </a>
+                {selected.whatsapp && (
+                  <a
+                    href={`https://wa.me/${selected.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${selected.name}! Tudo bem? Vi sua mensagem na Devnix e gostaria de conversar sobre o seu projeto. 😊`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-[#25d366]/30 text-[#25d366] bg-[#25d366]/10 hover:bg-[#25d366]/20 transition-all active:scale-95"
+                  >
+                    <MessageSquare className="size-4" />
+                    WhatsApp
+                    <ArrowUpRight className="size-3.5 opacity-60" />
+                  </a>
+                )}
+                {selected.phone && (
+                  <a
+                    href={`tel:${selected.phone}`}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                  >
+                    <Phone className="size-4" />
+                    {selected.phone}
+                  </a>
+                )}
+              </div>
+
+              {/* Info cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {selected.whatsapp && (
+                  <div className="flex items-center gap-3 p-3.5 rounded-xl border border-border bg-secondary/40">
+                    <MessageSquare className="size-4 text-muted-foreground shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">WhatsApp</p>
+                      <p className="text-sm font-medium truncate">{selected.whatsapp}</p>
+                    </div>
+                  </div>
+                )}
+                {selected.phone && (
+                  <div className="flex items-center gap-3 p-3.5 rounded-xl border border-border bg-secondary/40">
+                    <Phone className="size-4 text-muted-foreground shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Telefone</p>
+                      <p className="text-sm font-medium truncate">{selected.phone}</p>
+                    </div>
+                  </div>
+                )}
+                {selected.plan && (
+                  <div className="flex items-center gap-3 p-3.5 rounded-xl border border-border bg-secondary/40">
+                    <TrendingUp className="size-4 text-muted-foreground shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Plano</p>
+                      <p className="text-sm font-medium">{selected.plan}</p>
+                    </div>
+                  </div>
+                )}
+                {selected.readAt && (
+                  <div className="flex items-center gap-3 p-3.5 rounded-xl border border-border bg-secondary/40">
+                    <CheckCircle2 className="size-4 text-muted-foreground shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Lido em</p>
+                      <p className="text-sm font-medium">{fmtDate(selected.readAt)}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Subject */}
+              {selected.subject && (
+                <div className="rounded-xl border border-border p-4">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1.5">Assunto</p>
+                  <p className="text-sm font-medium">{selected.subject}</p>
+                </div>
+              )}
+
+              {/* Message */}
+              <div className="rounded-xl border border-border p-4">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-2">Mensagem</p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">{selected.message}</p>
+              </div>
+
+              {/* Status actions */}
+              <div className="rounded-xl border border-border p-4">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-3">Mover para</p>
+                <div className="flex flex-wrap gap-2">
+                  {(["novo", "pendente", "respondido", "aprovado"] as const).map(status => {
+                    const s = STATUS_CONFIG[status]
+                    const isActive = selected.status === status
+                    return (
+                      <button
+                        key={status}
+                        onClick={() => !isActive && handleStatus(selected.id, status)}
+                        disabled={isActive}
+                        className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                          isActive
+                            ? `${s.color} cursor-default`
+                            : "border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
+                        }`}
+                      >
+                        <span className={`size-1.5 rounded-full ${s.dot}`} />
+                        {s.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+            </div>
+          )}
         </div>
       </div>
     </div>
