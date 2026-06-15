@@ -3,9 +3,7 @@
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { ArrowLeft, CheckCircle, Clock, ArrowRight } from "lucide-react"
-import { projects } from "@/components/projects-section"
-
-type Project = (typeof projects)[number]
+import { projects, type Project } from "@/lib/projects-data"
 
 const ease = [0.16, 1, 0.3, 1] as const
 

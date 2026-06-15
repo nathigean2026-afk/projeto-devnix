@@ -64,10 +64,21 @@ function FloatingDots() {
       dots = Array.from({ length: 160 }, () => makeDot())
     }
 
-    // Expose inject fn to click handler
+    const MAX_DOTS = 400
+
+    // Expose inject fn to click handler — accumulates up to MAX_DOTS then resets burst dots
     ;(canvas as HTMLCanvasElement & { __inject?: (x: number, y: number) => void }).__inject = (x, y) => {
-      const count = Math.floor(Math.random() * 18 + 16)
-      for (let i = 0; i < count; i++) dots.push(makeDot(x, y, true))
+      const burstCount = Math.floor(Math.random() * 22 + 18)
+      // If near limit, remove oldest burst dots first
+      if (dots.length + burstCount > MAX_DOTS) {
+        const toRemove = (dots.length + burstCount) - MAX_DOTS
+        let removed = 0
+        dots = dots.filter((d) => {
+          if (removed < toRemove && d.burst) { removed++; return false }
+          return true
+        })
+      }
+      for (let i = 0; i < burstCount; i++) dots.push(makeDot(x, y, true))
     }
 
     const CONNECT_DIST = 100

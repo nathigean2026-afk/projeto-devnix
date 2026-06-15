@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Geist_Mono } from 'next/font/google'
-import { ThemeProvider } from 'next-themes'
+import { Providers } from '@/components/providers'
 import './globals.css'
 
 const inter = Inter({
@@ -39,14 +39,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="font-sans antialiased bg-background text-foreground noise-overlay">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange={false}
-        >
+        <Providers>
           {children}
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   )

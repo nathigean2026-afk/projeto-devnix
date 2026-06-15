@@ -40,12 +40,11 @@ function NeonCard({
 
   return (
     <div className={`relative rounded-2xl ${className ?? ""}`} style={{ isolation: "isolate" }}>
-      {/* Rotating neon border */}
+      {/* Rotating neon border — uses CSS class for theme-awareness */}
       <div
-        className="absolute inset-[-1.5px] rounded-2xl pointer-events-none"
+        className="neon-border-sweep absolute inset-[-1.5px] rounded-2xl pointer-events-none"
         style={{
-          background: "conic-gradient(from var(--angle, 0deg) at 50% 50%, transparent 0%, transparent 35%, rgba(255,255,255,0.55) 50%, transparent 65%, transparent 100%)",
-          animation: `neon-rotate ${durations[delay]}s linear infinite`,
+          animationDuration: `${durations[delay]}s`,
           animationDelay: `${delays[delay]}s`,
           zIndex: -1,
         }}
