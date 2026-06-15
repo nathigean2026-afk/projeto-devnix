@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Code2, Mail, GitBranch, AtSign, Link2, ArrowRight } from "lucide-react"
 
+
 const footerLinks = {
   Serviços: [
     "Sites Profissionais",
