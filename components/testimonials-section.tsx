@@ -1,130 +1,116 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { Star, Quote } from "lucide-react"
 
 const testimonials = [
   {
     name: "Carlos Andrade",
     role: "CEO, Andrade Imóveis",
-    avatar: "CA",
+    initials: "CA",
     content:
-      "Profissional incrível. Entregou o portal imobiliário no prazo, com todas as funcionalidades que pedimos e ainda sugeriu melhorias que não tínhamos pensado. O código nos foi entregue completo.",
+      "Entregou o portal imobiliário no prazo, com todas as funcionalidades pedidas e ainda sugeriu melhorias que não tínhamos pensado. O código nos foi entregue completo.",
     stars: 5,
   },
   {
     name: "Fernanda Lima",
     role: "Empreendedora Digital",
-    avatar: "FL",
+    initials: "FL",
     content:
-      "Precisava de uma landing page de alta conversão para o lançamento do meu curso. O resultado superou todas as expectativas. As animações ficaram perfeitas e as vendas explodiram no lançamento.",
+      "Precisava de uma landing page de alta conversão para o lançamento do meu curso. O resultado superou todas as expectativas. As vendas explodiram no lançamento.",
     stars: 5,
   },
   {
     name: "Rafael Souza",
     role: "Diretor, LogisTech",
-    avatar: "RS",
+    initials: "RS",
     content:
-      "Desenvolveu um sistema de gestão completo para nossa empresa. O diferencial foi a análise que ele fez do nosso problema antes de propor a solução. Parece que nos conhece há anos.",
+      "Desenvolveu um sistema de gestão completo para nossa empresa. O diferencial foi a análise do problema antes de propor a solução. Parece que nos conhece há anos.",
     stars: 5,
   },
   {
     name: "Mariana Costa",
     role: "Fundadora, Studio MC",
-    avatar: "MC",
+    initials: "MC",
     content:
-      "Contratei o projeto pré-pronto adaptado. Foi rápido, econômico e o resultado ficou exatamente como precisávamos. O suporte pós-entrega também é excelente.",
+      "Contratei o projeto pré-pronto adaptado. Foi rápido, econômico e o resultado ficou exatamente como precisávamos. Suporte pós-entrega excelente.",
     stars: 5,
   },
   {
     name: "Pedro Martins",
     role: "Tech Lead, StartupX",
-    avatar: "PM",
+    initials: "PM",
     content:
-      "Criou nossa plataforma analítica com dashboards em tempo real. A arquitetura é sólida, o código é limpo e a documentação é completa. Recomendo sem hesitar.",
+      "Criou nossa plataforma analítica com dashboards em tempo real. Arquitetura sólida, código limpo e documentação completa. Recomendo sem hesitar.",
     stars: 5,
   },
   {
     name: "Ana Paula Ribeiro",
     role: "Blogueira & Criadora",
-    avatar: "AP",
+    initials: "AP",
     content:
-      "Meu blog ficou lindo e super rápido. O SEO já começou a dar resultados no primeiro mês. Adoro que posso mexer no conteúdo sozinha pelo painel que ele criou.",
+      "Meu blog ficou lindo e super rápido. O SEO começou a dar resultados no primeiro mês. Adoro poder mexer no conteúdo sozinha pelo painel que ele criou.",
     stars: 5,
   },
 ]
 
 export function TestimonialsSection() {
   return (
-    <section className="py-24 sm:py-32 relative overflow-hidden">
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-px"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent, oklch(0.84 0.2 155 / 60%), transparent)",
-        }}
+    <section className="relative py-32 overflow-hidden">
+      {/* Divisor */}
+      <div className="absolute top-0 left-0 right-0 h-px"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(92,255,138,0.3), transparent)" }}
         aria-hidden="true"
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <p className="text-primary text-sm font-semibold tracking-widest uppercase mb-4">
-            Depoimentos
-          </p>
-          <h2 className="text-4xl sm:text-5xl font-bold text-balance mb-5">
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
+        {/* Header */}
+        <div className="mb-16">
+          <p className="section-label mb-5">Depoimentos</p>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#eef4f0] leading-tight tracking-tight">
             O que os clientes{" "}
-            <span className="neon-text">dizem</span>
+            <span className="text-[#5cff8a] glow-text-sm">dizem</span>
           </h2>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto text-pretty">
-            Resultados reais de projetos entregues com qualidade e transparência.
-          </p>
-        </motion.div>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {testimonials.map((t, index) => (
-            <motion.div
+        {/* Grid bento */}
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 rounded-2xl overflow-hidden border border-white/7"
+          style={{ gap: "1px", background: "rgba(255,255,255,0.06)" }}
+        >
+          {testimonials.map((t) => (
+            <div
               key={t.name}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.5, delay: index * 0.08 }}
-              className="group relative rounded-2xl border border-border bg-card p-6 hover:border-primary/30 transition-all duration-300"
+              className="group relative bg-[#0c1710] p-7 flex flex-col gap-5 hover:bg-[#0f1e14] transition-colors duration-300"
             >
-              {/* Quote icon */}
-              <Quote className="size-8 text-primary/20 mb-4" />
+              {/* Hover top */}
+              <div className="absolute top-0 left-0 right-0 h-px bg-[#5cff8a] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-              {/* Stars */}
-              <div className="flex gap-1 mb-4">
-                {Array.from({ length: t.stars }).map((_, i) => (
-                  <Star key={i} className="size-4 text-primary fill-primary" />
-                ))}
+              {/* Quote + estrelas */}
+              <div className="flex items-start justify-between">
+                <Quote className="size-6 text-[#5cff8a]/20" />
+                <div className="flex gap-0.5">
+                  {Array.from({ length: t.stars }).map((_, i) => (
+                    <Star key={i} className="size-3.5 text-[#5cff8a] fill-[#5cff8a]" />
+                  ))}
+                </div>
               </div>
 
-              {/* Content */}
-              <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+              {/* Texto */}
+              <p className="text-[13px] text-[#7a9985] leading-relaxed flex-1">
                 &ldquo;{t.content}&rdquo;
               </p>
 
-              {/* Author */}
-              <div className="flex items-center gap-3 mt-auto">
-                <div className="size-10 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-bold text-primary">{t.avatar}</span>
+              {/* Autor */}
+              <div className="flex items-center gap-3 pt-2 border-t border-white/5">
+                <div className="size-9 rounded-full bg-[#5cff8a]/10 border border-[#5cff8a]/25 flex items-center justify-center flex-shrink-0">
+                  <span className="text-[11px] font-bold text-[#5cff8a]">{t.initials}</span>
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-foreground">{t.name}</div>
-                  <div className="text-xs text-muted-foreground">{t.role}</div>
+                  <div className="text-[13px] font-semibold text-[#eef4f0]">{t.name}</div>
+                  <div className="text-[11px] text-[#536860]">{t.role}</div>
                 </div>
               </div>
-
-              {/* Hover accent */}
-              <div className="absolute bottom-0 left-0 right-0 h-px bg-primary/0 group-hover:bg-primary/30 rounded-b-2xl transition-colors duration-300" />
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

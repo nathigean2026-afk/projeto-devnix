@@ -1,141 +1,213 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react"
-import { ParticleBackground } from "./particle-background"
+import { useEffect, useRef } from "react"
+import Link from "next/link"
+import { ArrowRight, CheckCircle2, ChevronDown } from "lucide-react"
 
 const badges = [
-  "Código original entregue",
+  "Código-fonte incluso",
+  "Entrega no prazo",
   "Suporte pós-entrega",
-  "Projetos sob medida",
-  "Domínio 100% seu",
+  "100% personalizado",
 ]
 
 export function HeroSection() {
-  const scrollTo = (href: string) => {
-    const id = href.replace("#", "")
-    const el = document.getElementById(id)
-    if (el) el.scrollIntoView({ behavior: "smooth" })
-  }
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    let animId: number
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+    }
+    resize()
+    window.addEventListener("resize", resize)
+
+    type Particle = {
+      x: number; y: number; vx: number; vy: number
+      size: number; opacity: number; opacityDir: number
+    }
+
+    const particles: Particle[] = Array.from({ length: 90 }, () => ({
+      x: Math.random() * (canvas.width || 1200),
+      y: Math.random() * (canvas.height || 800),
+      vx: (Math.random() - 0.5) * 0.28,
+      vy: (Math.random() - 0.5) * 0.28,
+      size: Math.random() * 1.6 + 0.3,
+      opacity: Math.random() * 0.55 + 0.08,
+      opacityDir: (Math.random() - 0.5) * 0.007,
+    }))
+
+    type Streak = { x: number; y: number; len: number; speed: number; opacity: number; dead: boolean }
+    const streaks: Streak[] = []
+    let streakTimer = 0
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      for (const p of particles) {
+        p.x += p.vx
+        p.y += p.vy
+        p.opacity += p.opacityDir
+        if (p.opacity <= 0.04 || p.opacity >= 0.7) p.opacityDir *= -1
+        if (p.x < 0) p.x = canvas.width
+        if (p.x > canvas.width) p.x = 0
+        if (p.y < 0) p.y = canvas.height
+        if (p.y > canvas.height) p.y = 0
+
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(200,218,208,${p.opacity})`
+        ctx.fill()
+      }
+
+      streakTimer++
+      if (streakTimer > 200 + Math.random() * 140) {
+        streaks.push({
+          x: Math.random() * canvas.width * 0.8 + canvas.width * 0.1,
+          y: Math.random() * canvas.height * 0.35,
+          len: 90 + Math.random() * 90,
+          speed: 5 + Math.random() * 4,
+          opacity: 0.9,
+          dead: false,
+        })
+        streakTimer = 0
+      }
+
+      for (const s of streaks) {
+        if (s.dead) continue
+        s.x -= s.speed * 0.9
+        s.y += s.speed * 0.9
+        s.opacity -= 0.022
+        const g = ctx.createLinearGradient(s.x, s.y, s.x + s.len, s.y - s.len)
+        g.addColorStop(0, `rgba(255,255,255,0)`)
+        g.addColorStop(1, `rgba(255,255,255,${s.opacity})`)
+        ctx.beginPath()
+        ctx.moveTo(s.x, s.y)
+        ctx.lineTo(s.x + s.len, s.y - s.len)
+        ctx.strokeStyle = g
+        ctx.lineWidth = 1.2
+        ctx.stroke()
+        if (s.opacity <= 0) s.dead = true
+      }
+      for (let i = streaks.length - 1; i >= 0; i--) {
+        if (streaks[i].dead) streaks.splice(i, 1)
+      }
+
+      animId = requestAnimationFrame(draw)
+    }
+    draw()
+
+    return () => {
+      cancelAnimationFrame(animId)
+      window.removeEventListener("resize", resize)
+    }
+  }, [])
 
   return (
     <section
-      id="inicio"
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden grid-bg"
+      id="home"
+      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
     >
-      {/* Radial glow from center */}
+      {/* Canvas partículas */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        aria-hidden="true"
+      />
+
+      {/* Glow radial central — exato do vídeo */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] h-[520px] pointer-events-none"
         aria-hidden="true"
         style={{
           background:
-            "radial-gradient(ellipse 70% 50% at 50% 60%, oklch(0.84 0.2 155 / 8%) 0%, transparent 70%)",
+            "radial-gradient(ellipse 62% 58% at 50% 52%, rgba(25,90,48,0.6) 0%, rgba(18,62,34,0.28) 45%, transparent 75%)",
+          filter: "blur(28px)",
         }}
       />
 
-      {/* Animated particles / floating code */}
-      <ParticleBackground />
+      {/* Glow menor acima do texto */}
+      <div
+        className="absolute top-[28%] left-1/2 -translate-x-1/2 w-[320px] h-[180px] pointer-events-none"
+        aria-hidden="true"
+        style={{
+          background: "radial-gradient(ellipse at 50% 50%, rgba(92,255,138,0.1) 0%, transparent 70%)",
+          filter: "blur(18px)",
+        }}
+      />
 
-      {/* Content */}
-      <div className="relative z-10 text-center max-w-5xl mx-auto px-4 sm:px-6 pt-20">
-        {/* Badge pill */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/5 text-primary text-sm font-medium mb-8"
-        >
-          <Sparkles className="size-4" />
-          Desenvolvimento Web Profissional
-        </motion.div>
+      {/* Conteúdo */}
+      <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-5xl mx-auto pt-20">
+
+        {/* Badge topo */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/4 backdrop-blur-sm mb-8 animate-fade-up">
+          <span className="size-1.5 rounded-full bg-[#5cff8a] animate-pulse" />
+          <span className="text-[12px] font-medium text-[#c8d9cd] tracking-wide">
+            Seu projeto · seu código · sua propriedade
+          </span>
+        </div>
 
         {/* Headline */}
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1 }}
-          className="text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight text-balance leading-none mb-6"
+        <h1
+          className="text-5xl sm:text-6xl md:text-7xl lg:text-[82px] font-black leading-[0.93] tracking-tight text-[#eef4f0] animate-fade-up delay-100 text-balance"
         >
-          Seu projeto,{" "}
-          <span className="neon-text">
-            do zero
-          </span>
+          Desenvolvimento
           <br />
-          ao{" "}
-          <span className="neon-text">
-            ar
-          </span>
-        </motion.h1>
+          Web{" "}
+          <span className="text-[#5cff8a] glow-text">Profissional</span>
+        </h1>
 
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.25 }}
-          className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-10 text-pretty"
-        >
-          Transformo ideias em soluções digitais reais — sites, software personalizado,
-          plataformas analíticas e muito mais. Você tem o problema,{" "}
-          <span className="text-foreground font-medium">eu faço a solução</span>.
-        </motion.p>
+        {/* Subtítulo */}
+        <p className="mt-7 text-[15px] sm:text-lg text-[#7a9985] max-w-xl leading-relaxed animate-fade-up delay-200">
+          Sites, softwares, plataformas analíticas e landing pages.
+          Entrego a solução certa — e o código é sempre seu.
+        </p>
 
-        {/* CTA buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.35 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14"
-        >
-          <button
-            onClick={() => scrollTo("#contato")}
-            className="group flex items-center gap-2 px-8 py-4 text-base font-semibold text-primary-foreground bg-primary rounded-xl neon-glow hover:opacity-90 active:scale-95 transition-all duration-200"
+        {/* Badges de check */}
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mt-5 animate-fade-up delay-300">
+          {badges.map((b) => (
+            <span key={b} className="flex items-center gap-1.5 text-[12px] text-[#7a9985]">
+              <CheckCircle2 className="size-3.5 text-[#5cff8a]" />
+              {b}
+            </span>
+          ))}
+        </div>
+
+        {/* CTAs */}
+        <div className="flex flex-wrap items-center justify-center gap-3 mt-9 animate-fade-up delay-400">
+          <Link
+            href="#contato"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#5cff8a] text-[#0c1710] text-sm font-bold hover:bg-[#7aff9e] transition-all duration-200 group"
+            style={{ boxShadow: "0 0 28px rgba(92,255,138,0.45)" }}
           >
             Iniciar projeto
-            <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />
-          </button>
-          <button
-            onClick={() => scrollTo("#servicos")}
-            className="flex items-center gap-2 px-8 py-4 text-base font-medium text-foreground border border-border rounded-xl hover:border-primary/40 hover:bg-primary/5 active:scale-95 transition-all duration-200"
+            <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+          </Link>
+          <Link
+            href="#projetos"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl border border-white/10 bg-white/4 text-sm font-medium text-[#c8d9cd] hover:bg-white/7 hover:border-white/16 transition-all duration-200"
           >
-            Ver serviços
-          </button>
-        </motion.div>
-
-        {/* Feature badges */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="flex flex-wrap justify-center gap-3"
-        >
-          {badges.map((badge) => (
-            <div
-              key={badge}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border text-sm text-muted-foreground"
-            >
-              <CheckCircle2 className="size-3.5 text-primary flex-shrink-0" />
-              {badge}
-            </div>
-          ))}
-        </motion.div>
+            Ver projetos
+          </Link>
+        </div>
       </div>
 
       {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.6 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground"
+      <div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 animate-fade-in delay-700"
       >
-        <span className="text-xs tracking-widest uppercase">Role para explorar</span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-          className="size-5 rounded-full border border-muted-foreground/40 flex items-center justify-center"
-        >
-          <div className="size-1.5 rounded-full bg-muted-foreground/60" />
-        </motion.div>
-      </motion.div>
+        <span className="text-[10px] text-[#4a6655] tracking-[0.2em] uppercase">
+          Scroll to explore
+        </span>
+        <ChevronDown className="size-4 text-[#4a6655] animate-bounce" />
+      </div>
     </section>
   )
 }

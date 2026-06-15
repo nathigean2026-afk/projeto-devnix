@@ -1,9 +1,14 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { DM_Sans, Geist_Mono } from 'next/font/google'
 import './globals.css'
 
-const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
+const dmSans = DM_Sans({
+  variable: '--font-dm-sans',
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+})
+
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
@@ -11,33 +16,14 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'DevPro | Desenvolvimento Web & Software Personalizado',
-  description: 'Desenvolvimento web profissional: sites, software personalizado, plataformas analíticas, landing pages e blogs. Soluções sob medida para o seu negócio.',
+  description:
+    'Desenvolvimento web profissional: sites, software personalizado, plataformas analíticas, landing pages e blogs. Soluções sob medida para o seu negócio.',
   generator: 'v0.app',
-  icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
-  },
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
-  ],
+  colorScheme: 'dark',
+  themeColor: '#0c1710',
 }
 
 export default function RootLayout({
@@ -46,7 +32,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt-BR" className={`${geistSans.variable} ${geistMono.variable} dark bg-background`}>
+    <html
+      lang="pt-BR"
+      className={`${dmSans.variable} ${geistMono.variable} dark`}
+    >
       <body className="font-sans antialiased bg-background text-foreground">
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}

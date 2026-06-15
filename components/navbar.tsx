@@ -1,167 +1,157 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, Code2 } from "lucide-react"
+import Link from "next/link"
+import { Menu, X, Code2, ArrowRight } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 const navLinks = [
-  { href: "#inicio", label: "Início" },
-  { href: "#servicos", label: "Serviços" },
-  { href: "#projetos", label: "Projetos" },
-  { href: "#precos", label: "Preços" },
-  { href: "#sobre", label: "Sobre" },
-  { href: "#contato", label: "Contato" },
+  { label: "Início", href: "#home" },
+  { label: "Serviços", href: "#servicos" },
+  { label: "Projetos", href: "#projetos" },
+  { label: "Sobre", href: "#sobre" },
+  { label: "Preços", href: "#precos" },
+  { label: "Contato", href: "#contato" },
 ]
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [activeSection, setActiveSection] = useState("inicio")
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [active, setActive] = useState("#home")
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
-
-      const sections = navLinks.map((l) => l.href.replace("#", ""))
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const el = document.getElementById(sections[i])
-        if (el && window.scrollY + 100 >= el.offsetTop) {
-          setActiveSection(sections[i])
-          break
-        }
-      }
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    const onScroll = () => setScrolled(window.scrollY > 30)
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  const scrollTo = (href: string) => {
-    const id = href.replace("#", "")
-    const el = document.getElementById(id)
-    if (el) el.scrollIntoView({ behavior: "smooth" })
-    setMenuOpen(false)
-  }
+  useEffect(() => {
+    const ids = navLinks.map((l) => l.href.replace("#", ""))
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(`#${e.target.id}`)
+        })
+      },
+      { rootMargin: "-40% 0px -55% 0px" }
+    )
+    ids.forEach((id) => {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    })
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <>
-      <motion.header
-        initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      <header
+        className={cn(
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
           scrolled
-            ? "bg-background/90 backdrop-blur-xl border-b border-border"
+            ? "bg-[#0c1710]/85 backdrop-blur-2xl border-b border-white/6"
             : "bg-transparent"
-        }`}
+        )}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo */}
-          <button
-            onClick={() => scrollTo("#inicio")}
-            className="flex items-center gap-2 group"
-            aria-label="Ir para o início"
-          >
-            <div className="size-9 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center group-hover:border-primary group-hover:bg-primary/20 transition-all duration-300">
-              <Code2 className="size-5 text-primary" />
+          <Link href="#home" className="flex items-center gap-2.5 group">
+            <div
+              className="relative size-8 flex items-center justify-center rounded-lg border border-[#5cff8a]/25 bg-[#5cff8a]/8"
+              style={{ boxShadow: "0 0 14px rgba(92,255,138,0.15)" }}
+            >
+              <Code2 className="size-4 text-[#5cff8a]" />
             </div>
-            <span className="font-bold text-lg text-foreground">
-              Dev<span className="text-primary">Pro</span>
+            <span className="text-[15px] font-bold text-[#eef4f0] tracking-tight">
+              Dev<span className="text-[#5cff8a]">Pro</span>
             </span>
-          </button>
+          </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1" aria-label="Navegação principal">
-            {navLinks.map((link) => {
-              const isActive = activeSection === link.href.replace("#", "")
-              return (
-                <button
-                  key={link.href}
-                  onClick={() => scrollTo(link.href)}
-                  className={`relative px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
-                    isActive
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {isActive && (
-                    <motion.span
-                      layoutId="activeNav"
-                      className="absolute inset-0 rounded-md bg-primary/10 border border-primary/20"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10">{link.label}</span>
-                </button>
-              )
-            })}
+          {/* Links desktop */}
+          <nav className="hidden md:flex items-center">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "relative px-3.5 py-1.5 text-[13.5px] font-medium rounded-lg transition-all duration-200",
+                  active === link.href
+                    ? "text-[#eef4f0]"
+                    : "text-[#7a9985] hover:text-[#c8d9cd]"
+                )}
+              >
+                {active === link.href && (
+                  <span className="absolute inset-0 rounded-lg bg-white/7" />
+                )}
+                <span className="relative">{link.label}</span>
+              </Link>
+            ))}
           </nav>
 
-          {/* CTA Buttons */}
-          <div className="hidden md:flex items-center gap-3">
-            <button
-              onClick={() => scrollTo("#contato")}
-              className="px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:border-primary/40 hover:text-foreground transition-all duration-200"
+          {/* CTAs desktop */}
+          <div className="hidden md:flex items-center gap-2">
+            <Link
+              href="#contato"
+              className="text-[13px] font-medium text-[#7a9985] hover:text-[#c8d9cd] transition-colors px-3 py-1.5"
             >
               Falar comigo
-            </button>
-            <button
-              onClick={() => scrollTo("#projetos")}
-              className="px-4 py-2 text-sm font-semibold text-primary-foreground bg-primary rounded-lg hover:opacity-90 transition-all duration-200 flex items-center gap-2 neon-glow"
+            </Link>
+            <Link
+              href="#contato"
+              className="flex items-center gap-1.5 text-[13px] font-bold px-4 py-2 rounded-xl bg-[#5cff8a] text-[#0c1710] hover:bg-[#7aff9e] transition-all duration-200 group"
+              style={{ boxShadow: "0 0 22px rgba(92,255,138,0.35)" }}
             >
-              Ver projetos
-              <span className="text-primary-foreground/70">→</span>
-            </button>
+              Iniciar projeto
+              <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+            </Link>
           </div>
 
-          {/* Mobile menu button */}
+          {/* Hamburguer mobile */}
           <button
-            className="md:hidden size-9 flex items-center justify-center rounded-lg border border-border hover:border-primary/40 transition-colors"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+            className="md:hidden p-1.5 text-[#7a9985] hover:text-[#eef4f0] transition-colors"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Menu"
           >
-            {menuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
+            {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
         </div>
-      </motion.header>
+      </header>
 
-      {/* Mobile menu */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border md:hidden"
-          >
-            <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
-              {navLinks.map((link) => (
-                <button
-                  key={link.href}
-                  onClick={() => scrollTo(link.href)}
-                  className="w-full text-left px-4 py-3 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all duration-200"
-                >
-                  {link.label}
-                </button>
-              ))}
-              <div className="pt-3 flex flex-col gap-2 border-t border-border mt-2">
-                <button
-                  onClick={() => scrollTo("#contato")}
-                  className="w-full py-3 text-sm font-medium text-center border border-border rounded-lg hover:border-primary/40 transition-all"
-                >
-                  Falar comigo
-                </button>
-                <button
-                  onClick={() => scrollTo("#projetos")}
-                  className="w-full py-3 text-sm font-semibold text-center text-primary-foreground bg-primary rounded-lg"
-                >
-                  Ver projetos →
-                </button>
-              </div>
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Drawer mobile */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 md:hidden">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="absolute top-16 left-0 right-0 bg-[#0c1710]/98 border-b border-white/7 px-6 py-5 flex flex-col gap-0.5">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  "px-3 py-3 rounded-xl text-sm font-medium transition-colors",
+                  active === link.href
+                    ? "text-[#5cff8a] bg-[#5cff8a]/8"
+                    : "text-[#7a9985] hover:text-[#eef4f0]"
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <div className="mt-4 pt-4 border-t border-white/6">
+              <Link
+                href="#contato"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#5cff8a] text-[#0c1710] text-sm font-bold"
+              >
+                Iniciar projeto
+                <ArrowRight className="size-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
