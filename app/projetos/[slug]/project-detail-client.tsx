@@ -103,18 +103,12 @@ export function ProjectDetailClient({ project }: { project: Project }) {
                 transition={{ duration: 0.9, delay: 0.15, ease }}
               >
                 {project.beforeAfter ? (
-                  <div className="flex flex-col gap-3">
-                    <BeforeAfterSlider
-                      beforeSrc={project.beforeAfter.before}
-                      afterSrc={project.beforeAfter.after}
-                      beforeLabel="Antes"
-                      afterLabel="Depois"
-                      aspectRatio="4/3"
-                    />
-                    <p className="text-xs text-muted-foreground text-center">
-                      Arraste para comparar o site antigo com o novo
-                    </p>
-                  </div>
+                  <BeforeAfterSlider
+                    beforeSrc={project.beforeAfter.before}
+                    afterSrc={project.beforeAfter.after}
+                    beforeLabel="Antes"
+                    afterLabel="Depois"
+                  />
                 ) : (
                   <div
                     className="relative h-64 lg:h-80 rounded-2xl border border-border overflow-hidden"
