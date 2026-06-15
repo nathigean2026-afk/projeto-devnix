@@ -12,7 +12,6 @@ const trustedOrigins = [
   process.env.V0_RUNTIME_URL,
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
   process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : undefined,
-  // Allow all v0 preview subdomains
   "https://*.vusercontent.net",
   "https://*.v0.app",
 ].filter(Boolean) as string[]
@@ -23,8 +22,7 @@ export const auth = betterAuth({
   database: new Pool({ connectionString: process.env.DATABASE_URL }),
   emailAndPassword: { enabled: true },
   advanced: {
-    // Required for cross-site iframe (v0 preview) AND wildcard origin support
+    // sameSite=none + secure=true required for cross-site iframe (v0 preview)
     defaultCookieAttributes: { sameSite: "none", secure: true },
-    crossSubDomainCookies: { enabled: true },
   },
 })

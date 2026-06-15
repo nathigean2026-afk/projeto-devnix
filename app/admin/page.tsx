@@ -14,15 +14,18 @@ import {
 import { useTheme } from "next-themes"
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  novo:        { label: "Novo",        color: "bg-blue-500/15 text-blue-400 border-blue-500/25" },
-  lido:        { label: "Lido",        color: "bg-zinc-500/15 text-zinc-400 border-zinc-500/25" },
-  contatado:   { label: "Contatado",   color: "bg-amber-500/15 text-amber-400 border-amber-500/25" },
-  convertido:  { label: "Convertido",  color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25" },
-  arquivado:   { label: "Arquivado",   color: "bg-zinc-700/30 text-zinc-500 border-zinc-600/25" },
+  novo:       { label: "Novo",       color: "bg-blue-500/15 text-blue-400 border-blue-500/25" },
+  lido:       { label: "Lido",       color: "bg-zinc-500/15 text-zinc-400 border-zinc-500/25" },
+  contatado:  { label: "Contatado",  color: "bg-amber-500/15 text-amber-400 border-amber-500/25" },
+  convertido: { label: "Convertido", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25" },
+  arquivado:  { label: "Arquivado",  color: "bg-zinc-700/30 text-zinc-500 border-zinc-600/25" },
 }
 
 function formatDate(d: Date | string) {
-  return new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
+  return new Date(d).toLocaleDateString("pt-BR", {
+    day: "2-digit", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  })
 }
 
 export default function AdminDashboard() {
@@ -30,32 +33,30 @@ export default function AdminDashboard() {
   const { setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [leads, setLeads] = useState<Lead[]>([])
-  const [loading, setLoading] = useState(true)
+  const [leadsLoaded, setLeadsLoaded] = useState(false)
   const [selected, setSelected] = useState<Lead | null>(null)
   const [search, setSearch] = useState("")
   const [filterStatus, setFilterStatus] = useState("todos")
   const [isPending, startTransition] = useTransition()
 
+  // Reactive session hook — no race condition after login redirect
+  const { data: session, isPending: sessionLoading } = authClient.useSession()
+
   useEffect(() => { setMounted(true) }, [])
 
-  async function load() {
-    // Verify session on the client first before calling server actions
-    const { data: session } = await authClient.getSession()
+  // Load leads only once session is confirmed
+  useEffect(() => {
+    if (sessionLoading) return
     if (!session?.user) {
       router.push("/sign-in")
       return
     }
-    try {
-      const data = await getLeads()
-      setLeads(data)
-    } catch {
-      router.push("/sign-in")
-    } finally {
-      setLoading(false)
+    if (!leadsLoaded) {
+      getLeads()
+        .then(data => { setLeads(data); setLeadsLoaded(true) })
+        .catch(() => router.push("/sign-in"))
     }
-  }
-
-  useEffect(() => { load() }, [])
+  }, [session, sessionLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSignOut() {
     await authClient.signOut()
@@ -86,9 +87,10 @@ export default function AdminDashboard() {
   }
 
   const filtered = leads.filter(l => {
-    const matchSearch = l.name.toLowerCase().includes(search.toLowerCase())
-      || l.email.toLowerCase().includes(search.toLowerCase())
-      || (l.subject?.toLowerCase().includes(search.toLowerCase()) ?? false)
+    const matchSearch =
+      l.name.toLowerCase().includes(search.toLowerCase()) ||
+      l.email.toLowerCase().includes(search.toLowerCase()) ||
+      (l.subject?.toLowerCase().includes(search.toLowerCase()) ?? false)
     const matchStatus = filterStatus === "todos" || l.status === filterStatus
     return matchSearch && matchStatus
   })
@@ -99,9 +101,26 @@ export default function AdminDashboard() {
     convertidos: leads.filter(l => l.status === "convertido").length,
   }
 
+  // While session is being loaded, show a spinner — prevents false redirect
+  if (sessionLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-muted-foreground">
+          <div className="size-8 border-2 border-border border-t-foreground rounded-full animate-spin" />
+          <p className="text-sm">Verificando sessão...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // If session is definitely absent, render nothing (useEffect will redirect)
+  if (!session?.user) return null
+
+  const leadsLoading = !leadsLoaded
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Navbar admin */}
+      {/* Admin navbar */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -138,12 +157,12 @@ export default function AdminDashboard() {
       </header>
 
       <div className="max-w-screen-xl mx-auto w-full px-6 py-8 flex-1">
-        {/* Stats cards */}
+        {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
-            { icon: Inbox, label: "Total de Leads", value: stats.total, color: "text-foreground" },
-            { icon: Clock, label: "Novos (não lidos)", value: stats.novos, color: "text-blue-400" },
-            { icon: TrendingUp, label: "Convertidos", value: stats.convertidos, color: "text-emerald-400" },
+            { icon: Inbox,      label: "Total de Leads",    value: stats.total,       color: "text-foreground" },
+            { icon: Clock,      label: "Novos (não lidos)", value: stats.novos,        color: "text-blue-400" },
+            { icon: TrendingUp, label: "Convertidos",       value: stats.convertidos,  color: "text-emerald-400" },
           ].map(({ icon: Icon, label, value, color }) => (
             <div key={label} className="rounded-2xl border border-border bg-card p-5 flex items-center gap-4">
               <div className={`size-12 rounded-xl border border-border flex items-center justify-center ${color}`}>
@@ -185,7 +204,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="flex flex-col gap-2 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
-              {loading ? (
+              {leadsLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="h-20 rounded-xl bg-card border border-border animate-pulse" />
                 ))
@@ -235,7 +254,6 @@ export default function AdminDashboard() {
                     <p className="text-sm text-muted-foreground">{formatDate(selected.createdAt)}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    {/* Status select */}
                     <div className="relative">
                       <select
                         value={selected.status}
@@ -276,7 +294,12 @@ export default function AdminDashboard() {
                     </a>
                   )}
                   {selected.whatsapp && (
-                    <a href={`https://wa.me/${selected.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-border hover:bg-secondary transition group">
+                    <a
+                      href={`https://wa.me/${selected.whatsapp.replace(/\D/g, "")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-3 p-3 rounded-xl border border-border hover:bg-secondary transition group"
+                    >
                       <MessageSquare className="size-4 text-muted-foreground group-hover:text-foreground" />
                       <div>
                         <p className="text-xs text-muted-foreground">WhatsApp</p>
