@@ -71,6 +71,7 @@ export function Footer() {
                 width={130}
                 height={38}
                 className="object-contain"
+                style={{ height: "auto" }}
               />
             </a>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-xs mb-6">

@@ -61,18 +61,20 @@ export function Navbar() {
               <Image
                 src="/logo-icon.png"
                 alt="Devnix"
-                width={44}
-                height={44}
-                className="object-contain block sm:hidden"
+                width={56}
+                height={56}
+                className={`object-contain block sm:hidden transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
+                style={{ height: "auto" }}
                 priority
               />
               {/* Desktop: full logo */}
               <Image
                 src="/logo-full.png"
                 alt="Devnix — Soluções Web Inteligentes"
-                width={200}
-                height={58}
-                className="object-contain hidden sm:block"
+                width={260}
+                height={75}
+                className={`object-contain hidden sm:block transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
+                style={{ height: "auto" }}
                 priority
               />
             </a>
@@ -135,7 +137,14 @@ export function Navbar() {
           >
             {/* Logo mobile */}
             <div className="flex justify-center mb-4">
-              <Image src="/logo-full.png" alt="Devnix" width={160} height={48} className="object-contain" />
+              <Image
+                src="/logo-full.png"
+                alt="Devnix"
+                width={200}
+                height={58}
+                className={`object-contain transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
+                style={{ height: "auto" }}
+              />
             </div>
             <nav className="flex flex-col mt-8">
               {links.map((l, i) => (

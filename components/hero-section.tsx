@@ -23,11 +23,19 @@ export function HeroSection() {
       {/* Grid pattern */}
       <div className="absolute inset-0 grid-pattern pointer-events-none" aria-hidden="true" />
 
-      {/* Subtle center glow */}
+      {/* Dot pattern overlay for extra depth */}
+      <div className="absolute inset-0 dot-pattern pointer-events-none opacity-60" aria-hidden="true" />
+
+      {/* Corner glows */}
       <div
         aria-hidden="true"
-        className="hero-glow w-[800px] h-[500px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-        style={{ background: "radial-gradient(ellipse, var(--foreground) 0%, transparent 65%)", opacity: 0.028 }}
+        className="hero-glow w-[600px] h-[600px] -top-32 -left-32 opacity-[0.035]"
+        style={{ background: "radial-gradient(circle, #3b82f6 0%, transparent 70%)" }}
+      />
+      <div
+        aria-hidden="true"
+        className="hero-glow w-[500px] h-[500px] -bottom-20 -right-20 opacity-[0.025]"
+        style={{ background: "radial-gradient(circle, #6366f1 0%, transparent 70%)" }}
       />
 
       <motion.div

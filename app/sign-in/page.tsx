@@ -31,7 +31,7 @@ export default function SignInPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex justify-center mb-10">
-          <Image src="/logo-full.png" alt="Devnix" width={200} height={60} className="object-contain" loading="eager" priority />
+          <Image src="/logo-full.png" alt="Devnix" width={200} height={60} className="object-contain" style={{ height: "auto" }} loading="eager" priority />
         </div>
 
         {/* Card */}

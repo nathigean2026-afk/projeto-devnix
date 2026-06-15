@@ -34,7 +34,7 @@ export default function SignUpPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-10">
-          <Image src="/logo-full.png" alt="Devnix" width={200} height={60} className="object-contain" loading="eager" priority />
+          <Image src="/logo-full.png" alt="Devnix" width={200} height={60} className="object-contain" style={{ height: "auto" }} loading="eager" priority />
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-8 shadow-2xl">

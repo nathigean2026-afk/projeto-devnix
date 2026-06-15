@@ -27,7 +27,7 @@ function formatDate(d: Date | string) {
 
 export default function AdminDashboard() {
   const router = useRouter()
-  const { theme, setTheme, resolvedTheme } = useTheme()
+  const { setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
