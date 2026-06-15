@@ -11,11 +11,26 @@ export default function SignUpPage() {
   const router = useRouter()
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const [allowed, setAllowed] = useState<boolean | null>(null)
   const [form, setForm] = useState({ name: "", email: "", password: "" })
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
+
+  // Check if sign-up is allowed (only if no admin exists yet)
+  useEffect(() => {
+    fetch("/api/admin/can-register")
+      .then(r => r.json())
+      .then(d => {
+        if (!d.allowed) {
+          router.replace("/sign-in")
+        } else {
+          setAllowed(true)
+        }
+      })
+      .catch(() => router.replace("/sign-in"))
+  }, [router])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -35,6 +50,15 @@ export default function SignUpPage() {
     router.refresh()
   }
 
+  // Loading or redirecting
+  if (allowed === null) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="size-7 border-2 border-border border-t-foreground rounded-full animate-spin" />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -42,18 +66,18 @@ export default function SignUpPage() {
           <Image
             src="/logo-full.png"
             alt="Devnix"
-            width={160}
-            height={46}
+            width={140}
+            height={40}
             className={`object-contain transition-all duration-300${mounted && resolvedTheme !== "dark" ? " brightness-0" : ""}`}
-            style={{ height: "auto", maxHeight: "46px" }}
+            style={{ width: "auto", maxHeight: "40px" }}
             loading="eager"
             priority
           />
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-8 shadow-2xl">
-          <h1 className="text-2xl font-bold text-foreground mb-1 text-editorial">Criar conta admin</h1>
-          <p className="text-muted-foreground text-sm mb-8">Crie o primeiro acesso administrativo da Devnix.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">Criar conta admin</h1>
+          <p className="text-muted-foreground text-sm mb-8">Configure o primeiro acesso administrativo da Devnix.</p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">

@@ -160,28 +160,28 @@ export default function AdminDashboard() {
     <div className="h-screen flex flex-col overflow-hidden bg-background text-foreground">
 
       {/* ── Navbar ── */}
-      <header className="h-14 shrink-0 border-b border-border flex items-center justify-between px-5 gap-4"
+      <header className="h-14 shrink-0 border-b border-border flex items-center justify-between px-4 gap-3 overflow-hidden"
         style={{ background: "var(--background)" }}>
 
-        {/* Logo compacta */}
-        <a href="/" className="flex items-center gap-2.5 group">
+        {/* Logo compacta — tamanho fixo, nunca cresce */}
+        <a href="/" className="flex items-center gap-2 shrink-0 group min-w-0">
           <Image
             src="/logo-icon.png"
             alt="Devnix"
-            width={26}
-            height={26}
-            className={`object-contain transition-all${mounted && !isDark ? " brightness-0" : ""}`}
-            style={{ width: "auto" }}
+            width={24}
+            height={24}
+            className={`object-contain shrink-0 transition-all${mounted && !isDark ? " brightness-0" : ""}`}
+            style={{ width: "24px", height: "24px" }}
           />
-          <span className="text-sm font-bold">Devnix</span>
-          <span className="text-xs text-muted-foreground hidden sm:inline">/ Painel Admin</span>
+          <span className="text-sm font-bold leading-none">Devnix</span>
+          <span className="text-xs text-muted-foreground hidden sm:inline leading-none">/&nbsp;Admin</span>
         </a>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {/* User badge */}
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border text-xs">
-            <User className="size-3 text-muted-foreground" />
-            <span className="text-muted-foreground font-medium truncate max-w-[140px]">
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border text-xs max-w-[160px] overflow-hidden">
+            <User className="size-3 text-muted-foreground shrink-0" />
+            <span className="text-muted-foreground font-medium truncate">
               {session.user.name ?? session.user.email}
             </span>
           </div>
@@ -189,7 +189,7 @@ export default function AdminDashboard() {
           {mounted && (
             <button
               onClick={() => setTheme(isDark ? "light" : "dark")}
-              className="size-8 rounded-lg border border-border flex items-center justify-center hover:bg-secondary transition"
+              className="size-8 rounded-lg border border-border flex items-center justify-center hover:bg-secondary transition shrink-0"
               aria-label="Alternar tema"
             >
               {isDark ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
@@ -198,10 +198,10 @@ export default function AdminDashboard() {
 
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-1.5 px-3 h-8 rounded-lg border border-border text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition"
+            className="flex items-center gap-1.5 px-3 h-8 rounded-lg border border-border text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition shrink-0"
           >
             <LogOut className="size-3.5" />
-            Sair
+            <span className="hidden sm:inline">Sair</span>
           </button>
         </div>
       </header>
