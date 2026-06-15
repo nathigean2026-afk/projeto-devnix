@@ -33,26 +33,24 @@ function FloatingDots() {
       x: number; y: number; r: number
       vx: number; vy: number
       alpha: number; targetAlpha: number; alphaSpeed: number
-      burst?: boolean; life?: number; maxLife?: number
+      burst?: boolean
     }
 
     let dots: Dot[] = []
 
     function makeDot(x?: number, y?: number, burst = false): Dot {
+      const speed = burst ? Math.random() * 2.8 + 0.8 : (Math.random() - 0.5) * 0.32
       const angle = Math.random() * Math.PI * 2
-      const speed = burst ? Math.random() * 3 + 1 : (Math.random() - 0.5) * 0.32
       return {
         x: x ?? Math.random() * W,
         y: y ?? Math.random() * H,
-        r: burst ? Math.random() * 2 + 0.5 : Math.random() * 1.5 + 0.3,
+        r: burst ? Math.random() * 1.8 + 0.4 : Math.random() * 1.5 + 0.3,
         vx: burst ? Math.cos(angle) * speed : (Math.random() - 0.5) * 0.32,
         vy: burst ? Math.sin(angle) * speed : (Math.random() - 0.5) * 0.32,
-        alpha: burst ? 0.9 : Math.random() * 0.55 + 0.12,
+        alpha: burst ? 0.8 : Math.random() * 0.55 + 0.12,
         targetAlpha: Math.random() * 0.55 + 0.12,
         alphaSpeed: Math.random() * 0.005 + 0.001,
         burst,
-        life: burst ? 0 : undefined,
-        maxLife: burst ? Math.random() * 40 + 30 : undefined,
       }
     }
 
@@ -65,20 +63,36 @@ function FloatingDots() {
     }
 
     const MAX_DOTS = 400
+    // Pool of burst dots sorted by age — oldest index = 0
+    const burstPool: Dot[] = []
 
-    // Expose inject fn to click handler — accumulates up to MAX_DOTS then resets burst dots
+    // When click happens: spawn new burst dots.
+    // They keep their velocity forever (slow over time) and join the normal
+    // pool permanently — they never die. If over MAX_DOTS, evict the oldest burst.
     ;(canvas as HTMLCanvasElement & { __inject?: (x: number, y: number) => void }).__inject = (x, y) => {
-      const burstCount = Math.floor(Math.random() * 22 + 18)
-      // If near limit, remove oldest burst dots first
-      if (dots.length + burstCount > MAX_DOTS) {
-        const toRemove = (dots.length + burstCount) - MAX_DOTS
-        let removed = 0
-        dots = dots.filter((d) => {
-          if (removed < toRemove && d.burst) { removed++; return false }
-          return true
-        })
+      const count = Math.floor(Math.random() * 20 + 14)
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2
+        const speed = Math.random() * 2.8 + 0.8
+        const d: Dot = {
+          x, y,
+          r: Math.random() * 1.8 + 0.4,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          alpha: Math.random() * 0.5 + 0.5,
+          targetAlpha: Math.random() * 0.55 + 0.12,
+          alphaSpeed: Math.random() * 0.005 + 0.001,
+          burst: true,
+        }
+        burstPool.push(d)
+        dots.push(d)
       }
-      for (let i = 0; i < burstCount; i++) dots.push(makeDot(x, y, true))
+      // Evict oldest burst dots if over limit
+      while (dots.length > MAX_DOTS && burstPool.length > 0) {
+        const evict = burstPool.shift()!
+        const idx = dots.indexOf(evict)
+        if (idx !== -1) dots.splice(idx, 1)
+      }
     }
 
     const CONNECT_DIST = 100
@@ -88,55 +102,51 @@ function FloatingDots() {
 
       const isDark = document.documentElement.classList.contains("dark") ||
         !document.documentElement.classList.contains("light")
-      // Light mode: much darker so dots are clearly visible
       const color = isDark ? "255,255,255" : "0,0,0"
       const alphaMultiplier = isDark ? 1 : 2.8
 
-      const active = dots.filter((d) => {
-        if (!d.burst) return true
-        d.life! += 1
-        return d.life! < d.maxLife!
-      })
-      dots = active
-
       // Draw connection lines between nearby dots
-      for (let i = 0; i < active.length; i++) {
-        for (let j = i + 1; j < active.length; j++) {
-          const dx = active[i].x - active[j].x
-          const dy = active[i].y - active[j].y
+      for (let i = 0; i < dots.length; i++) {
+        for (let j = i + 1; j < dots.length; j++) {
+          const dx = dots[i].x - dots[j].x
+          const dy = dots[i].y - dots[j].y
           const dist = Math.sqrt(dx * dx + dy * dy)
           if (dist < CONNECT_DIST) {
             const lineAlpha = (1 - dist / CONNECT_DIST) * 0.12 * alphaMultiplier
             ctx!.strokeStyle = `rgba(${color},${lineAlpha.toFixed(3)})`
             ctx!.lineWidth = 0.5
             ctx!.beginPath()
-            ctx!.moveTo(active[i].x, active[i].y)
-            ctx!.lineTo(active[j].x, active[j].y)
+            ctx!.moveTo(dots[i].x, dots[i].y)
+            ctx!.lineTo(dots[j].x, dots[j].y)
             ctx!.stroke()
           }
         }
       }
 
-      // Draw + move dots
-      for (const d of active) {
+      // Update + draw every dot
+      for (const d of dots) {
+        // Decelerate burst dots — once slow enough they become ambient
+        if (d.burst) {
+          d.vx *= 0.97
+          d.vy *= 0.97
+          const speed = Math.sqrt(d.vx * d.vx + d.vy * d.vy)
+          if (speed < 0.35) d.burst = false // graduate to normal dot
+        }
+
         d.x += d.vx
         d.y += d.vy
 
-        if (!d.burst) {
-          if (d.x < -4) d.x = W + 4
-          if (d.x > W + 4) d.x = -4
-          if (d.y < -4) d.y = H + 4
-          if (d.y > H + 4) d.y = -4
-          if (Math.abs(d.alpha - d.targetAlpha) < d.alphaSpeed) {
-            d.targetAlpha = Math.random() * 0.55 + 0.12
-          }
-          d.alpha += (d.targetAlpha - d.alpha) * d.alphaSpeed * 40
-        } else {
-          // burst fade out
-          d.vx *= 0.96
-          d.vy *= 0.96
-          d.alpha = 0.9 * (1 - d.life! / d.maxLife!)
+        // Wrap around edges for all dots
+        if (d.x < -4) d.x = W + 4
+        if (d.x > W + 4) d.x = -4
+        if (d.y < -4) d.y = H + 4
+        if (d.y > H + 4) d.y = -4
+
+        // Breathe alpha
+        if (Math.abs(d.alpha - d.targetAlpha) < d.alphaSpeed) {
+          d.targetAlpha = Math.random() * 0.55 + 0.12
         }
+        d.alpha += (d.targetAlpha - d.alpha) * d.alphaSpeed * 40
 
         const a = Math.min(d.alpha * alphaMultiplier, 1)
         ctx!.beginPath()

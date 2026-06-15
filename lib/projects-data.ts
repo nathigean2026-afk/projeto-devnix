@@ -2,6 +2,28 @@
 
 export const projects = [
   {
+    slug: "maktub-barbearia",
+    title: "Maktub Barbearia",
+    category: "Site + Agendamento Online",
+    desc: "Site completo com agendamento online, galeria de cortes, cardápio de serviços e localização — 100% do cliente.",
+    tech: ["Next.js", "Framer Motion", "Tailwind CSS"],
+    col: "lg:col-span-2",
+    cover: "barbearia",
+    liveUrl: "https://v0-maktubebarbearia.vercel.app",
+    challenge:
+      "A Maktub Barbearia precisava de uma presença digital profissional que refletisse a identidade premium do espaço, facilitar o agendamento online dos clientes e apresentar os serviços com preços de forma clara, substituindo o contato exclusivo por WhatsApp.",
+    solution:
+      "Desenvolvemos um site completo e responsivo com identidade visual escura e sofisticada, fluxo de agendamento passo a passo (serviço → data → horário → dados → confirmação), galeria interativa de cortes, cardápio de serviços com preços e seção de localização com mapa.",
+    results: [
+      "Agendamento 100% online, sem depender do WhatsApp",
+      "Galeria de cortes valorizando o trabalho do barbeiro",
+      "Site carrega em menos de 1 segundo",
+      "Design dark premium alinhado à identidade da marca",
+    ],
+    duration: "2 semanas",
+    stack: ["Next.js 16", "Framer Motion", "Tailwind CSS", "Vercel", "TypeScript"],
+  },
+  {
     slug: "plataforma-saas-gestao",
     title: "Plataforma SaaS de Gestão",
     category: "Software Personalizado",
@@ -129,4 +151,4 @@ export const projects = [
   },
 ]
 
-export type Project = (typeof projects)[number]
+export type Project = (typeof projects)[number] & { liveUrl?: string }

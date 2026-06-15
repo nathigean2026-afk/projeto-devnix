@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { ArrowLeft, CheckCircle, Clock, ArrowRight } from "lucide-react"
+import { ArrowLeft, CheckCircle, Clock, ArrowRight, ExternalLink } from "lucide-react"
 import { projects, type Project } from "@/lib/projects-data"
 
 const ease = [0.16, 1, 0.3, 1] as const
@@ -82,6 +82,16 @@ export function ProjectDetailClient({ project }: { project: Project }) {
                   >
                     Quero um igual <ArrowRight className="size-3.5" />
                   </Link>
+                  {project.liveUrl && (
+                    <a
+                      href={project.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-6 py-3 rounded-full border border-border text-xs font-bold tracking-widest uppercase text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-all"
+                    >
+                      Ver site ao vivo <ExternalLink className="size-3.5" />
+                    </a>
+                  )}
                 </motion.div>
               </div>
 
