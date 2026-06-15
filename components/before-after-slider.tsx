@@ -17,19 +17,8 @@ export function BeforeAfterSlider({
   afterLabel = "Depois",
 }: BeforeAfterSliderProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [position, setPosition] = useState(50) // 0–100%
+  const [position, setPosition] = useState(50)
   const [dragging, setDragging] = useState(false)
-  const [containerWidth, setContainerWidth] = useState(0)
-
-  // Track container width for correct pixel math on the BEFORE clip
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const ro = new ResizeObserver(() => setContainerWidth(el.offsetWidth))
-    ro.observe(el)
-    setContainerWidth(el.offsetWidth)
-    return () => ro.disconnect()
-  }, [])
 
   const update = useCallback((clientX: number) => {
     const rect = containerRef.current?.getBoundingClientRect()
@@ -38,137 +27,158 @@ export function BeforeAfterSlider({
     setPosition(pct)
   }, [])
 
-  // Mouse
-  const onMouseDown = (e: React.MouseEvent) => { e.preventDefault(); setDragging(true); update(e.clientX) }
-  const onMouseMove = useCallback((e: MouseEvent) => { if (dragging) update(e.clientX) }, [dragging, update])
-  const onMouseUp   = useCallback(() => setDragging(false), [])
+  const onMouseDown  = (e: React.MouseEvent)  => { e.preventDefault(); setDragging(true); update(e.clientX) }
+  const onTouchStart = (e: React.TouchEvent)  => { setDragging(true); update(e.touches[0].clientX) }
 
-  // Touch
-  const onTouchStart = (e: React.TouchEvent) => { setDragging(true); update(e.touches[0].clientX) }
-  const onTouchMove  = useCallback((e: TouchEvent) => { if (dragging) { e.preventDefault(); update(e.touches[0].clientX) } }, [dragging, update])
+  const onMouseMove  = useCallback((e: MouseEvent) => { if (dragging) update(e.clientX) }, [dragging, update])
+  const onMouseUp    = useCallback(() => setDragging(false), [])
+  const onTouchMove  = useCallback((e: TouchEvent) => {
+    if (dragging) { e.preventDefault(); update(e.touches[0].clientX) }
+  }, [dragging, update])
   const onTouchEnd   = useCallback(() => setDragging(false), [])
 
   useEffect(() => {
     window.addEventListener("mousemove", onMouseMove)
     window.addEventListener("mouseup",   onMouseUp)
-    window.addEventListener("touchmove",  onTouchMove,  { passive: false })
-    window.addEventListener("touchend",   onTouchEnd)
+    window.addEventListener("touchmove", onTouchMove, { passive: false })
+    window.addEventListener("touchend",  onTouchEnd)
     return () => {
       window.removeEventListener("mousemove", onMouseMove)
       window.removeEventListener("mouseup",   onMouseUp)
-      window.removeEventListener("touchmove",  onTouchMove)
-      window.removeEventListener("touchend",   onTouchEnd)
+      window.removeEventListener("touchmove", onTouchMove)
+      window.removeEventListener("touchend",  onTouchEnd)
     }
   }, [onMouseMove, onMouseUp, onTouchMove, onTouchEnd])
 
   return (
     <div className="flex flex-col gap-3 w-full">
-      {/* Outer scroll wrapper — max height so very long screenshots don't go forever */}
+      {/* Scroll wrapper */}
       <div
         className="w-full rounded-2xl border border-border overflow-hidden"
-        style={{ maxHeight: "70vh", overflowY: "auto", position: "relative" }}
+        style={{ maxHeight: "70vh", overflowY: "auto" }}
       >
         {/*
-          Inner drag container:
-          – position: relative so the handle and divider are anchored to it
-          – height: auto so both images show at FULL natural height
-          – We use a CSS grid so both images share the exact same cell
-            and the taller one sets the row height
+          Drag container — position: relative, height = natural image height.
+          Both images are stacked with CSS grid (grid-template-areas trick):
+          they share the same grid cell so the taller one sets the row height.
+          The BEFORE image uses clipPath so it's clipped at pixel level
+          regardless of scroll position — no absolute positioning needed.
         */}
         <div
           ref={containerRef}
           className="relative w-full select-none"
-          style={{ cursor: dragging ? "grabbing" : "ew-resize", minHeight: "200px" }}
+          style={{
+            cursor: dragging ? "grabbing" : "ew-resize",
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            gridTemplateRows: "1fr",
+          }}
           onMouseDown={onMouseDown}
           onTouchStart={onTouchStart}
           aria-label="Arraste para comparar antes e depois"
         >
-          {/* ── AFTER image — full width, natural height, sits behind ── */}
+          {/* AFTER — full width, sits in grid cell, defines the row height */}
           <Image
             src={afterSrc}
             alt={afterLabel}
             width={1280}
-            height={900}
+            height={3200}
             className="w-full h-auto block"
-            style={{ display: "block" }}
+            style={{ gridArea: "1 / 1 / 2 / 2", display: "block" }}
             sizes="(max-width: 1024px) 100vw, 55vw"
             draggable={false}
             priority
           />
 
-          {/* ── BEFORE image — clipped to the left of the handle ──
-              It sits on top of AFTER, absolutely positioned to fill the same space.
-              clipPath cuts it at the handle position so only left side shows.
-          ── */}
-          <div
-            className="absolute inset-0 overflow-hidden pointer-events-none"
-            style={{ width: `${position}%` }}
-          >
-            {/* This inner div must be exactly as wide as the container so
-                the image renders at the same scale as the AFTER image */}
-            <div style={{ width: containerWidth > 0 ? `${containerWidth}px` : "100%" }}>
-              <Image
-                src={beforeSrc}
-                alt={beforeLabel}
-                width={1280}
-                height={900}
-                className="w-full h-auto block"
-                sizes="(max-width: 1024px) 100vw, 55vw"
-                draggable={false}
-                priority
-              />
-            </div>
-          </div>
+          {/*
+            BEFORE — exact same cell, exact same size.
+            clipPath cuts the image at the handle position.
+            Because clipPath works in the element's own coordinate space,
+            it always covers the full height no matter scroll position.
+          */}
+          <Image
+            src={beforeSrc}
+            alt={beforeLabel}
+            width={1280}
+            height={3200}
+            className="w-full h-auto block"
+            style={{
+              gridArea: "1 / 1 / 2 / 2",
+              clipPath: `inset(0 ${100 - position}% 0 0)`,
+              display: "block",
+            }}
+            sizes="(max-width: 1024px) 100vw, 55vw"
+            draggable={false}
+            priority
+          />
 
-          {/* ── Divider line ── */}
+          {/* Divider line — absolute, spans the full natural height of the grid */}
           <div
-            className="absolute top-0 bottom-0 w-0.5 pointer-events-none"
+            className="absolute top-0 bottom-0 w-px pointer-events-none"
             style={{
               left: `${position}%`,
               background: "rgba(255,255,255,0.95)",
-              boxShadow: "0 0 10px rgba(0,0,0,0.5)",
+              boxShadow: "0 0 12px rgba(0,0,0,0.55)",
+              zIndex: 10,
             }}
           />
 
-          {/* ── Handle knob ── */}
+          {/* Handle knob — sticky to viewport center vertically via position:sticky trick:
+              we place it absolute and use top:50% but inside a sticky inner wrapper */}
           <div
-            className="absolute -translate-x-1/2 size-11 rounded-full flex items-center justify-center gap-1 pointer-events-none z-10"
-            style={{
-              left: `${position}%`,
-              top: "50%",
-              transform: `translateX(-50%) translateY(-50%)`,
-              background: "var(--background)",
-              border: "2px solid rgba(255,255,255,0.9)",
-              boxShadow: "0 0 0 1px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.4)",
-            }}
+            className="absolute w-0 pointer-events-none"
+            style={{ left: `${position}%`, top: 0, bottom: 0, zIndex: 11 }}
           >
-            <svg width="11" height="11" viewBox="0 0 10 10" fill="none" className="opacity-75">
-              <path d="M6 2L3 5l3 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <svg width="11" height="11" viewBox="0 0 10 10" fill="none" className="opacity-75">
-              <path d="M4 2l3 3-3 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <div
+              className="sticky size-11 rounded-full flex items-center justify-center gap-0.5"
+              style={{
+                top: "calc(50% - 22px)",
+                transform: "translateX(-50%)",
+                background: "var(--background)",
+                border: "2.5px solid rgba(255,255,255,0.92)",
+                boxShadow: "0 0 0 1px rgba(0,0,0,0.12), 0 4px 24px rgba(0,0,0,0.45)",
+              }}
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-70">
+                <path d="M6 2L3 5l3 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-70">
+                <path d="M4 2l3 3-3 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
           </div>
 
-          {/* ── Labels — sticky to top so they're always visible on scroll ── */}
+          {/* Labels */}
           <div
-            className="absolute top-3 left-3 pointer-events-none z-10"
-            style={{ opacity: position > 10 ? 1 : 0, transition: "opacity 0.2s" }}
+            className="sticky top-3 pointer-events-none"
+            style={{
+              gridArea: "1 / 1 / 2 / 2",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              padding: "12px 12px 0",
+              zIndex: 12,
+            }}
           >
             <span
               className="px-2.5 py-1 rounded text-[11px] font-bold tracking-widest uppercase text-white"
-              style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)" }}
+              style={{
+                background: "rgba(0,0,0,0.62)",
+                backdropFilter: "blur(6px)",
+                opacity: position > 8 ? 1 : 0,
+                transition: "opacity 0.2s",
+              }}
             >
               {beforeLabel}
             </span>
-          </div>
-          <div
-            className="absolute top-3 right-3 pointer-events-none z-10"
-            style={{ opacity: position < 90 ? 1 : 0, transition: "opacity 0.2s" }}
-          >
             <span
               className="px-2.5 py-1 rounded text-[11px] font-bold tracking-widest uppercase text-white"
-              style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)" }}
+              style={{
+                background: "rgba(0,0,0,0.62)",
+                backdropFilter: "blur(6px)",
+                opacity: position < 92 ? 1 : 0,
+                transition: "opacity 0.2s",
+              }}
             >
               {afterLabel}
             </span>
@@ -176,7 +186,6 @@ export function BeforeAfterSlider({
         </div>
       </div>
 
-      {/* Caption */}
       <p className="text-xs text-muted-foreground text-center">
         Arraste para comparar — role para ver o site completo
       </p>
