@@ -1,12 +1,11 @@
-import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { DM_Sans, Geist_Mono } from 'next/font/google'
+import { Space_Grotesk, Geist_Mono } from 'next/font/google'
 import './globals.css'
 
-const dmSans = DM_Sans({
-  variable: '--font-dm-sans',
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-space-grotesk',
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  weight: ['300', '400', '500', '600', '700'],
 })
 
 const geistMono = Geist_Mono({
@@ -23,22 +22,19 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: 'dark',
-  themeColor: '#0c1710',
+  themeColor: '#09090b',
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="pt-BR"
-      className={`${dmSans.variable} ${geistMono.variable} dark`}
+      className={`${spaceGrotesk.variable} ${geistMono.variable} dark noise`}
     >
       <body className="font-sans antialiased bg-background text-foreground">
         {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   )

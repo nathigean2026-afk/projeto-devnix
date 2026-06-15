@@ -1,8 +1,4 @@
-"use client"
-
-import Link from "next/link"
-import { Code2, Mail, GitBranch, AtSign, Link2, ArrowRight } from "lucide-react"
-
+import { Code2, Mail, GitBranch, AtSign, Link2 } from "lucide-react"
 
 const footerLinks = {
   Serviços: [
@@ -13,8 +9,7 @@ const footerLinks = {
     "E-commerce",
     "Blogs & Conteúdo",
   ],
-  Projetos: ["Portfólio", "Projetos Pré-prontos", "Cases de sucesso", "Depoimentos"],
-  Empresa: ["Sobre mim", "Como funciona", "Preços", "Contato"],
+  Navegação: ["Serviços", "Processo", "Preços", "FAQ", "Contato"],
 }
 
 const socials = [
@@ -26,63 +21,69 @@ const socials = [
 
 export function Footer() {
   return (
-    <footer className="relative border-t border-white/7 bg-[#080e0a]">
-      {/* Linha de brilho no topo */}
+    <footer className="relative overflow-hidden border-t border-zinc-800/60 bg-zinc-950">
+      {/* "Let's Talk" gigantesco que se mistura ao fundo */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-px"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(92,255,138,0.5), transparent)" }}
+        className="absolute inset-x-0 top-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
         aria-hidden="true"
+      >
+        <span
+          className="text-[clamp(80px,18vw,220px)] font-black text-white tracking-tight leading-none whitespace-nowrap"
+          style={{ opacity: 0.025 }}
+        >
+          Let&apos;s Talk
+        </span>
+      </div>
+
+      {/* Glow sutil no topo */}
+      <div
+        className="absolute inset-x-0 top-0 h-px pointer-events-none"
+        style={{
+          background: "linear-gradient(90deg, transparent, rgba(74,222,128,0.3), transparent)",
+        }}
       />
 
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        {/* CTA banner */}
-        <div
-          className="relative rounded-2xl border border-[#5cff8a]/15 bg-[#5cff8a]/4 p-8 mb-16 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden"
-        >
-          {/* Glow sutil atrás */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-20 pb-10">
+        {/* CTA Banner */}
+        <div className="relative rounded-2xl border border-green-400/15 bg-green-400/[0.03] p-8 mb-16 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden">
           <div
             className="absolute inset-0 pointer-events-none"
             aria-hidden="true"
             style={{
-              background: "radial-gradient(ellipse 60% 80% at 20% 50%, rgba(92,255,138,0.07) 0%, transparent 70%)",
+              background:
+                "radial-gradient(ellipse 60% 100% at 10% 50%, rgba(74,222,128,0.06) 0%, transparent 70%)",
             }}
           />
-          <div className="relative">
-            <h3 className="font-black text-[#eef4f0] text-xl mb-1">Pronto para começar?</h3>
-            <p className="text-[13px] text-[#7a9985]">
+          <div className="relative z-10">
+            <h3 className="text-xl font-bold text-white mb-1">Pronto para começar?</h3>
+            <p className="text-sm text-zinc-500">
               Entre em contato e receba uma proposta sem compromisso em até 24h.
             </p>
           </div>
-          <Link
+          <a
             href="#contato"
-            className="relative flex items-center gap-2 px-6 py-3 rounded-xl bg-[#5cff8a] text-[#0c1710] font-bold text-sm hover:bg-[#7aff9e] transition-all duration-200 whitespace-nowrap flex-shrink-0 group"
-            style={{ boxShadow: "0 0 22px rgba(92,255,138,0.4)" }}
+            className="relative z-10 flex items-center gap-2 px-6 py-3 rounded-xl bg-green-400 text-black font-bold text-sm hover:bg-green-300 transition-all duration-200 whitespace-nowrap glow-green"
           >
-            Iniciar projeto
-            <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-          </Link>
+            Iniciar Projeto
+          </a>
         </div>
 
-        {/* Links */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-14">
-          {/* Brand */}
+        {/* Grid de links */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+          {/* Marca */}
           <div className="lg:col-span-2">
-            <Link href="#home" className="flex items-center gap-2.5 mb-5 group w-fit">
-              <div
-                className="size-8 rounded-lg border border-[#5cff8a]/25 bg-[#5cff8a]/8 flex items-center justify-center"
-                style={{ boxShadow: "0 0 12px rgba(92,255,138,0.12)" }}
-              >
-                <Code2 className="size-4 text-[#5cff8a]" />
-              </div>
-              <span className="text-[15px] font-bold text-[#eef4f0]">
-                Dev<span className="text-[#5cff8a]">Pro</span>
+            <a href="#" className="flex items-center gap-2 mb-5 w-fit">
+              <Code2 className="size-5 text-green-400" />
+              <span className="text-white font-bold text-base tracking-tight">
+                Dev<span className="text-green-400">Pro</span>
               </span>
-            </Link>
-            <p className="text-[13px] text-[#536860] leading-relaxed max-w-xs mb-7">
+              <span className="size-1.5 rounded-full bg-green-400 mb-2.5 animate-pulse-glow" />
+            </a>
+            <p className="text-xs text-zinc-600 leading-relaxed max-w-xs mb-6">
               Desenvolvimento web profissional. Sites, software, plataformas analíticas e soluções
               digitais sob medida. Código 100% entregue ao cliente.
             </p>
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
               {socials.map(({ Icon, href, label }) => (
                 <a
                   key={label}
@@ -90,7 +91,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="size-8 rounded-lg border border-white/7 bg-[#111f16] flex items-center justify-center text-[#536860] hover:border-[#5cff8a]/25 hover:text-[#5cff8a] hover:bg-[#5cff8a]/6 transition-all duration-200"
+                  className="size-8 rounded-lg border border-zinc-800 bg-zinc-900 flex items-center justify-center text-zinc-600 hover:border-green-400/30 hover:text-green-400 hover:bg-green-400/[0.05] transition-all duration-200"
                 >
                   <Icon className="size-3.5" />
                 </a>
@@ -98,14 +99,16 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Categorias */}
+          {/* Links de navegação */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h4 className="text-[11px] font-semibold text-[#eef4f0] uppercase tracking-widest mb-5">{category}</h4>
+              <h4 className="text-xs font-semibold text-white uppercase tracking-[0.12em] mb-5">
+                {category}
+              </h4>
               <ul className="flex flex-col gap-3">
                 {links.map((link) => (
                   <li key={link}>
-                    <span className="text-[13px] text-[#536860] hover:text-[#c8d9cd] cursor-pointer transition-colors duration-200">
+                    <span className="text-xs text-zinc-600 hover:text-zinc-300 cursor-pointer transition-colors duration-200">
                       {link}
                     </span>
                   </li>
@@ -115,14 +118,15 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Bottom */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-8 border-t border-white/6">
-          <p className="text-[12px] text-[#536860]">
+        {/* Bottom bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-8 border-t border-zinc-800/60">
+          <p className="text-xs text-zinc-700">
             &copy; {new Date().getFullYear()} DevPro. Todos os direitos reservados.
           </p>
-          <p className="text-[12px] text-[#536860]">
-            Feito com <span className="text-[#5cff8a]">♥</span> por{" "}
-            <span className="text-[#c8d9cd]">DevPro</span>
+          <p className="text-xs text-zinc-700">
+            Feito com{" "}
+            <span className="text-green-400/60">&#9829;</span> por{" "}
+            <span className="text-zinc-500">DevPro</span>
           </p>
         </div>
       </div>

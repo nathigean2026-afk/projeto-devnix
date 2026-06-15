@@ -1,157 +1,97 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Menu, X, Code2, ArrowRight } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Menu, X, Code2 } from "lucide-react"
 
-const navLinks = [
-  { label: "Início", href: "#home" },
+const links = [
   { label: "Serviços", href: "#servicos" },
-  { label: "Projetos", href: "#projetos" },
-  { label: "Sobre", href: "#sobre" },
+  { label: "Processo", href: "#processo" },
   { label: "Preços", href: "#precos" },
-  { label: "Contato", href: "#contato" },
+  { label: "FAQ", href: "#faq" },
 ]
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [active, setActive] = useState("#home")
+  const [open, setOpen] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 30)
+    const onScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  useEffect(() => {
-    const ids = navLinks.map((l) => l.href.replace("#", ""))
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) setActive(`#${e.target.id}`)
-        })
-      },
-      { rootMargin: "-40% 0px -55% 0px" }
-    )
-    ids.forEach((id) => {
-      const el = document.getElementById(id)
-      if (el) observer.observe(el)
-    })
-    return () => observer.disconnect()
-  }, [])
-
   return (
-    <>
-      <header
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
-          scrolled
-            ? "bg-[#0c1710]/85 backdrop-blur-2xl border-b border-white/6"
-            : "bg-transparent"
-        )}
-      >
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="#home" className="flex items-center gap-2.5 group">
-            <div
-              className="relative size-8 flex items-center justify-center rounded-lg border border-[#5cff8a]/25 bg-[#5cff8a]/8"
-              style={{ boxShadow: "0 0 14px rgba(92,255,138,0.15)" }}
-            >
-              <Code2 className="size-4 text-[#5cff8a]" />
-            </div>
-            <span className="text-[15px] font-bold text-[#eef4f0] tracking-tight">
-              Dev<span className="text-[#5cff8a]">Pro</span>
-            </span>
-          </Link>
+    <header
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-black/60 backdrop-blur-md border-b border-white/[0.06]"
+          : "bg-transparent"
+      }`}
+    >
+      <nav className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        {/* Logo */}
+        <a href="#" className="flex items-center gap-1.5 group">
+          <Code2 className="size-5 text-green-400" />
+          <span className="text-white font-bold text-base tracking-tight">
+            Dev<span className="text-green-400">Pro</span>
+          </span>
+          <span className="size-1.5 rounded-full bg-green-400 mb-2.5 animate-pulse-glow" />
+        </a>
 
-          {/* Links desktop */}
-          <nav className="hidden md:flex items-center">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "relative px-3.5 py-1.5 text-[13.5px] font-medium rounded-lg transition-all duration-200",
-                  active === link.href
-                    ? "text-[#eef4f0]"
-                    : "text-[#7a9985] hover:text-[#c8d9cd]"
-                )}
+        {/* Desktop links */}
+        <ul className="hidden md:flex items-center gap-7">
+          {links.map((l) => (
+            <li key={l.href}>
+              <a
+                href={l.href}
+                className="text-sm text-zinc-400 hover:text-white transition-colors duration-200 font-medium"
               >
-                {active === link.href && (
-                  <span className="absolute inset-0 rounded-lg bg-white/7" />
-                )}
-                <span className="relative">{link.label}</span>
-              </Link>
-            ))}
-          </nav>
+                {l.label}
+              </a>
+            </li>
+          ))}
+        </ul>
 
-          {/* CTAs desktop */}
-          <div className="hidden md:flex items-center gap-2">
-            <Link
-              href="#contato"
-              className="text-[13px] font-medium text-[#7a9985] hover:text-[#c8d9cd] transition-colors px-3 py-1.5"
-            >
-              Falar comigo
-            </Link>
-            <Link
-              href="#contato"
-              className="flex items-center gap-1.5 text-[13px] font-bold px-4 py-2 rounded-xl bg-[#5cff8a] text-[#0c1710] hover:bg-[#7aff9e] transition-all duration-200 group"
-              style={{ boxShadow: "0 0 22px rgba(92,255,138,0.35)" }}
-            >
-              Iniciar projeto
-              <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
-            </Link>
-          </div>
+        {/* CTA */}
+        <a
+          href="#contato"
+          className="hidden md:inline-flex items-center px-4 py-2 text-sm font-semibold text-green-400 border border-green-400/40 rounded-lg bg-green-400/[0.05] hover:bg-green-400/[0.10] hover:border-green-400/60 transition-all duration-200 glow-green-sm"
+        >
+          Iniciar Projeto
+        </a>
 
-          {/* Hamburguer mobile */}
-          <button
-            className="md:hidden p-1.5 text-[#7a9985] hover:text-[#eef4f0] transition-colors"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Menu"
+        {/* Mobile toggle */}
+        <button
+          className="md:hidden text-zinc-400 hover:text-white transition-colors"
+          onClick={() => setOpen(!open)}
+          aria-label="Abrir menu"
+        >
+          {open ? <X className="size-5" /> : <Menu className="size-5" />}
+        </button>
+      </nav>
+
+      {/* Mobile menu */}
+      {open && (
+        <div className="md:hidden bg-black/80 backdrop-blur-md border-t border-white/[0.06] px-6 py-5 flex flex-col gap-4">
+          {links.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              onClick={() => setOpen(false)}
+              className="text-sm font-medium text-zinc-300 hover:text-green-400 transition-colors"
+            >
+              {l.label}
+            </a>
+          ))}
+          <a
+            href="#contato"
+            onClick={() => setOpen(false)}
+            className="mt-2 px-4 py-2.5 text-sm font-semibold text-green-400 border border-green-400/40 rounded-lg text-center bg-green-400/[0.05]"
           >
-            {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-          </button>
-        </div>
-      </header>
-
-      {/* Drawer mobile */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setMobileOpen(false)}
-          />
-          <div className="absolute top-16 left-0 right-0 bg-[#0c1710]/98 border-b border-white/7 px-6 py-5 flex flex-col gap-0.5">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "px-3 py-3 rounded-xl text-sm font-medium transition-colors",
-                  active === link.href
-                    ? "text-[#5cff8a] bg-[#5cff8a]/8"
-                    : "text-[#7a9985] hover:text-[#eef4f0]"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <div className="mt-4 pt-4 border-t border-white/6">
-              <Link
-                href="#contato"
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#5cff8a] text-[#0c1710] text-sm font-bold"
-              >
-                Iniciar projeto
-                <ArrowRight className="size-4" />
-              </Link>
-            </div>
-          </div>
+            Iniciar Projeto
+          </a>
         </div>
       )}
-    </>
+    </header>
   )
 }
