@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from 'next'
-import { Space_Grotesk, Geist_Mono } from 'next/font/google'
+import { Inter, Geist_Mono } from 'next/font/google'
+import { ThemeProvider } from 'next-themes'
 import './globals.css'
 
-const spaceGrotesk = Space_Grotesk({
-  variable: '--font-space-grotesk',
+const inter = Inter({
+  variable: '--font-inter',
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
 })
 
 const geistMono = Geist_Mono({
@@ -21,8 +22,10 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'dark',
-  themeColor: '#09090b',
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#080808' },
+    { media: '(prefers-color-scheme: light)', color: '#fafafa' },
+  ],
 }
 
 export default function RootLayout({
@@ -31,10 +34,18 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${spaceGrotesk.variable} ${geistMono.variable} dark noise`}
+      className={`${inter.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
     >
-      <body className="font-sans antialiased bg-background text-foreground">
-        {children}
+      <body className="font-sans antialiased bg-background text-foreground noise-overlay">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange={false}
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )

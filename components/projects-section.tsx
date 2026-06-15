@@ -1,5 +1,7 @@
 "use client"
 
+import { useRef } from "react"
+import { motion, useInView } from "framer-motion"
 import { ExternalLink } from "lucide-react"
 
 const projects = [
@@ -8,136 +10,179 @@ const projects = [
     category: "Software Personalizado",
     desc: "Sistema completo com dashboard analítico, controle de estoque, vendas e relatórios em tempo real.",
     tech: ["Next.js", "PostgreSQL", "TypeScript"],
-    accent: "rgba(92,255,138,0.12)",
-    span: "lg:col-span-2",
+    col: "lg:col-span-2",
+    row: "",
   },
   {
     title: "E-commerce de Moda",
     category: "Loja Virtual",
-    desc: "Loja com catálogo, carrinho, checkout Stripe e painel admin completo.",
+    desc: "Loja com catálogo, carrinho, checkout e painel admin completo — código entregue.",
     tech: ["React", "Stripe", "Node.js"],
-    accent: "rgba(92,200,255,0.10)",
-    span: "",
+    col: "",
+    row: "",
   },
   {
     title: "Dashboard Analítico",
     category: "Plataforma Analítica",
     desc: "BI com gráficos em tempo real, múltiplas fontes de dados e exportação de relatórios.",
     tech: ["React", "D3.js", "SQL"],
-    accent: "rgba(180,92,255,0.10)",
-    span: "",
+    col: "",
+    row: "",
   },
   {
     title: "Portal Imobiliário",
     category: "Site Profissional",
-    desc: "Portal com busca avançada, mapa interativo, tour virtual e CRM para corretores.",
+    desc: "Portal com busca avançada, mapa interativo, tour virtual e CRM integrado.",
     tech: ["Next.js", "Mapbox", "Prisma"],
-    accent: "rgba(255,200,92,0.10)",
-    span: "",
+    col: "",
+    row: "",
   },
   {
     title: "Landing Page SaaS",
     category: "Landing Page",
     desc: "Página de alta conversão com animações, depoimentos, preços e formulário integrado.",
     tech: ["Next.js", "Framer Motion"],
-    accent: "rgba(255,92,138,0.10)",
-    span: "",
+    col: "",
+    row: "",
   },
   {
     title: "Blog Especializado",
     category: "Blog & Conteúdo",
-    desc: "Plataforma com CMS, SEO otimizado, categorias, pesquisa full-text e monetização.",
+    desc: "Plataforma com CMS headless, SEO otimizado, categorias e pesquisa full-text.",
     tech: ["Next.js", "MDX", "Algolia"],
-    accent: "rgba(92,255,200,0.10)",
-    span: "lg:col-span-2",
+    col: "lg:col-span-2",
+    row: "",
   },
 ]
 
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.07 } },
+}
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.23, 1, 0.32, 1] } },
+}
+
 export function ProjectsSection() {
+  const ref = useRef<HTMLElement>(null)
+  const inView = useInView(ref, { once: true, margin: "-80px" })
+
   return (
-    <section id="projetos" className="relative py-32 overflow-hidden">
-      {/* Divisor */}
-      <div className="absolute top-0 left-0 right-0 h-px"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(92,255,138,0.3), transparent)" }}
-        aria-hidden="true"
-      />
+    <section id="projetos" ref={ref} className="relative py-32 overflow-hidden">
+      <div className="absolute inset-0 grid-pattern pointer-events-none opacity-40" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
-        {/* Header */}
-        <div className="mb-16">
-          <p className="section-label mb-5">Portfólio</p>
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#eef4f0] leading-tight tracking-tight">
-              Projetos que{" "}
-              <span className="text-[#5cff8a] glow-text-sm">entregam resultados</span>
-            </h2>
-            <p className="text-[#7a9985] text-sm max-w-xs leading-relaxed lg:text-right">
-              Cada projeto é único — problema analisado, solução construída, código entregue.
-            </p>
-          </div>
+        {/* Label */}
+        <motion.div
+          className="flex items-center gap-3 mb-6"
+          initial={{ opacity: 0, x: -16 }}
+          animate={inView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="h-px w-8 bg-foreground opacity-30" />
+          <span className="label-sm text-muted-foreground">Portfólio</span>
+        </motion.div>
+
+        {/* Heading */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-14">
+          <motion.h2
+            className="text-editorial text-[clamp(38px,6vw,72px)] text-foreground leading-none"
+            initial={{ opacity: 0, y: 24 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+          >
+            Projetos que
+            <br />
+            <span style={{ opacity: 0.35 }}>entregam resultados.</span>
+          </motion.h2>
+          <motion.p
+            className="text-sm text-muted-foreground max-w-xs leading-relaxed"
+            initial={{ opacity: 0, y: 16 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.25 }}
+          >
+            Cada projeto é único — problema analisado, solução construída, código entregue.
+          </motion.p>
         </div>
 
-        {/* Grid bento */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px rounded-2xl overflow-hidden border border-white/7"
-          style={{ background: "rgba(255,255,255,0.06)" }}>
+        {/* Bento grid */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border rounded-2xl overflow-hidden"
+          variants={containerVariants}
+          initial="hidden"
+          animate={inView ? "visible" : "hidden"}
+        >
           {projects.map((p) => (
-            <article
+            <motion.article
               key={p.title}
-              className={`group relative bg-[#0c1710] flex flex-col overflow-hidden hover:bg-[#0f1e14] transition-colors duration-300 ${p.span}`}
+              variants={cardVariants}
+              className={`group relative flex flex-col bg-background hover:bg-secondary transition-colors duration-300 overflow-hidden ${p.col}`}
             >
-              {/* Linha hover */}
-              <div className="absolute top-0 left-0 right-0 h-px bg-[#5cff8a] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-              {/* Área de preview */}
+              {/* Top line on hover */}
               <div
-                className="h-36 relative overflow-hidden flex items-center justify-center"
-                style={{ background: p.accent }}
-              >
-                {/* Grade sutil */}
-                <div
-                  className="absolute inset-0 opacity-30"
-                  style={{
-                    backgroundImage: "linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)",
-                    backgroundSize: "32px 32px",
-                  }}
-                />
-                <span className="font-mono text-[11px] text-white/15 select-none">{`{ ${p.category} }`}</span>
+                className="absolute top-0 left-0 right-0 h-px transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                style={{ background: "var(--foreground)" }}
+              />
+
+              {/* Preview area */}
+              <div className="h-32 relative flex items-center justify-center bg-secondary overflow-hidden">
+                <div className="absolute inset-0 grid-pattern opacity-60" />
+                <span className="label-sm text-muted-foreground opacity-40 font-mono select-none">
+                  {`{ ${p.category} }`}
+                </span>
                 <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <div className="size-7 rounded-lg bg-[#0c1710]/80 border border-white/10 flex items-center justify-center">
-                    <ExternalLink className="size-3 text-[#7a9985]" />
+                  <div
+                    className="size-7 rounded-lg border border-border flex items-center justify-center"
+                    style={{ background: "var(--background)" }}
+                  >
+                    <ExternalLink className="size-3 text-muted-foreground" />
                   </div>
                 </div>
               </div>
 
-              {/* Conteúdo */}
+              {/* Content */}
               <div className="p-6 flex flex-col gap-3 flex-1">
-                <span className="inline-flex self-start text-[11px] font-medium text-[#5cff8a] bg-[#5cff8a]/8 border border-[#5cff8a]/20 px-2.5 py-0.5 rounded-full">
+                <span
+                  className="inline-flex self-start label-sm border border-border px-2.5 py-0.5 rounded-full text-muted-foreground"
+                  style={{ fontSize: "9px" }}
+                >
                   {p.category}
                 </span>
-                <h3 className="text-[14px] font-semibold text-[#eef4f0]">{p.title}</h3>
-                <p className="text-[12.5px] text-[#7a9985] leading-relaxed">{p.desc}</p>
+                <h3 className="text-sm font-semibold text-foreground">{p.title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
                 <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
                   {p.tech.map((t) => (
-                    <span key={t} className="px-2 py-0.5 text-[11px] font-mono rounded bg-[#111f16] border border-white/7 text-[#7a9985]">
+                    <span
+                      key={t}
+                      className="label-sm border border-border px-2 py-0.5 rounded text-muted-foreground font-mono"
+                      style={{ fontSize: "9px", background: "var(--secondary)" }}
+                    >
                       {t}
                     </span>
                   ))}
                 </div>
               </div>
-            </article>
+            </motion.article>
           ))}
-        </div>
+        </motion.div>
 
         {/* CTA */}
-        <div className="flex justify-center mt-12">
+        <motion.div
+          className="flex justify-center mt-12"
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.7, delay: 0.6 }}
+        >
           <a
             href="#contato"
-            className="flex items-center gap-2 text-[13px] font-medium text-[#5cff8a] border border-[#5cff8a]/25 px-6 py-2.5 rounded-xl hover:bg-[#5cff8a]/8 transition-all duration-200"
+            className="flex items-center gap-3 text-sm font-medium text-muted-foreground border border-border px-7 py-3.5 rounded-full hover:border-foreground/20 hover:text-foreground transition-all duration-300"
           >
             Tem um projeto em mente? Vamos conversar
-            <span className="text-[#5cff8a]/60">→</span>
+            <span className="opacity-50">→</span>
           </a>
-        </div>
+        </motion.div>
       </div>
     </section>
   )

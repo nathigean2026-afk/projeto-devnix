@@ -1,5 +1,7 @@
 "use client"
 
+import { useRef } from "react"
+import { motion, useInView } from "framer-motion"
 import { Star, Quote } from "lucide-react"
 
 const testimonials = [
@@ -53,66 +55,112 @@ const testimonials = [
   },
 ]
 
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+}
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.23, 1, 0.32, 1] } },
+}
+
 export function TestimonialsSection() {
+  const ref = useRef<HTMLElement>(null)
+  const inView = useInView(ref, { once: true, margin: "-80px" })
+
   return (
-    <section className="relative py-32 overflow-hidden">
-      {/* Divisor */}
-      <div className="absolute top-0 left-0 right-0 h-px"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(92,255,138,0.3), transparent)" }}
-        aria-hidden="true"
-      />
+    <section ref={ref} className="relative py-32 overflow-hidden">
+      <div className="absolute inset-0 dot-pattern pointer-events-none opacity-40" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
-        {/* Header */}
-        <div className="mb-16">
-          <p className="section-label mb-5">Depoimentos</p>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#eef4f0] leading-tight tracking-tight">
-            O que os clientes{" "}
-            <span className="text-[#5cff8a] glow-text-sm">dizem</span>
-          </h2>
+        {/* Label */}
+        <motion.div
+          className="flex items-center gap-3 mb-6"
+          initial={{ opacity: 0, x: -16 }}
+          animate={inView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="h-px w-8 bg-foreground opacity-30" />
+          <span className="label-sm text-muted-foreground">Depoimentos</span>
+        </motion.div>
+
+        {/* Heading */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-14">
+          <motion.h2
+            className="text-editorial text-[clamp(38px,6vw,72px)] text-foreground leading-none"
+            initial={{ opacity: 0, y: 24 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+          >
+            O que os clientes
+            <br />
+            <span style={{ opacity: 0.35 }}>dizem.</span>
+          </motion.h2>
+          <motion.p
+            className="text-sm text-muted-foreground max-w-xs leading-relaxed"
+            initial={{ opacity: 0, y: 16 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.25 }}
+          >
+            Mais de 50 projetos entregues com 100% de satisfação dos clientes.
+          </motion.p>
         </div>
 
-        {/* Grid bento */}
-        <div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 rounded-2xl overflow-hidden border border-white/7"
-          style={{ gap: "1px", background: "rgba(255,255,255,0.06)" }}
+        {/* Grid */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border rounded-2xl overflow-hidden"
+          variants={containerVariants}
+          initial="hidden"
+          animate={inView ? "visible" : "hidden"}
         >
           {testimonials.map((t) => (
-            <div
+            <motion.div
               key={t.name}
-              className="group relative bg-[#0c1710] p-7 flex flex-col gap-5 hover:bg-[#0f1e14] transition-colors duration-300"
+              variants={cardVariants}
+              className="group relative flex flex-col gap-5 p-7 bg-background hover:bg-secondary transition-colors duration-300"
             >
-              {/* Hover top */}
-              <div className="absolute top-0 left-0 right-0 h-px bg-[#5cff8a] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              {/* Top hover line */}
+              <div
+                className="absolute top-0 left-0 right-0 h-px transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                style={{ background: "var(--foreground)" }}
+              />
 
-              {/* Quote + estrelas */}
+              {/* Quote + stars */}
               <div className="flex items-start justify-between">
-                <Quote className="size-6 text-[#5cff8a]/20" />
+                <Quote className="size-6 text-muted-foreground opacity-15" />
                 <div className="flex gap-0.5">
                   {Array.from({ length: t.stars }).map((_, i) => (
-                    <Star key={i} className="size-3.5 text-[#5cff8a] fill-[#5cff8a]" />
+                    <Star key={i} className="size-3 text-foreground opacity-60 fill-foreground" />
                   ))}
                 </div>
               </div>
 
-              {/* Texto */}
-              <p className="text-[13px] text-[#7a9985] leading-relaxed flex-1">
+              {/* Content */}
+              <p className="text-sm text-muted-foreground leading-relaxed flex-1">
                 &ldquo;{t.content}&rdquo;
               </p>
 
-              {/* Autor */}
-              <div className="flex items-center gap-3 pt-2 border-t border-white/5">
-                <div className="size-9 rounded-full bg-[#5cff8a]/10 border border-[#5cff8a]/25 flex items-center justify-center flex-shrink-0">
-                  <span className="text-[11px] font-bold text-[#5cff8a]">{t.initials}</span>
+              {/* Author */}
+              <div className="flex items-center gap-3 pt-4 border-t border-border">
+                <div
+                  className="size-9 rounded-full border border-border flex items-center justify-center flex-shrink-0"
+                  style={{ background: "var(--secondary)" }}
+                >
+                  <span className="label-sm text-foreground" style={{ fontSize: "9px" }}>
+                    {t.initials}
+                  </span>
                 </div>
                 <div>
-                  <div className="text-[13px] font-semibold text-[#eef4f0]">{t.name}</div>
-                  <div className="text-[11px] text-[#536860]">{t.role}</div>
+                  <div className="text-sm font-semibold text-foreground">{t.name}</div>
+                  <div className="label-sm text-muted-foreground" style={{ fontSize: "9px" }}>
+                    {t.role}
+                  </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   )

@@ -1,36 +1,39 @@
+"use client"
+
+import { useRef } from "react"
+import { motion, useInView } from "framer-motion"
+
+const stats = [
+  { value: "+50", label: "Projetos Entregues" },
+  { value: "100%", label: "Satisfação dos Clientes" },
+  { value: "+5", label: "Anos de Experiência" },
+  { value: "24h", label: "Suporte Responsivo" },
+]
+
 export function StatsSection() {
-  const stats = [
-    { value: "+50", label: "Projetos Entregues" },
-    { value: "100%", label: "Satisfação dos Clientes" },
-    { value: "+5", label: "Anos de Experiência" },
-    { value: "24h", label: "Suporte Responsivo" },
-  ]
+  const ref = useRef<HTMLElement>(null)
+  const inView = useInView(ref, { once: true, margin: "-40px" })
 
   return (
-    <section className="relative py-8 border-y border-white/[0.06]">
-      {/* Subtle glow border top */}
-      <div
-        className="absolute inset-x-0 top-0 h-px pointer-events-none"
-        style={{
-          background: "linear-gradient(90deg, transparent, rgba(74,222,128,0.25), transparent)",
-        }}
-      />
-      <div
-        className="absolute inset-x-0 bottom-0 h-px pointer-events-none"
-        style={{
-          background: "linear-gradient(90deg, transparent, rgba(74,222,128,0.15), transparent)",
-        }}
-      />
-
+    <section ref={ref} className="relative border-y border-border overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-white/[0.06]">
-          {stats.map((s) => (
-            <div key={s.label} className="flex flex-col items-center justify-center py-6 px-4 gap-1">
-              <span className="text-4xl md:text-5xl font-bold text-white text-glow tracking-tight">
+        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
+          {stats.map((s, i) => (
+            <motion.div
+              key={s.label}
+              className="flex flex-col items-center justify-center py-8 px-4 gap-1"
+              initial={{ opacity: 0, y: 16 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <span
+                className="text-4xl md:text-5xl font-black text-foreground"
+                style={{ letterSpacing: "-0.04em" }}
+              >
                 {s.value}
               </span>
-              <span className="text-xs text-zinc-500 font-medium text-center">{s.label}</span>
-            </div>
+              <span className="label-sm text-muted-foreground text-center">{s.label}</span>
+            </motion.div>
           ))}
         </div>
       </div>

@@ -1,3 +1,7 @@
+"use client"
+
+import { useRef } from "react"
+import { motion, useInView } from "framer-motion"
 import { Check, Zap, Crown, Package } from "lucide-react"
 
 const plans = [
@@ -6,7 +10,7 @@ const plans = [
     name: "Starter",
     price: "Mensalidade",
     priceDetail: "valor combinado",
-    desc: "Projetos pré-prontos adaptados ao seu banco de dados e identidade visual. Rápido e econômico.",
+    desc: "Templates premium adaptados ao seu banco de dados e identidade visual. Rápido e econômico.",
     features: [
       "Template escolhido por você",
       "Adaptação ao banco de dados",
@@ -58,106 +62,124 @@ const plans = [
 ]
 
 export function PricingSection() {
+  const ref = useRef<HTMLElement>(null)
+  const inView = useInView(ref, { once: true, margin: "-80px" })
+
   return (
-    <section id="precos" className="relative py-28">
-      <div
-        className="absolute inset-0 pointer-events-none"
-        aria-hidden="true"
-        style={{
-          background:
-            "radial-gradient(ellipse 70% 50% at 50% 60%, rgba(74,222,128,0.04) 0%, transparent 70%)",
-        }}
-      />
+    <section id="precos" ref={ref} className="relative py-32 overflow-hidden">
+      <div className="absolute inset-0 dot-pattern pointer-events-none opacity-40" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <p className="text-xs font-semibold text-green-400 tracking-[0.15em] uppercase mb-4">
-            — Pacotes
-          </p>
-          <h2 className="text-4xl sm:text-5xl font-bold text-white leading-tight tracking-tight mb-4">
-            Os melhores preços do setor.
-          </h2>
-          <p className="text-zinc-500 text-sm max-w-sm mx-auto leading-relaxed">
-            Cada projeto é único. Orçamento personalizado sem compromisso.
-          </p>
+        {/* Label */}
+        <motion.div
+          className="flex items-center gap-3 mb-6"
+          initial={{ opacity: 0, x: -16 }}
+          animate={inView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="h-px w-8 bg-foreground opacity-30" />
+          <span className="label-sm text-muted-foreground">Pacotes</span>
+        </motion.div>
+
+        {/* Heading */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-14">
+          <motion.h2
+            className="text-editorial text-[clamp(38px,6vw,72px)] text-foreground leading-none"
+            initial={{ opacity: 0, y: 24 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+          >
+            Investimento
+            <br />
+            <span style={{ opacity: 0.35 }}>transparente.</span>
+          </motion.h2>
+          <motion.p
+            className="text-sm text-muted-foreground max-w-xs leading-relaxed"
+            initial={{ opacity: 0, y: 16 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.25 }}
+          >
+            Orçamento personalizado sem compromisso. Cada projeto é único.
+          </motion.p>
         </div>
 
         {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {plans.map((plan) => {
+          {plans.map((plan, i) => {
             const Icon = plan.icon
             return (
-              <div
+              <motion.div
                 key={plan.name}
-                className={`relative rounded-2xl border flex flex-col p-7 transition-all duration-300 ${
-                  plan.featured
-                    ? "border-green-400/35 bg-zinc-900 pricing-featured"
-                    : "border-zinc-800 bg-zinc-900 hover:border-zinc-700"
-                }`}
+                className="relative rounded-2xl border flex flex-col p-7 transition-all duration-300 hover:-translate-y-1"
+                style={{
+                  borderColor: plan.featured ? "rgba(var(--foreground-rgb, 242,242,242), 0.2)" : "var(--border)",
+                  background: plan.featured ? "var(--secondary)" : "var(--background)",
+                }}
+                initial={{ opacity: 0, y: 32 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.7, delay: 0.15 + i * 0.12, ease: [0.23, 1, 0.32, 1] }}
               >
                 {plan.featured && (
                   <div
-                    className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-green-400 text-black text-[11px] font-bold rounded-full whitespace-nowrap"
-                    style={{ boxShadow: "0 0 20px rgba(74,222,128,0.45)" }}
+                    className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 text-[10px] font-bold rounded-full whitespace-nowrap label-sm"
+                    style={{
+                      background: "var(--foreground)",
+                      color: "var(--background)",
+                    }}
                   >
                     Mais Escolhido
                   </div>
                 )}
 
                 <div
-                  className={`size-11 rounded-xl flex items-center justify-center mb-5 border ${
-                    plan.featured
-                      ? "bg-green-400/10 border-green-400/30"
-                      : "bg-zinc-800 border-zinc-700"
-                  }`}
+                  className="size-11 rounded-xl border border-border flex items-center justify-center mb-5"
+                  style={{ background: "var(--muted)" }}
                 >
-                  <Icon
-                    className={`size-5 ${plan.featured ? "text-green-400" : "text-zinc-400"}`}
-                  />
+                  <Icon className="size-5 text-muted-foreground" />
                 </div>
 
-                <h3 className="text-base font-bold text-white mb-1">{plan.name}</h3>
+                <h3 className="text-base font-bold text-foreground mb-1">{plan.name}</h3>
                 <div className="flex items-baseline gap-2 mb-3">
-                  <span
-                    className={`text-xl font-black ${plan.featured ? "text-green-400" : "text-white"}`}
-                    style={plan.featured ? { textShadow: "0 0 20px rgba(74,222,128,0.4)" } : {}}
-                  >
-                    {plan.price}
-                  </span>
-                  <span className="text-xs text-zinc-600">{plan.priceDetail}</span>
+                  <span className="text-xl font-black text-foreground">{plan.price}</span>
+                  <span className="text-xs text-muted-foreground opacity-60">{plan.priceDetail}</span>
                 </div>
-                <p className="text-xs text-zinc-500 leading-relaxed mb-6">{plan.desc}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed mb-6">{plan.desc}</p>
 
                 <ul className="flex flex-col gap-2.5 mb-8 flex-1">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2.5">
-                      <Check className="size-3.5 text-green-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-xs text-zinc-400">{f}</span>
+                      <Check className="size-3.5 text-foreground opacity-50 flex-shrink-0 mt-0.5" />
+                      <span className="text-xs text-muted-foreground">{f}</span>
                     </li>
                   ))}
                 </ul>
 
                 <a
                   href="#contato"
-                  className={`flex items-center justify-center w-full py-3 rounded-xl text-sm font-bold transition-all duration-200 ${
+                  className="flex items-center justify-center w-full py-3.5 rounded-xl text-[11px] font-bold tracking-widest uppercase transition-all duration-300 hover:opacity-75"
+                  style={
                     plan.featured
-                      ? "bg-green-400 text-black hover:bg-green-300 glow-green"
-                      : "border border-zinc-700 text-zinc-300 hover:border-green-400/30 hover:bg-green-400/[0.04] hover:text-white"
-                  }`}
+                      ? { background: "var(--foreground)", color: "var(--background)" }
+                      : { border: "1px solid var(--border)", color: "var(--muted-foreground)" }
+                  }
                 >
                   {plan.cta}
                 </a>
-              </div>
+              </motion.div>
             )
           })}
         </div>
 
-        <p className="text-center text-xs text-zinc-600 mt-8">
+        <motion.p
+          className="text-center text-xs text-muted-foreground opacity-50 mt-8"
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 0.5 } : {}}
+          transition={{ delay: 0.8 }}
+        >
           Todos os projetos incluem{" "}
-          <span className="text-zinc-400">código original entregue</span> e opção de{" "}
-          <span className="text-zinc-400">manutenção continuada</span>.
-        </p>
+          <span className="opacity-100 text-foreground">código original entregue</span> e opção de{" "}
+          <span className="opacity-100 text-foreground">manutenção continuada</span>.
+        </motion.p>
       </div>
     </section>
   )

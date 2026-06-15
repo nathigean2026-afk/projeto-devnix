@@ -1,99 +1,175 @@
-import { Globe, Code2, BarChart3, Layout, ShoppingCart, Wrench, BookOpen, Smartphone } from "lucide-react"
+"use client"
+
+import { useRef } from "react"
+import { motion, useInView } from "framer-motion"
+import { Globe, Code2, BarChart3, Layout, ShoppingCart, Wrench, BookOpen, Zap } from "lucide-react"
 
 const services = [
   {
     icon: Globe,
+    num: "01",
     title: "Sites Profissionais",
-    desc: "Do institucional ao e-commerce. Responsivo, rápido e com SEO otimizado desde o primeiro commit.",
+    desc: "Do institucional ao corporativo. Responsivo, performático e com SEO técnico desde o primeiro commit.",
+    tags: ["Next.js", "React", "SEO"],
   },
   {
     icon: Code2,
+    num: "02",
     title: "Software Personalizado",
-    desc: "Você tem o problema — eu analiso e construo a solução exata. Nada genérico, tudo sob medida.",
+    desc: "Você tem o problema — eu analiso e construo a solução exata. Nada genérico, tudo sob medida para o seu negócio.",
+    tags: ["Full-Stack", "API", "DB"],
   },
   {
     icon: BarChart3,
+    num: "03",
     title: "Plataformas Analíticas",
-    desc: "Dashboards em tempo real, relatórios interativos e BI para decisões mais rápidas.",
+    desc: "Dashboards em tempo real, relatórios interativos e BI para decisões mais rápidas e inteligentes.",
+    tags: ["Dashboard", "BI", "Real-time"],
   },
   {
     icon: Layout,
+    num: "04",
     title: "Landing Pages",
-    desc: "Páginas de alta conversão para campanhas, lançamentos e captação de leads.",
+    desc: "Páginas de alta conversão para campanhas, lançamentos e captação de leads com copy e design validados.",
+    tags: ["CRO", "A/B", "Analytics"],
   },
   {
     icon: ShoppingCart,
+    num: "05",
     title: "E-commerce",
-    desc: "Lojas virtuais completas com carrinho, pagamento e painel admin — código entregue.",
+    desc: "Lojas virtuais completas com carrinho, checkout, pagamento integrado e painel admin — código seu.",
+    tags: ["Checkout", "Pagamentos", "Admin"],
   },
   {
     icon: BookOpen,
+    num: "06",
     title: "Blogs & Conteúdo",
-    desc: "Plataformas de blog com CMS integrado, SEO avançado e estrutura escalável.",
+    desc: "Plataformas com CMS headless integrado, SEO avançado e estrutura escalável para crescer sem limites.",
+    tags: ["CMS", "MDX", "SEO"],
   },
   {
-    icon: Smartphone,
+    icon: Zap,
+    num: "07",
     title: "Projetos Pré-prontos",
-    desc: "Templates prontos adaptados ao seu banco de dados. Rápido, econômico, sob mensalidade.",
+    desc: "Templates premium adaptados ao seu banco de dados e identidade. Rápido, econômico, via mensalidade.",
+    tags: ["Template", "Rápido", "Mensal"],
   },
   {
     icon: Wrench,
+    num: "08",
     title: "Manutenção & Suporte",
-    desc: "Atualizações, correções e melhorias com preço combinado. Sem surpresas.",
+    desc: "Atualizações, correções e melhorias contínuas com preço combinado e atendimento direto. Sem surpresas.",
+    tags: ["Suporte", "Updates", "24h"],
   },
 ]
 
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+}
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 32 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
+}
+
 export function ServicesSection() {
+  const ref = useRef<HTMLElement>(null)
+  const inView = useInView(ref, { once: true, margin: "-80px" })
+
   return (
-    <section id="servicos" className="relative py-28">
-      {/* Radial bg glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        aria-hidden="true"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(74,222,128,0.03) 0%, transparent 70%)",
-        }}
-      />
+    <section id="servicos" ref={ref} className="relative py-32 overflow-hidden">
+      {/* Dot pattern bg */}
+      <div className="absolute inset-0 dot-pattern pointer-events-none opacity-60" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
-        {/* Header */}
-        <div className="mb-16">
-          <p className="text-xs font-semibold text-green-400 tracking-[0.15em] uppercase mb-4">
-            — Serviços
-          </p>
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-            <h2 className="text-4xl sm:text-5xl font-bold text-white leading-tight tracking-tight">
-              Tudo que você precisa{" "}
-              <br className="hidden sm:block" />
-              para <span className="text-green-400">ter sucesso online</span>.
-            </h2>
-            <p className="text-zinc-500 text-sm max-w-xs leading-relaxed">
-              Código-fonte original sempre incluso. Você tem total domínio sobre o que foi construído.
-            </p>
-          </div>
+        {/* Section label */}
+        <motion.div
+          className="flex items-center gap-3 mb-6"
+          initial={{ opacity: 0, x: -16 }}
+          animate={inView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="h-px w-8 bg-foreground opacity-30" />
+          <span className="label-sm text-muted-foreground">Serviços</span>
+        </motion.div>
+
+        {/* Heading */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-16">
+          <motion.h2
+            className="text-editorial text-[clamp(38px,6vw,72px)] text-foreground leading-none max-w-2xl"
+            initial={{ opacity: 0, y: 24 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+          >
+            O que eu faço,
+            <br />
+            <span style={{ opacity: 0.35 }}>com excelência.</span>
+          </motion.h2>
+          <motion.p
+            className="text-sm text-muted-foreground max-w-xs leading-relaxed"
+            initial={{ opacity: 0, y: 16 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.25 }}
+          >
+            Código-fonte original sempre incluso. Você tem total domínio sobre tudo que foi construído.
+          </motion.p>
         </div>
 
         {/* Cards grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-border rounded-2xl overflow-hidden"
+          variants={containerVariants}
+          initial="hidden"
+          animate={inView ? "visible" : "hidden"}
+        >
           {services.map((s) => {
             const Icon = s.icon
             return (
-              <div
+              <motion.div
                 key={s.title}
-                className="service-card group relative rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col gap-4 cursor-default"
+                variants={cardVariants}
+                className="group relative flex flex-col gap-5 p-6 bg-background hover:bg-secondary transition-colors duration-300 cursor-default"
               >
-                <div className="size-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center group-hover:border-green-400/30 group-hover:bg-green-400/[0.06] transition-all duration-300">
-                  <Icon className="size-5 text-zinc-400 group-hover:text-green-400 transition-colors duration-300" />
+                {/* Number */}
+                <span className="label-sm text-muted-foreground opacity-40">{s.num}</span>
+
+                {/* Icon */}
+                <div
+                  className="size-10 rounded-xl border border-border flex items-center justify-center group-hover:border-foreground/20 transition-all duration-300"
+                  style={{ background: "var(--secondary)" }}
+                >
+                  <Icon className="size-4 text-muted-foreground group-hover:text-foreground transition-colors duration-300" />
                 </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-white mb-1.5">{s.title}</h3>
-                  <p className="text-xs text-zinc-500 leading-relaxed">{s.desc}</p>
+
+                {/* Text */}
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold text-foreground mb-2 leading-snug">{s.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{s.desc}</p>
                 </div>
-              </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1.5">
+                  {s.tags.map((t) => (
+                    <span
+                      key={t}
+                      className="label-sm text-muted-foreground border border-border px-2 py-0.5 rounded-full"
+                      style={{ fontSize: "9px" }}
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Hover line */}
+                <div
+                  className="absolute bottom-0 left-0 h-px w-0 group-hover:w-full transition-all duration-500"
+                  style={{ background: "var(--foreground)" }}
+                />
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   )

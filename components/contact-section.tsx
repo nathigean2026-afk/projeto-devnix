@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
+import { motion, useInView } from "framer-motion"
 import { Send, Mail, GitBranch, AtSign, Link2, CheckCircle, Loader2 } from "lucide-react"
 
 const contactLinks = [
@@ -10,10 +11,9 @@ const contactLinks = [
   { icon: AtSign, label: "Instagram", value: "@devpro.dev", href: "https://instagram.com" },
 ]
 
-const inputCls =
-  "w-full px-4 py-3 rounded-xl bg-zinc-800/60 border border-zinc-700 text-white placeholder:text-zinc-600 text-sm focus:outline-none focus:border-green-400/40 focus:ring-1 focus:ring-green-400/20 transition-all duration-200"
-
 export function ContactSection() {
+  const ref = useRef<HTMLElement>(null)
+  const inView = useInView(ref, { once: true, margin: "-80px" })
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" })
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle")
 
@@ -26,56 +26,70 @@ export function ContactSection() {
     setTimeout(() => setStatus("idle"), 5000)
   }
 
+  const inputCls =
+    "w-full px-4 py-3 rounded-xl border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:border-foreground/30 focus:ring-1 focus:ring-foreground/10 transition-all duration-200 bg-background"
+
   return (
-    <section id="contato" className="relative py-28">
-      <div
-        className="absolute inset-x-0 top-0 h-px pointer-events-none"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(74,222,128,0.15), transparent)" }}
-      />
-      <div
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] pointer-events-none"
-        style={{
-          background: "radial-gradient(ellipse at 50% 100%, rgba(74,222,128,0.06) 0%, transparent 70%)",
-        }}
-      />
+    <section id="contato" ref={ref} className="relative py-32 overflow-hidden">
+      <div className="absolute inset-0 dot-pattern pointer-events-none opacity-40" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
-        {/* Header */}
-        <div className="mb-14">
-          <p className="text-xs font-semibold text-green-400 tracking-[0.15em] uppercase mb-4">
-            — Contato
-          </p>
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-            <h2 className="text-4xl sm:text-5xl font-bold text-white leading-tight tracking-tight">
-              Vamos construir algo{" "}
-              <span className="text-green-400">incrível</span> juntos.
-            </h2>
-            <p className="text-zinc-500 text-sm max-w-xs leading-relaxed lg:text-right">
-              Respondo em até 24h com uma proposta detalhada — sem custo de consulta.
-            </p>
-          </div>
+        {/* Label */}
+        <motion.div
+          className="flex items-center gap-3 mb-6"
+          initial={{ opacity: 0, x: -16 }}
+          animate={inView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="h-px w-8 bg-foreground opacity-30" />
+          <span className="label-sm text-muted-foreground">Contato</span>
+        </motion.div>
+
+        {/* Heading */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-14">
+          <motion.h2
+            className="text-editorial text-[clamp(38px,6vw,72px)] text-foreground leading-none"
+            initial={{ opacity: 0, y: 24 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+          >
+            Vamos construir
+            <br />
+            <span style={{ opacity: 0.35 }}>algo incrível.</span>
+          </motion.h2>
+          <motion.p
+            className="text-sm text-muted-foreground max-w-xs leading-relaxed"
+            initial={{ opacity: 0, y: 16 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.25 }}
+          >
+            Respondo em até 24h com uma proposta detalhada — sem custo de consulta.
+          </motion.p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-          {/* Formulário */}
-          <div className="lg:col-span-3 rounded-2xl border border-zinc-800 bg-zinc-900 p-8">
+          {/* Form */}
+          <motion.div
+            className="lg:col-span-3 rounded-2xl border border-border p-8"
+            style={{ background: "var(--secondary)" }}
+            initial={{ opacity: 0, y: 32 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.23, 1, 0.32, 1] }}
+          >
             {status === "success" ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <CheckCircle
-                  className="size-12 text-green-400 mb-4"
-                  style={{ filter: "drop-shadow(0 0 14px rgba(74,222,128,0.5))" }}
-                />
-                <h4 className="text-lg font-bold text-white mb-2">Mensagem enviada!</h4>
-                <p className="text-sm text-zinc-500">
+                <CheckCircle className="size-12 text-foreground mb-4 opacity-80" />
+                <h4 className="text-lg font-bold text-foreground mb-2">Mensagem enviada!</h4>
+                <p className="text-sm text-muted-foreground">
                   Obrigado pelo contato. Retornarei em breve com uma proposta.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                <h3 className="text-base font-bold text-white mb-2">Enviar mensagem</h3>
+                <h3 className="text-base font-bold text-foreground mb-2">Enviar mensagem</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="name" className="text-xs font-medium text-zinc-500">Nome *</label>
+                    <label htmlFor="name" className="text-xs font-medium text-muted-foreground">Nome *</label>
                     <input
                       id="name" type="text" required value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -83,7 +97,7 @@ export function ContactSection() {
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="email" className="text-xs font-medium text-zinc-500">E-mail *</label>
+                    <label htmlFor="email" className="text-xs font-medium text-muted-foreground">E-mail *</label>
                     <input
                       id="email" type="email" required value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -92,7 +106,7 @@ export function ContactSection() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="subject" className="text-xs font-medium text-zinc-500">Assunto *</label>
+                  <label htmlFor="subject" className="text-xs font-medium text-muted-foreground">Assunto *</label>
                   <input
                     id="subject" type="text" required value={form.subject}
                     onChange={(e) => setForm({ ...form, subject: e.target.value })}
@@ -100,7 +114,7 @@ export function ContactSection() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="message" className="text-xs font-medium text-zinc-500">Descreva seu projeto *</label>
+                  <label htmlFor="message" className="text-xs font-medium text-muted-foreground">Descreva seu projeto *</label>
                   <textarea
                     id="message" required value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
@@ -111,41 +125,51 @@ export function ContactSection() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="flex items-center justify-center gap-2 py-3.5 rounded-xl bg-green-400 text-black text-sm font-bold hover:bg-green-300 transition-all duration-200 disabled:opacity-60 glow-green"
+                  className="flex items-center justify-center gap-2 py-4 rounded-xl text-[11px] font-bold tracking-widest uppercase transition-all duration-300 hover:opacity-75 disabled:opacity-50"
+                  style={{ background: "var(--foreground)", color: "var(--background)" }}
                 >
                   {status === "loading" ? (
                     <><Loader2 className="size-4 animate-spin" />Enviando...</>
                   ) : (
-                    <><Send className="size-4" />Enviar mensagem</>
+                    <><Send className="size-3.5" />Enviar Mensagem</>
                   )}
                 </button>
               </form>
             )}
-          </div>
+          </motion.div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-2 flex flex-col gap-4">
-            {/* Garantias */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex-1">
-              <h3 className="text-sm font-bold text-white mb-3">Resposta garantida em 24h</h3>
-              <p className="text-xs text-zinc-500 leading-relaxed mb-5">
-                Todo contato é respondido rapidamente com uma proposta clara e sem taxas de consulta.
+          <motion.div
+            className="lg:col-span-2 flex flex-col gap-4"
+            initial={{ opacity: 0, y: 32 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.35, ease: [0.23, 1, 0.32, 1] }}
+          >
+            {/* Guarantees */}
+            <div
+              className="rounded-2xl border border-border p-6 flex-1"
+              style={{ background: "var(--background)" }}
+            >
+              <h3 className="text-sm font-bold text-foreground mb-3">Resposta garantida em 24h</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-5">
+                Todo contato é respondido com uma proposta clara e sem taxas de consulta.
               </p>
               <div className="flex flex-col gap-2.5">
                 {["Orçamento sem compromisso", "Proposta detalhada e transparente", "Sem taxa de consulta"].map((item) => (
                   <div key={item} className="flex items-center gap-2">
-                    <CheckCircle className="size-3.5 text-green-400 flex-shrink-0" />
-                    <span className="text-xs text-zinc-400">{item}</span>
+                    <CheckCircle className="size-3.5 text-foreground opacity-50 flex-shrink-0" />
+                    <span className="text-xs text-muted-foreground">{item}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Links */}
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
-              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-4">
-                Outros canais
-              </h3>
+            {/* Social links */}
+            <div
+              className="rounded-2xl border border-border p-6"
+              style={{ background: "var(--background)" }}
+            >
+              <h3 className="label-sm text-muted-foreground mb-4">Outros canais</h3>
               <div className="flex flex-col gap-2">
                 {contactLinks.map((opt) => {
                   const Icon = opt.icon
@@ -155,21 +179,24 @@ export function ContactSection() {
                       href={opt.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-green-400/[0.04] hover:border-green-400/20 border border-transparent transition-all duration-200 group"
+                      className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-secondary border border-transparent hover:border-border transition-all duration-200 group"
                     >
-                      <div className="size-8 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                        <Icon className="size-3.5 text-zinc-500 group-hover:text-green-400 transition-colors" />
+                      <div
+                        className="size-8 rounded-lg border border-border flex items-center justify-center flex-shrink-0"
+                        style={{ background: "var(--secondary)" }}
+                      >
+                        <Icon className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
                       </div>
                       <div>
-                        <div className="text-[10px] text-zinc-600">{opt.label}</div>
-                        <div className="text-xs text-zinc-300 font-medium">{opt.value}</div>
+                        <div className="label-sm text-muted-foreground" style={{ fontSize: "9px" }}>{opt.label}</div>
+                        <div className="text-xs text-foreground font-medium">{opt.value}</div>
                       </div>
                     </a>
                   )
                 })}
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
