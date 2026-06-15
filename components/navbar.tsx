@@ -61,8 +61,8 @@ export function Navbar() {
               <Image
                 src="/logo-icon.png"
                 alt="Devnix"
-                width={32}
-                height={32}
+                width={44}
+                height={44}
                 className="object-contain block sm:hidden"
                 priority
               />
@@ -70,8 +70,8 @@ export function Navbar() {
               <Image
                 src="/logo-full.png"
                 alt="Devnix — Soluções Web Inteligentes"
-                width={140}
-                height={40}
+                width={200}
+                height={58}
                 className="object-contain hidden sm:block"
                 priority
               />
