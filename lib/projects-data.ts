@@ -4,9 +4,9 @@ export const projects = [
   {
     slug: "maktub-barbearia",
     title: "Maktub Barbearia",
-    category: "Site + Agendamento Online",
-    desc: "Site completo com agendamento online, galeria de cortes, cardápio de serviços e localização — 100% do cliente.",
-    tech: ["Next.js", "Framer Motion", "Tailwind CSS"],
+    category: "Site + Sistema de Gestão",
+    desc: "Site público com agendamento online + painel admin completo com CRM, fluxo de caixa, analytics e auditoria.",
+    tech: ["Next.js 16", "Neon PostgreSQL", "Better Auth"],
     col: "lg:col-span-2",
     cover: "barbearia",
     liveUrl: "https://v0-maktubebarbearia.vercel.app",
@@ -15,17 +15,18 @@ export const projects = [
       after: "/images/maktub-after.png",
     },
     challenge:
-      "A Maktub Barbearia precisava de uma presença digital profissional que refletisse a identidade premium do espaço, facilitar o agendamento online dos clientes e apresentar os serviços com preços de forma clara, substituindo o contato exclusivo por WhatsApp.",
+      "A Maktub Barbearia operava com um site básico em Python/Flask sem visual profissional, agendamentos feitos exclusivamente por WhatsApp e zero visibilidade sobre receita, clientes recorrentes ou performance do negócio.",
     solution:
-      "Desenvolvemos um site completo e responsivo com identidade visual escura e sofisticada, fluxo de agendamento passo a passo (serviço → data → horário → dados → confirmação), galeria interativa de cortes, cardápio de serviços com preços e seção de localização com mapa.",
+      "Sistema completo em Next.js 16 com dois mundos: site público (agendamento passo a passo, galeria de cortes, cardápio de serviços, mapa) e painel admin autenticado com dashboard de KPIs, CRM de clientes, fluxo de caixa, analytics com gráficos e log de auditoria.",
     results: [
-      "Agendamento 100% online, sem depender do WhatsApp",
-      "Galeria de cortes valorizando o trabalho do barbeiro",
-      "Site carrega em menos de 1 segundo",
-      "Design dark premium alinhado à identidade da marca",
+      "Agendamento 100% online — zero dependência do WhatsApp",
+      "Painel admin com CRM, caixa e analytics em tempo real",
+      "Autenticação segura com Better Auth + roles admin/barbeiro",
+      "Banco de dados PostgreSQL no Neon com Drizzle ORM",
+      "Deploy automatizado na Vercel com CI/CD",
     ],
     duration: "2 semanas",
-    stack: ["Next.js 16", "Framer Motion", "Tailwind CSS", "Vercel", "TypeScript"],
+    stack: ["Next.js 16", "TypeScript", "Neon (PostgreSQL)", "Drizzle ORM", "Better Auth", "Tailwind CSS v4", "shadcn/ui", "Recharts", "Vercel"],
   },
   {
     slug: "plataforma-saas-gestao",

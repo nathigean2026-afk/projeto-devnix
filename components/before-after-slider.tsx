@@ -16,46 +16,50 @@ export function BeforeAfterSlider({
   beforeLabel = "Antes",
   afterLabel = "Depois",
 }: BeforeAfterSliderProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [position, setPosition] = useState(50) // 0–100%
+  const wrapperRef   = useRef<HTMLDivElement>(null)
+  const beforeRef    = useRef<HTMLDivElement>(null)
+  const afterRef     = useRef<HTMLDivElement>(null)
+  const syncing      = useRef(false)
+
+  const [split, setSplit]     = useState(50)   // % of width given to "before"
   const [dragging, setDragging] = useState(false)
-  const [containerWidth, setContainerWidth] = useState(0)
 
-  // Track container width for correct pixel math on the BEFORE clip
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const ro = new ResizeObserver(() => setContainerWidth(el.offsetWidth))
-    ro.observe(el)
-    setContainerWidth(el.offsetWidth)
-    return () => ro.disconnect()
+  /* ── sync scroll between the two panels ── */
+  const syncScroll = useCallback((source: "before" | "after") => {
+    if (syncing.current) return
+    syncing.current = true
+    const src = source === "before" ? beforeRef.current : afterRef.current
+    const dst = source === "before" ? afterRef.current  : beforeRef.current
+    if (src && dst) dst.scrollTop = src.scrollTop
+    requestAnimationFrame(() => { syncing.current = false })
   }, [])
 
-  const update = useCallback((clientX: number) => {
-    const rect = containerRef.current?.getBoundingClientRect()
+  /* ── divider drag ── */
+  const updateSplit = useCallback((clientX: number) => {
+    const rect = wrapperRef.current?.getBoundingClientRect()
     if (!rect) return
-    const pct = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100))
-    setPosition(pct)
+    const pct = Math.min(90, Math.max(10, ((clientX - rect.left) / rect.width) * 100))
+    setSplit(pct)
   }, [])
 
-  // Mouse
-  const onMouseDown = (e: React.MouseEvent) => { e.preventDefault(); setDragging(true); update(e.clientX) }
-  const onMouseMove = useCallback((e: MouseEvent) => { if (dragging) update(e.clientX) }, [dragging, update])
-  const onMouseUp   = useCallback(() => setDragging(false), [])
+  const onMouseDownDivider  = (e: React.MouseEvent)  => { e.preventDefault(); setDragging(true) }
+  const onTouchStartDivider = (e: React.TouchEvent)  => { setDragging(true) }
 
-  // Touch
-  const onTouchStart = (e: React.TouchEvent) => { setDragging(true); update(e.touches[0].clientX) }
-  const onTouchMove  = useCallback((e: TouchEvent) => { if (dragging) { e.preventDefault(); update(e.touches[0].clientX) } }, [dragging, update])
-  const onTouchEnd   = useCallback(() => setDragging(false), [])
+  const onMouseMove = useCallback((e: MouseEvent) => { if (dragging) updateSplit(e.clientX) }, [dragging, updateSplit])
+  const onMouseUp   = useCallback(() => setDragging(false), [])
+  const onTouchMove = useCallback((e: TouchEvent) => {
+    if (dragging) { e.preventDefault(); updateSplit(e.touches[0].clientX) }
+  }, [dragging, updateSplit])
+  const onTouchEnd  = useCallback(() => setDragging(false), [])
 
   useEffect(() => {
-    window.addEventListener("mousemove", onMouseMove)
-    window.addEventListener("mouseup",   onMouseUp)
-    window.addEventListener("touchmove",  onTouchMove,  { passive: false })
+    window.addEventListener("mousemove",  onMouseMove)
+    window.addEventListener("mouseup",    onMouseUp)
+    window.addEventListener("touchmove",  onTouchMove, { passive: false })
     window.addEventListener("touchend",   onTouchEnd)
     return () => {
-      window.removeEventListener("mousemove", onMouseMove)
-      window.removeEventListener("mouseup",   onMouseUp)
+      window.removeEventListener("mousemove",  onMouseMove)
+      window.removeEventListener("mouseup",    onMouseUp)
       window.removeEventListener("touchmove",  onTouchMove)
       window.removeEventListener("touchend",   onTouchEnd)
     }
@@ -63,122 +67,107 @@ export function BeforeAfterSlider({
 
   return (
     <div className="flex flex-col gap-3 w-full">
-      {/* Outer scroll wrapper — max height so very long screenshots don't go forever */}
+
+      {/* ── outer wrapper ── */}
       <div
-        className="w-full rounded-2xl border border-border overflow-hidden"
-        style={{ maxHeight: "70vh", overflowY: "auto", position: "relative" }}
+        ref={wrapperRef}
+        className="relative w-full rounded-2xl border border-border overflow-hidden select-none"
+        style={{ height: "70vh", cursor: dragging ? "col-resize" : "auto" }}
       >
-        {/*
-          Inner drag container:
-          – position: relative so the handle and divider are anchored to it
-          – height: auto so both images show at FULL natural height
-          – We use a CSS grid so both images share the exact same cell
-            and the taller one sets the row height
-        */}
+
+        {/* ── BEFORE panel ── */}
         <div
-          ref={containerRef}
-          className="relative w-full select-none"
-          style={{ cursor: dragging ? "grabbing" : "ew-resize", minHeight: "200px" }}
-          onMouseDown={onMouseDown}
-          onTouchStart={onTouchStart}
-          aria-label="Arraste para comparar antes e depois"
+          ref={beforeRef}
+          className="absolute inset-y-0 left-0 overflow-y-auto overflow-x-hidden"
+          style={{ width: `${split}%` }}
+          onScroll={() => syncScroll("before")}
         >
-          {/* ── AFTER image — full width, natural height, sits behind ── */}
-          <Image
-            src={afterSrc}
-            alt={afterLabel}
-            width={1280}
-            height={900}
-            className="w-full h-auto block"
-            style={{ display: "block" }}
-            sizes="(max-width: 1024px) 100vw, 55vw"
-            draggable={false}
-            priority
-          />
-
-          {/* ── BEFORE image — clipped to the left of the handle ──
-              It sits on top of AFTER, absolutely positioned to fill the same space.
-              clipPath cuts it at the handle position so only left side shows.
-          ── */}
-          <div
-            className="absolute inset-0 overflow-hidden pointer-events-none"
-            style={{ width: `${position}%` }}
-          >
-            {/* This inner div must be exactly as wide as the container so
-                the image renders at the same scale as the AFTER image */}
-            <div style={{ width: containerWidth > 0 ? `${containerWidth}px` : "100%" }}>
-              <Image
-                src={beforeSrc}
-                alt={beforeLabel}
-                width={1280}
-                height={900}
-                className="w-full h-auto block"
-                sizes="(max-width: 1024px) 100vw, 55vw"
-                draggable={false}
-                priority
-              />
-            </div>
-          </div>
-
-          {/* ── Divider line ── */}
-          <div
-            className="absolute top-0 bottom-0 w-0.5 pointer-events-none"
-            style={{
-              left: `${position}%`,
-              background: "rgba(255,255,255,0.95)",
-              boxShadow: "0 0 10px rgba(0,0,0,0.5)",
-            }}
-          />
-
-          {/* ── Handle knob ── */}
-          <div
-            className="absolute -translate-x-1/2 size-11 rounded-full flex items-center justify-center gap-1 pointer-events-none z-10"
-            style={{
-              left: `${position}%`,
-              top: "50%",
-              transform: `translateX(-50%) translateY(-50%)`,
-              background: "var(--background)",
-              border: "2px solid rgba(255,255,255,0.9)",
-              boxShadow: "0 0 0 1px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.4)",
-            }}
-          >
-            <svg width="11" height="11" viewBox="0 0 10 10" fill="none" className="opacity-75">
-              <path d="M6 2L3 5l3 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <svg width="11" height="11" viewBox="0 0 10 10" fill="none" className="opacity-75">
-              <path d="M4 2l3 3-3 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-
-          {/* ── Labels — sticky to top so they're always visible on scroll ── */}
-          <div
-            className="absolute top-3 left-3 pointer-events-none z-10"
-            style={{ opacity: position > 10 ? 1 : 0, transition: "opacity 0.2s" }}
-          >
+          {/* label */}
+          <div className="sticky top-3 left-0 z-10 px-3 pointer-events-none">
             <span
               className="px-2.5 py-1 rounded text-[11px] font-bold tracking-widest uppercase text-white"
-              style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)" }}
+              style={{ background: "rgba(0,0,0,0.62)", backdropFilter: "blur(6px)" }}
             >
               {beforeLabel}
             </span>
           </div>
-          <div
-            className="absolute top-3 right-3 pointer-events-none z-10"
-            style={{ opacity: position < 90 ? 1 : 0, transition: "opacity 0.2s" }}
-          >
+          {/* image — full natural width of this panel */}
+          <img
+            src={beforeSrc}
+            alt={beforeLabel}
+            draggable={false}
+            style={{ width: `${100 / (split / 100)}%`, maxWidth: "none", display: "block" }}
+          />
+        </div>
+
+        {/* ── AFTER panel ── */}
+        <div
+          ref={afterRef}
+          className="absolute inset-y-0 right-0 overflow-y-auto overflow-x-hidden"
+          style={{ width: `${100 - split}%` }}
+          onScroll={() => syncScroll("after")}
+        >
+          {/* label */}
+          <div className="sticky top-3 right-0 z-10 px-3 flex justify-end pointer-events-none">
             <span
               className="px-2.5 py-1 rounded text-[11px] font-bold tracking-widest uppercase text-white"
-              style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)" }}
+              style={{ background: "rgba(0,0,0,0.62)", backdropFilter: "blur(6px)" }}
             >
               {afterLabel}
             </span>
           </div>
+          {/* image — full natural width of this panel */}
+          <img
+            src={afterSrc}
+            alt={afterLabel}
+            draggable={false}
+            style={{ width: `${100 / ((100 - split) / 100)}%`, maxWidth: "none", display: "block" }}
+          />
         </div>
+
+        {/* ── Draggable divider ── */}
+        <div
+          className="absolute inset-y-0 z-20 flex items-center justify-center"
+          style={{
+            left: `${split}%`,
+            transform: "translateX(-50%)",
+            width: 40,
+            cursor: "col-resize",
+          }}
+          onMouseDown={onMouseDownDivider}
+          onTouchStart={onTouchStartDivider}
+        >
+          {/* line */}
+          <div
+            className="absolute inset-y-0 w-px"
+            style={{
+              left: "50%",
+              background: "rgba(255,255,255,0.9)",
+              boxShadow: "0 0 10px rgba(0,0,0,0.5)",
+            }}
+          />
+          {/* knob */}
+          <div
+            className="relative size-11 rounded-full flex items-center justify-center gap-0.5"
+            style={{
+              background: "var(--background)",
+              border: "2.5px solid rgba(255,255,255,0.9)",
+              boxShadow: "0 0 0 1px rgba(0,0,0,0.12), 0 4px 20px rgba(0,0,0,0.45)",
+            }}
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M6 2L3 5l3 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"/>
+            </svg>
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M4 2l3 3-3 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"/>
+            </svg>
+          </div>
+        </div>
+
       </div>
 
-      {/* Caption */}
       <p className="text-xs text-muted-foreground text-center">
-        Arraste para comparar — role para ver o site completo
+        Arraste o divisor para comparar — role para ver o site completo
       </p>
     </div>
   )
