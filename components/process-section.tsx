@@ -25,6 +25,43 @@ const steps = [
   },
 ]
 
+// Neon sweep border card with individual delay
+function NeonCard({
+  children,
+  delay,
+  className,
+}: {
+  children: React.ReactNode
+  delay: number
+  className?: string
+}) {
+  const durations = [2.6, 3.1, 3.7]
+  const delays = [0, 0.9, 1.8]
+
+  return (
+    <div className={`relative rounded-2xl ${className ?? ""}`} style={{ isolation: "isolate" }}>
+      {/* Rotating neon border */}
+      <div
+        className="absolute inset-[-1.5px] rounded-2xl pointer-events-none"
+        style={{
+          background: "conic-gradient(from var(--angle, 0deg) at 50% 50%, transparent 0%, transparent 35%, rgba(255,255,255,0.55) 50%, transparent 65%, transparent 100%)",
+          animation: `neon-rotate ${durations[delay]}s linear infinite`,
+          animationDelay: `${delays[delay]}s`,
+          zIndex: -1,
+        }}
+        aria-hidden="true"
+      />
+      {/* Inner bg fill */}
+      <div
+        className="absolute inset-[1px] rounded-[calc(1rem-1px)] z-[-1]"
+        style={{ background: "var(--background)" }}
+        aria-hidden="true"
+      />
+      {children}
+    </div>
+  )
+}
+
 export function ProcessSection() {
   const ref = useRef<HTMLElement>(null)
   const inView = useInView(ref, { once: true, margin: "-80px" })
@@ -59,47 +96,29 @@ export function ProcessSection() {
           eficiente.
         </motion.h2>
 
-        {/* Steps */}
-        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-0">
-          {/* Connecting line */}
-          <div
-            className="hidden md:block absolute top-8 left-[calc(16.66%+32px)] right-[calc(16.66%+32px)] h-px pointer-events-none opacity-20"
-            style={{ background: "var(--foreground)" }}
-            aria-hidden="true"
-          />
-
+        {/* Steps with neon border */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {steps.map((step, i) => {
             const Icon = step.icon
             return (
               <motion.div
                 key={step.num}
-                className="relative flex flex-col items-start md:items-center md:text-center gap-6 px-0 md:px-8 pb-12 md:pb-0"
                 initial={{ opacity: 0, y: 32 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.8, delay: 0.2 + i * 0.15, ease: [0.23, 1, 0.32, 1] }}
               >
-                {/* Vertical line (mobile) */}
-                {i < 2 && (
-                  <div
-                    className="md:hidden absolute left-7 top-[72px] bottom-0 w-px opacity-15"
-                    style={{ background: "var(--foreground)" }}
-                  />
-                )}
-
-                {/* Circle */}
-                <div
-                  className="relative size-16 rounded-2xl border border-border bg-secondary flex flex-col items-center justify-center gap-0.5 flex-shrink-0 z-10"
-                >
-                  <Icon className="size-5 text-foreground opacity-70" />
-                  <span className="label-sm text-muted-foreground" style={{ fontSize: "8px" }}>
-                    {step.num}
-                  </span>
-                </div>
-
-                <div>
-                  <h3 className="text-base font-bold text-foreground mb-2">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">{step.desc}</p>
-                </div>
+                <NeonCard delay={i} className="p-8 flex flex-col items-start gap-5 border border-border/30">
+                  <div className="relative size-14 rounded-xl border border-border bg-secondary flex flex-col items-center justify-center gap-0.5 flex-shrink-0">
+                    <Icon className="size-5 text-foreground opacity-70" />
+                    <span className="label-sm text-muted-foreground" style={{ fontSize: "8px" }}>
+                      {step.num}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-foreground mb-2">{step.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
+                  </div>
+                </NeonCard>
               </motion.div>
             )
           })}

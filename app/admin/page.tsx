@@ -163,17 +163,16 @@ export default function AdminDashboard() {
       <header className="h-14 shrink-0 border-b border-border flex items-center justify-between px-4 gap-3 overflow-hidden"
         style={{ background: "var(--background)" }}>
 
-        {/* Logo compacta — tamanho fixo, nunca cresce */}
+        {/* Logo — usa logo-full em tamanho compacto */}
         <a href="/" className="flex items-center gap-2 shrink-0 group min-w-0">
           <Image
-            src="/logo-icon.png"
+            src="/logo-full.png"
             alt="Devnix"
-            width={24}
-            height={24}
+            width={110}
+            height={32}
             className={`object-contain shrink-0 transition-all${mounted && !isDark ? " brightness-0" : ""}`}
-            style={{ width: "24px", height: "24px" }}
+            style={{ width: "auto", maxHeight: "32px" }}
           />
-          <span className="text-sm font-bold leading-none">Devnix</span>
           <span className="text-xs text-muted-foreground hidden sm:inline leading-none">/&nbsp;Admin</span>
         </a>
 

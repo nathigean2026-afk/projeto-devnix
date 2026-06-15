@@ -300,8 +300,32 @@
   initial-value: 0deg;
   inherits: false;
 }
+@property --neon-angle-0 {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@property --neon-angle-1 {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@property --neon-angle-2 {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
 @keyframes neon-rotate {
   to { --angle: 360deg; }
+}
+@keyframes neon-rotate-0 {
+  to { --neon-angle-0: 360deg; }
+}
+@keyframes neon-rotate-1 {
+  to { --neon-angle-1: 360deg; }
+}
+@keyframes neon-rotate-2 {
+  to { --neon-angle-2: 360deg; }
 }
 
 /* ─── COSMIC TRANSITION ─────────────────────────────────── */

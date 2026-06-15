@@ -104,14 +104,25 @@ export function ContactSection() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-          {/* Form */}
+          {/* Form — neon sweep border */}
           <motion.div
-            className="lg:col-span-3 rounded-2xl border border-border p-8"
-            style={{ background: "var(--secondary)" }}
+            className="lg:col-span-3 relative rounded-2xl p-8"
+            style={{ isolation: "isolate", background: "var(--secondary)" }}
             initial={{ opacity: 0, y: 40, scale: 0.95, filter: "blur(8px)" }}
             animate={inView ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
             transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
+            {/* Rotating neon border */}
+            <div
+              className="absolute inset-[-1.5px] rounded-2xl pointer-events-none"
+              style={{
+                background: "conic-gradient(from var(--angle, 0deg) at 50% 50%, transparent 0%, transparent 35%, rgba(255,255,255,0.6) 50%, transparent 65%, transparent 100%)",
+                animation: "neon-rotate 3s linear infinite",
+                zIndex: -1,
+              }}
+              aria-hidden="true"
+            />
+            <div className="absolute inset-[1px] rounded-[calc(1rem-1px)] z-[-1]" style={{ background: "var(--secondary)" }} aria-hidden="true" />
             {status === "success" ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <CheckCircle className="size-12 text-foreground mb-4 opacity-80" />

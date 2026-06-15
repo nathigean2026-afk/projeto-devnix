@@ -1,12 +1,90 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useEffect } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, ArrowDown } from "lucide-react"
 
 const TAGS = ["Sites", "Software", "E-commerce", "Plataformas", "Landing Pages", "Blogs", "Sistemas", "APIs"]
 
-const ease = [0.23, 1, 0.32, 1] as const
+// Animated floating dots canvas
+function FloatingDots() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    let animId: number
+    let W = 0, H = 0
+
+    type Dot = {
+      x: number; y: number; r: number
+      vx: number; vy: number
+      alpha: number; targetAlpha: number; alphaSpeed: number
+    }
+
+    let dots: Dot[] = []
+
+    function resize() {
+      W = canvas!.offsetWidth
+      H = canvas!.offsetHeight
+      canvas!.width = W
+      canvas!.height = H
+      dots = Array.from({ length: 130 }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.5 + 0.3,
+        vx: (Math.random() - 0.5) * 0.32,
+        vy: (Math.random() - 0.5) * 0.32,
+        alpha: Math.random() * 0.45 + 0.06,
+        targetAlpha: Math.random() * 0.45 + 0.06,
+        alphaSpeed: Math.random() * 0.005 + 0.001,
+      }))
+    }
+
+    function draw() {
+      ctx!.clearRect(0, 0, W, H)
+      const isDark = !document.documentElement.classList.contains("light")
+      const color = isDark ? "255,255,255" : "0,0,0"
+
+      for (const d of dots) {
+        d.x += d.vx
+        d.y += d.vy
+        if (d.x < -4) d.x = W + 4
+        if (d.x > W + 4) d.x = -4
+        if (d.y < -4) d.y = H + 4
+        if (d.y > H + 4) d.y = -4
+
+        if (Math.abs(d.alpha - d.targetAlpha) < d.alphaSpeed) {
+          d.targetAlpha = Math.random() * 0.45 + 0.05
+        }
+        d.alpha += (d.targetAlpha - d.alpha) * d.alphaSpeed * 40
+
+        ctx!.beginPath()
+        ctx!.arc(d.x, d.y, d.r, 0, Math.PI * 2)
+        ctx!.fillStyle = `rgba(${color},${d.alpha.toFixed(3)})`
+        ctx!.fill()
+      }
+      animId = requestAnimationFrame(draw)
+    }
+
+    resize()
+    draw()
+    const ro = new ResizeObserver(resize)
+    ro.observe(canvas)
+    return () => { cancelAnimationFrame(animId); ro.disconnect() }
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      aria-hidden="true"
+    />
+  )
+}
 
 export function HeroSection() {
   const ref = useRef<HTMLElement>(null)
@@ -23,18 +101,18 @@ export function HeroSection() {
       {/* Grid pattern */}
       <div className="absolute inset-0 grid-pattern pointer-events-none" aria-hidden="true" />
 
-      {/* Dot pattern overlay for extra depth */}
-      <div className="absolute inset-0 dot-pattern pointer-events-none opacity-60" aria-hidden="true" />
+      {/* Animated floating dots */}
+      <FloatingDots />
 
       {/* Corner glows */}
       <div
         aria-hidden="true"
-        className="hero-glow w-[600px] h-[600px] -top-32 -left-32 opacity-[0.035]"
+        className="hero-glow w-[600px] h-[600px] -top-32 -left-32 opacity-[0.04]"
         style={{ background: "radial-gradient(circle, #3b82f6 0%, transparent 70%)" }}
       />
       <div
         aria-hidden="true"
-        className="hero-glow w-[500px] h-[500px] -bottom-20 -right-20 opacity-[0.025]"
+        className="hero-glow w-[500px] h-[500px] -bottom-20 -right-20 opacity-[0.03]"
         style={{ background: "radial-gradient(circle, #6366f1 0%, transparent 70%)" }}
       />
 
