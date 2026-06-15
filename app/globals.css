@@ -199,7 +199,7 @@
   background-size: 28px 28px;
 }
 .light .dot-pattern {
-  background-image: radial-gradient(rgba(0,0,0,0.07) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(0,0,0,0.13) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
@@ -317,6 +317,31 @@
 }
 @keyframes neon-rotate {
   to { --angle: 360deg; }
+}
+
+/* ─── INLINE NEON BORDER (contact form) ────────────────── */
+/* A theme-aware neon sweep used via JS inline style.
+   We provide a helper class so the sweep color adapts. */
+.neon-border-sweep {
+  background: conic-gradient(
+    from var(--angle, 0deg) at 50% 50%,
+    transparent 0%,
+    transparent 35%,
+    rgba(255,255,255,0.65) 50%,
+    transparent 65%,
+    transparent 100%
+  );
+  animation: neon-rotate 3s linear infinite;
+}
+.light .neon-border-sweep {
+  background: conic-gradient(
+    from var(--angle, 0deg) at 50% 50%,
+    transparent 0%,
+    transparent 35%,
+    rgba(0,0,0,0.55) 50%,
+    transparent 65%,
+    transparent 100%
+  );
 }
 @keyframes neon-rotate-0 {
   to { --neon-angle-0: 360deg; }
