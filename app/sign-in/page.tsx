@@ -39,10 +39,10 @@ export default function SignInPage() {
           <Image
             src="/logo-full.png"
             alt="Devnix"
-            width={220}
-            height={64}
+            width={160}
+            height={46}
             className={`object-contain transition-all duration-300${mounted && resolvedTheme !== "dark" ? " brightness-0" : ""}`}
-            style={{ height: "auto" }}
+            style={{ height: "auto", maxHeight: "46px" }}
             loading="eager"
             priority
           />

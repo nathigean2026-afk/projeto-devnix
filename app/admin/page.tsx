@@ -77,8 +77,18 @@ export default function AdminDashboard() {
   useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
+    // Only redirect after the session check is fully resolved AND no session exists.
+    // We use a small debounce to avoid false redirects during re-hydration.
     if (sessionLoading) return
-    if (!session?.user) { router.push("/sign-in"); return }
+    if (!session?.user) {
+      const timer = setTimeout(() => {
+        // Double-check: if still no session after 300ms, redirect
+        authClient.getSession().then(({ data }) => {
+          if (!data?.user) router.push("/sign-in")
+        })
+      }, 300)
+      return () => clearTimeout(timer)
+    }
     if (!leadsLoaded) loadLeads()
   }, [session, sessionLoading]) // eslint-disable-line
 
@@ -361,26 +371,31 @@ export default function AdminDashboard() {
 
               {/* Quick action buttons */}
               <div className="flex flex-wrap gap-2">
-                <a
-                  href={`mailto:${selected.email}?subject=Re: ${encodeURIComponent(selected.subject ?? "Sua solicitação — Devnix")}`}
+                <button
+                  onClick={() => {
+                    const url = `mailto:${selected.email}?subject=Re: ${encodeURIComponent(selected.subject ?? "Sua solicitação — Devnix")}`
+                    // Open outside iframe if inside one (v0 preview)
+                    try { (window.top ?? window).open(url, "_blank") } catch { window.open(url, "_blank") }
+                  }}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 active:scale-95"
                   style={{ background: "var(--foreground)", color: "var(--background)" }}
                 >
                   <Mail className="size-4" />
                   Responder por E-mail
                   <ArrowUpRight className="size-3.5 opacity-60" />
-                </a>
+                </button>
                 {selected.whatsapp && (
-                  <a
-                    href={`https://wa.me/${selected.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${selected.name}! Tudo bem? Vi sua mensagem na Devnix e gostaria de conversar sobre o seu projeto. 😊`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => {
+                      const url = `https://wa.me/${selected.whatsapp!.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${selected.name}! Tudo bem? Vi sua mensagem na Devnix e gostaria de conversar sobre o seu projeto.`)}`
+                      try { (window.top ?? window).open(url, "_blank") } catch { window.open(url, "_blank") }
+                    }}
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-[#25d366]/30 text-[#25d366] bg-[#25d366]/10 hover:bg-[#25d366]/20 transition-all active:scale-95"
                   >
                     <MessageSquare className="size-4" />
                     WhatsApp
                     <ArrowUpRight className="size-3.5 opacity-60" />
-                  </a>
+                  </button>
                 )}
                 {selected.phone && (
                   <a
