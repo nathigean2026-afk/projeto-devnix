@@ -78,7 +78,7 @@ export function FaqSection() {
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.2 }}
         >
-          <Accordion type="single" collapsible className="w-full flex flex-col gap-2">
+          <Accordion className="w-full flex flex-col gap-2">
             {faqs.map((faq, i) => (
               <AccordionItem
                 key={i}
