@@ -89,13 +89,13 @@ export function ProjectsSection() {
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-14">
           <motion.h2
             className="text-editorial text-[clamp(38px,6vw,72px)] text-foreground leading-none"
-            initial={{ opacity: 0, y: 24 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+            initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+            animate={inView ? { opacity: 1, scale: 1, filter: "blur(0px)" } : {}}
+            transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
             Projetos que
             <br />
-            <span style={{ opacity: 0.35 }}>entregam resultados.</span>
+            <span className="text-muted-foreground">entregam resultados.</span>
           </motion.h2>
           <motion.p
             className="text-sm text-muted-foreground max-w-xs leading-relaxed"

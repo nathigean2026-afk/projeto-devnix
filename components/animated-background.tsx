@@ -1,20 +1,28 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useTheme } from "next-themes"
 
-interface Orb {
+interface Particle {
   x: number
   y: number
   vx: number
   vy: number
-  r: number
+  size: number
   opacity: number
+  originalX: number
+  originalY: number
 }
 
 export function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const mouseRef = useRef({ x: -9999, y: -9999 })
+  const particlesRef = useRef<Particle[]>([])
+  const rafRef = useRef<number>(0)
   const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -22,109 +30,120 @@ export function AnimatedBackground() {
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    let raf: number
-    let w = 0, h = 0
+    let w = 0
+    let h = 0
 
     const resize = () => {
       w = canvas.width = window.innerWidth
       h = canvas.height = window.innerHeight
+      // Respawn particles on resize
+      particlesRef.current = createParticles(w, h)
     }
+
+    const createParticles = (width: number, height: number): Particle[] =>
+      Array.from({ length: 220 }, () => {
+        const x = Math.random() * width
+        const y = Math.random() * height
+        return {
+          x,
+          y,
+          vx: 0,
+          vy: 0,
+          size: 1 + Math.random() * 2.5,
+          opacity: 0.15 + Math.random() * 0.55,
+          originalX: x,
+          originalY: y,
+        }
+      })
+
     resize()
-    window.addEventListener("resize", resize)
+    window.addEventListener("resize", resize, { passive: true })
 
-    // Floating orbs
-    const orbs: Orb[] = Array.from({ length: 5 }, (_, i) => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
-      r: 200 + i * 80,
-      opacity: 0.06 + Math.random() * 0.06,
-    }))
+    const REPEL_RADIUS = 130
+    const REPEL_STRENGTH = 5.5
+    const RETURN_SPEED = 0.042
+    const FRICTION = 0.88
 
-    // Moving dots
-    const dots = Array.from({ length: 80 }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.4,
-      vy: (Math.random() - 0.5) * 0.4,
-      r: 0.8 + Math.random() * 1.2,
-      opacity: 0.15 + Math.random() * 0.25,
-    }))
-
-    let mouseX = w / 2, mouseY = h / 2
-    const onMouse = (e: MouseEvent) => { mouseX = e.clientX; mouseY = e.clientY }
-    window.addEventListener("mousemove", onMouse)
+    const onMouseMove = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY }
+    }
+    const onMouseLeave = () => {
+      mouseRef.current = { x: -9999, y: -9999 }
+    }
+    window.addEventListener("mousemove", onMouseMove, { passive: true })
+    window.addEventListener("mouseleave", onMouseLeave)
 
     const draw = () => {
       ctx.clearRect(0, 0, w, h)
       const isDark = resolvedTheme !== "light"
-      const orbColor = isDark ? "255,255,255" : "0,0,0"
-      const dotColor = isDark ? "255,255,255" : "10,10,10"
+      const rgb = isDark ? "255,255,255" : "0,0,0"
+      const mx = mouseRef.current.x
+      const my = mouseRef.current.y
 
-      // Draw orbs
-      orbs.forEach((orb) => {
-        orb.x += orb.vx + (mouseX - w / 2) * 0.00015
-        orb.y += orb.vy + (mouseY - h / 2) * 0.00015
-        if (orb.x < -orb.r) orb.x = w + orb.r
-        if (orb.x > w + orb.r) orb.x = -orb.r
-        if (orb.y < -orb.r) orb.y = h + orb.r
-        if (orb.y > h + orb.r) orb.y = -orb.r
+      particlesRef.current.forEach((p) => {
+        // Mouse repulsion
+        const dx = p.x - mx
+        const dy = p.y - my
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < REPEL_RADIUS && dist > 0) {
+          const force = (1 - dist / REPEL_RADIUS) * REPEL_STRENGTH
+          p.vx += (dx / dist) * force
+          p.vy += (dy / dist) * force
+        }
 
-        const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r)
-        grad.addColorStop(0, `rgba(${orbColor},${orb.opacity})`)
-        grad.addColorStop(1, `rgba(${orbColor},0)`)
-        ctx.fillStyle = grad
+        // Return to origin
+        p.vx += (p.originalX - p.x) * RETURN_SPEED
+        p.vy += (p.originalY - p.y) * RETURN_SPEED
+
+        // Friction
+        p.vx *= FRICTION
+        p.vy *= FRICTION
+
+        p.x += p.vx
+        p.y += p.vy
+
+        // Draw particle
+        ctx.globalAlpha = p.opacity * (isDark ? 0.6 : 0.5)
+        ctx.fillStyle = `rgb(${rgb})`
         ctx.beginPath()
-        ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2)
+        ctx.arc(p.x, p.y, p.size * 0.5, 0, Math.PI * 2)
         ctx.fill()
       })
 
-      // Draw dots + connections
-      dots.forEach((dot) => {
-        dot.x += dot.vx
-        dot.y += dot.vy
-        if (dot.x < 0) dot.x = w
-        if (dot.x > w) dot.x = 0
-        if (dot.y < 0) dot.y = h
-        if (dot.y > h) dot.y = 0
-
-        ctx.globalAlpha = dot.opacity * (isDark ? 0.5 : 0.35)
-        ctx.fillStyle = `rgb(${dotColor})`
-        ctx.beginPath()
-        ctx.arc(dot.x, dot.y, dot.r, 0, Math.PI * 2)
-        ctx.fill()
-      })
-
-      // Connections
+      // Draw connections between nearby particles
       ctx.globalAlpha = 1
-      for (let i = 0; i < dots.length; i++) {
-        for (let j = i + 1; j < dots.length; j++) {
-          const dx = dots[i].x - dots[j].x
-          const dy = dots[i].y - dots[j].y
-          const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist < 120) {
+      const pts = particlesRef.current
+      for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+          const dx = pts[i].x - pts[j].x
+          const dy = pts[i].y - pts[j].y
+          const d = dx * dx + dy * dy
+          if (d < 8000) {
+            const alpha = (1 - d / 8000) * (isDark ? 0.07 : 0.05)
             ctx.beginPath()
-            ctx.moveTo(dots[i].x, dots[i].y)
-            ctx.lineTo(dots[j].x, dots[j].y)
-            const alpha = (1 - dist / 120) * (isDark ? 0.06 : 0.04)
-            ctx.strokeStyle = `rgba(${dotColor},${alpha})`
-            ctx.lineWidth = 0.5
+            ctx.moveTo(pts[i].x, pts[i].y)
+            ctx.lineTo(pts[j].x, pts[j].y)
+            ctx.strokeStyle = `rgba(${rgb},${alpha})`
+            ctx.lineWidth = 0.4
             ctx.stroke()
           }
         }
       }
 
-      raf = requestAnimationFrame(draw)
+      rafRef.current = requestAnimationFrame(draw)
     }
 
     draw()
+
     return () => {
-      cancelAnimationFrame(raf)
+      cancelAnimationFrame(rafRef.current)
       window.removeEventListener("resize", resize)
-      window.removeEventListener("mousemove", onMouse)
+      window.removeEventListener("mousemove", onMouseMove)
+      window.removeEventListener("mouseleave", onMouseLeave)
     }
   }, [resolvedTheme])
+
+  if (!mounted) return null
 
   return (
     <canvas

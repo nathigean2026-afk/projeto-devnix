@@ -128,9 +128,10 @@
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: rgba(128,128,128,0.25);
   border-radius: 2px;
 }
+* { scrollbar-color: rgba(128,128,128,0.25) transparent; scrollbar-width: thin; }
 
 /* ─── NOISE OVERLAY ─────────────────────────────────────── */
 .noise-overlay::before {
@@ -205,7 +206,6 @@
 /* ─── SERVICE CARD ──────────────────────────────────────── */
 .service-card {
   transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-  transform-style: preserve-3d;
 }
 .service-card:hover {
   border-color: rgba(255, 255, 255, 0.18) !important;
@@ -220,6 +220,119 @@
   box-shadow:
     0 0 0 1px rgba(0,0,0,0.06),
     0 20px 60px rgba(0,0,0,0.12);
+}
+
+/* ─── NEON SWEEP CARD ───────────────────────────────────── */
+/* Rotating white light border sweep on pricing cards */
+.neon-card {
+  position: relative;
+  isolation: isolate;
+}
+/* Outer rotating glow layer */
+.neon-card::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    transparent 0%,
+    transparent 40%,
+    rgba(255,255,255,0.5) 50%,
+    transparent 60%,
+    transparent 100%
+  );
+  z-index: -1;
+  animation: neon-rotate 3.5s linear infinite;
+}
+/* Inner background fill covering the conic border */
+.neon-card::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: calc(1rem - 1px);
+  background: var(--background);
+  z-index: -1;
+}
+.neon-card-secondary::after {
+  background: var(--secondary);
+}
+
+.neon-card-featured::before {
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    transparent 0%,
+    transparent 33%,
+    rgba(255,255,255,0.85) 48%,
+    rgba(255,255,255,0.35) 52%,
+    transparent 62%,
+    transparent 100%
+  );
+  animation-duration: 2.4s;
+}
+.light .neon-card::before {
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    transparent 0%,
+    transparent 40%,
+    rgba(0,0,0,0.4) 50%,
+    transparent 60%,
+    transparent 100%
+  );
+}
+.light .neon-card-featured::before {
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    transparent 0%,
+    transparent 33%,
+    rgba(0,0,0,0.65) 48%,
+    rgba(0,0,0,0.2) 52%,
+    transparent 62%,
+    transparent 100%
+  );
+}
+.light .neon-card::after,
+.light .neon-card-secondary::after { background: var(--background); }
+.light .neon-card-secondary::after { background: var(--secondary); }
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes neon-rotate {
+  to { --angle: 360deg; }
+}
+
+/* ─── COSMIC TRANSITION ─────────────────────────────────── */
+/* Section reveal with wormhole/black-hole scale effect */
+.cosmic-section {
+  --cosmic-progress: 0;
+}
+@keyframes wormhole-in {
+  0%   { opacity: 0; transform: scale(0.82) translateY(40px); filter: blur(12px); }
+  60%  { opacity: 1; filter: blur(0px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes stellar-in {
+  0%   { opacity: 0; transform: scale(1.08) translateY(-20px); filter: blur(6px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
+}
+.reveal-wormhole {
+  animation: wormhole-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.reveal-stellar {
+  animation: stellar-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ─── STAR RING ─────────────────────────────────────────── */
+@keyframes star-ring {
+  0%   { transform: rotate(0deg) scale(0.5); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0; }
+}
+.star-ring {
+  animation: star-ring 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* ─── MARQUEE ───────────────────────────────────────────── */

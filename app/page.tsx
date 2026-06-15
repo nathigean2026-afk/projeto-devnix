@@ -11,24 +11,43 @@ import { ContactSection } from "@/components/contact-section"
 import { Footer } from "@/components/footer"
 import { AnimatedBackground } from "@/components/animated-background"
 import { CustomCursor } from "@/components/custom-cursor"
+import { CosmicReveal } from "@/components/cosmic-reveal"
 
 export default function Home() {
   return (
     <>
       <AnimatedBackground />
       <CustomCursor />
-      <div className="relative z-10 min-h-screen bg-background/0">
+      <div className="relative z-10 min-h-screen">
         <Navbar />
         <HeroSection />
-        <StatsSection />
-        <ServicesSection />
-        <ProcessSection />
-        <ProjectsSection />
-        <TestimonialsSection />
-        <PricingSection />
-        <FaqSection />
-        <ContactSection />
-        <Footer />
+        <CosmicReveal delay={0}>
+          <StatsSection />
+        </CosmicReveal>
+        <CosmicReveal delay={0}>
+          <ServicesSection />
+        </CosmicReveal>
+        <CosmicReveal delay={0}>
+          <ProcessSection />
+        </CosmicReveal>
+        <CosmicReveal delay={0}>
+          <ProjectsSection />
+        </CosmicReveal>
+        <CosmicReveal delay={0}>
+          <TestimonialsSection />
+        </CosmicReveal>
+        <CosmicReveal delay={0}>
+          <PricingSection />
+        </CosmicReveal>
+        <CosmicReveal delay={0}>
+          <FaqSection />
+        </CosmicReveal>
+        <CosmicReveal delay={0}>
+          <ContactSection />
+        </CosmicReveal>
+        <CosmicReveal delay={0}>
+          <Footer />
+        </CosmicReveal>
       </div>
     </>
   )

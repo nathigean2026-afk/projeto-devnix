@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { motion, useInView } from "framer-motion"
 import { Send, Mail, GitBranch, AtSign, Link2, CheckCircle, Loader2 } from "lucide-react"
 
@@ -16,6 +16,17 @@ export function ContactSection() {
   const inView = useInView(ref, { once: true, margin: "-80px" })
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" })
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle")
+
+  // Listen for plan selection from PricingSection
+  useEffect(() => {
+    const subjectEl = document.getElementById("subject") as HTMLInputElement | null
+    if (!subjectEl) return
+    const handler = () => {
+      setForm((prev) => ({ ...prev, subject: subjectEl.value }))
+    }
+    subjectEl.addEventListener("input", handler)
+    return () => subjectEl.removeEventListener("input", handler)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,7 +45,6 @@ export function ContactSection() {
       <div className="absolute inset-0 dot-pattern pointer-events-none opacity-40" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
-        {/* Label */}
         <motion.div
           className="flex items-center gap-3 mb-6"
           initial={{ opacity: 0, x: -16 }}
@@ -45,17 +55,16 @@ export function ContactSection() {
           <span className="label-sm text-muted-foreground">Contato</span>
         </motion.div>
 
-        {/* Heading */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-14">
           <motion.h2
             className="text-editorial text-[clamp(38px,6vw,72px)] text-foreground leading-none"
-            initial={{ opacity: 0, y: 24 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+            initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+            animate={inView ? { opacity: 1, scale: 1, filter: "blur(0px)" } : {}}
+            transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
             Vamos construir
             <br />
-            <span style={{ opacity: 0.35 }}>algo incrível.</span>
+            <span className="text-muted-foreground">algo incrível.</span>
           </motion.h2>
           <motion.p
             className="text-sm text-muted-foreground max-w-xs leading-relaxed"
@@ -72,9 +81,9 @@ export function ContactSection() {
           <motion.div
             className="lg:col-span-3 rounded-2xl border border-border p-8"
             style={{ background: "var(--secondary)" }}
-            initial={{ opacity: 0, y: 32 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.23, 1, 0.32, 1] }}
+            initial={{ opacity: 0, y: 40, scale: 0.95, filter: "blur(8px)" }}
+            animate={inView ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
+            transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
             {status === "success" ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -141,11 +150,10 @@ export function ContactSection() {
           {/* Sidebar */}
           <motion.div
             className="lg:col-span-2 flex flex-col gap-4"
-            initial={{ opacity: 0, y: 32 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.35, ease: [0.23, 1, 0.32, 1] }}
+            initial={{ opacity: 0, y: 40, scale: 0.95, filter: "blur(8px)" }}
+            animate={inView ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
+            transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
           >
-            {/* Guarantees */}
             <div
               className="rounded-2xl border border-border p-6 flex-1"
               style={{ background: "var(--background)" }}
@@ -164,7 +172,6 @@ export function ContactSection() {
               </div>
             </div>
 
-            {/* Social links */}
             <div
               className="rounded-2xl border border-border p-6"
               style={{ background: "var(--background)" }}

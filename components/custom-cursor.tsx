@@ -1,85 +1,81 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { useTheme } from "next-themes"
 
 export function CustomCursor() {
-  const cursorRef = useRef<HTMLDivElement>(null)
-  const followerRef = useRef<HTMLDivElement>(null)
-  const [mounted, setMounted] = useState(false)
-  const { resolvedTheme } = useTheme()
+  const dotRef = useRef<HTMLDivElement>(null)
+  const ringRef = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-    const cursor = cursorRef.current
-    const follower = followerRef.current
-    if (!cursor || !follower) return
+    const dot = dotRef.current
+    const ring = ringRef.current
+    if (!dot || !ring) return
 
     let mouseX = 0, mouseY = 0
-    let followerX = 0, followerY = 0
+    let ringX = 0, ringY = 0
     let raf: number
 
-    const move = (e: MouseEvent) => {
+    const onMove = (e: MouseEvent) => {
       mouseX = e.clientX
       mouseY = e.clientY
-      cursor.style.transform = `translate(${mouseX - 4}px, ${mouseY - 4}px)`
+      if (!visible) setVisible(true)
+      dot.style.transform = `translate(${mouseX - 4}px, ${mouseY - 4}px)`
     }
 
     const animate = () => {
-      followerX += (mouseX - followerX) * 0.12
-      followerY += (mouseY - followerY) * 0.12
-      follower.style.transform = `translate(${followerX - 20}px, ${followerY - 20}px)`
+      ringX += (mouseX - ringX) * 0.11
+      ringY += (mouseY - ringY) * 0.11
+      ring.style.transform = `translate(${ringX - 18}px, ${ringY - 18}px)`
       raf = requestAnimationFrame(animate)
     }
 
     const onEnter = () => {
-      cursor.style.transform += " scale(2.5)"
-      follower.style.opacity = "0.4"
+      dot.style.transform += " scale(2)"
+      ring.style.opacity = "0.3"
     }
     const onLeave = () => {
-      follower.style.opacity = "1"
+      ring.style.opacity = "1"
     }
 
-    document.addEventListener("mousemove", move)
-    document.querySelectorAll("a, button, [data-cursor]").forEach((el) => {
+    document.addEventListener("mousemove", onMove, { passive: true })
+    document.querySelectorAll("a, button").forEach((el) => {
       el.addEventListener("mouseenter", onEnter)
       el.addEventListener("mouseleave", onLeave)
     })
 
     raf = requestAnimationFrame(animate)
     return () => {
-      document.removeEventListener("mousemove", move)
+      document.removeEventListener("mousemove", onMove)
       cancelAnimationFrame(raf)
     }
   }, [])
 
-  if (!mounted) return null
-
-  const isDark = resolvedTheme === "dark"
-
   return (
     <>
       <div
-        ref={cursorRef}
+        ref={dotRef}
         className="fixed top-0 left-0 z-[9999] pointer-events-none mix-blend-difference"
-        style={{ willChange: "transform" }}
+        style={{
+          willChange: "transform",
+          opacity: visible ? 1 : 0,
+          transition: "opacity 0.3s",
+        }}
       >
-        <div
-          className="size-2 rounded-full"
-          style={{ background: isDark ? "#ffffff" : "#0a0a0a" }}
-        />
+        <div className="size-2 rounded-full bg-white" />
       </div>
       <div
-        ref={followerRef}
+        ref={ringRef}
         className="fixed top-0 left-0 z-[9998] pointer-events-none mix-blend-difference"
-        style={{ willChange: "transform" }}
+        style={{
+          willChange: "transform",
+          opacity: visible ? 1 : 0,
+          transition: "opacity 0.3s",
+        }}
       >
         <div
-          className="size-10 rounded-full border"
-          style={{
-            borderColor: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
-            transition: "opacity 0.3s",
-          }}
+          className="size-9 rounded-full border border-white"
+          style={{ transition: "opacity 0.3s" }}
         />
       </div>
     </>

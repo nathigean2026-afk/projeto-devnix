@@ -65,6 +65,18 @@ export function PricingSection() {
   const ref = useRef<HTMLElement>(null)
   const inView = useInView(ref, { once: true, margin: "-80px" })
 
+  const handlePlanClick = (planName: string) => {
+    const contactSection = document.getElementById("contato")
+    const subjectInput = document.getElementById("subject") as HTMLInputElement | null
+    if (subjectInput) {
+      subjectInput.value = `Interesse no plano ${planName}`
+      subjectInput.dispatchEvent(new Event("input", { bubbles: true }))
+    }
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
   return (
     <section id="precos" ref={ref} className="relative py-32 overflow-hidden">
       <div className="absolute inset-0 dot-pattern pointer-events-none opacity-40" />
@@ -85,13 +97,13 @@ export function PricingSection() {
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-14">
           <motion.h2
             className="text-editorial text-[clamp(38px,6vw,72px)] text-foreground leading-none"
-            initial={{ opacity: 0, y: 24 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+            initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+            animate={inView ? { opacity: 1, scale: 1, filter: "blur(0px)" } : {}}
+            transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
             Investimento
             <br />
-            <span style={{ opacity: 0.35 }}>transparente.</span>
+            <span className="text-muted-foreground">transparente.</span>
           </motion.h2>
           <motion.p
             className="text-sm text-muted-foreground max-w-xs leading-relaxed"
@@ -110,14 +122,10 @@ export function PricingSection() {
             return (
               <motion.div
                 key={plan.name}
-                className="relative rounded-2xl border flex flex-col p-7 transition-all duration-300 hover:-translate-y-1"
-                style={{
-                  borderColor: plan.featured ? "rgba(var(--foreground-rgb, 242,242,242), 0.2)" : "var(--border)",
-                  background: plan.featured ? "var(--secondary)" : "var(--background)",
-                }}
-                initial={{ opacity: 0, y: 32 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.7, delay: 0.15 + i * 0.12, ease: [0.23, 1, 0.32, 1] }}
+                className={`neon-card rounded-2xl flex flex-col p-7 transition-all duration-300 hover:-translate-y-1 ${plan.featured ? "neon-card-featured neon-card-secondary" : ""}`}
+                initial={{ opacity: 0, y: 40, scale: 0.92, filter: "blur(8px)" }}
+                animate={inView ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
+                transition={{ duration: 0.85, delay: 0.15 + i * 0.14, ease: [0.16, 1, 0.3, 1] }}
               >
                 {plan.featured && (
                   <div
@@ -154,9 +162,10 @@ export function PricingSection() {
                   ))}
                 </ul>
 
-                <a
-                  href="#contato"
-                  className="flex items-center justify-center w-full py-3.5 rounded-xl text-[11px] font-bold tracking-widest uppercase transition-all duration-300 hover:opacity-75"
+                <button
+                  type="button"
+                  onClick={() => handlePlanClick(plan.name)}
+                  className="flex items-center justify-center w-full py-3.5 rounded-xl text-[11px] font-bold tracking-widest uppercase transition-all duration-300 hover:opacity-75 cursor-pointer"
                   style={
                     plan.featured
                       ? { background: "var(--foreground)", color: "var(--background)" }
@@ -164,7 +173,7 @@ export function PricingSection() {
                   }
                 >
                   {plan.cta}
-                </a>
+                </button>
               </motion.div>
             )
           })}
