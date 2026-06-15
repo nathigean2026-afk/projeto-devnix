@@ -1,16 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
+import { useTheme } from "next-themes"
 import Image from "next/image"
 
 export default function SignInPage() {
   const router = useRouter()
+  const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -31,7 +36,16 @@ export default function SignInPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex justify-center mb-10">
-          <Image src="/logo-full.png" alt="Devnix" width={200} height={60} className="object-contain" style={{ height: "auto" }} loading="eager" priority />
+          <Image
+            src="/logo-full.png"
+            alt="Devnix"
+            width={220}
+            height={64}
+            className={`object-contain transition-all duration-300${mounted && resolvedTheme !== "dark" ? " brightness-0" : ""}`}
+            style={{ height: "auto" }}
+            loading="eager"
+            priority
+          />
         </div>
 
         {/* Card */}

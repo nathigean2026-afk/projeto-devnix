@@ -39,6 +39,12 @@ export default function AdminDashboard() {
   useEffect(() => { setMounted(true) }, [])
 
   async function load() {
+    // Verify session on the client first before calling server actions
+    const { data: session } = await authClient.getSession()
+    if (!session?.user) {
+      router.push("/sign-in")
+      return
+    }
     try {
       const data = await getLeads()
       setLeads(data)
@@ -99,7 +105,14 @@ export default function AdminDashboard() {
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Image src="/logo-icon.png" alt="Devnix" width={32} height={32} className="object-contain" />
+            <Image
+              src="/logo-icon.png"
+              alt="Devnix"
+              width={32}
+              height={32}
+              className={`object-contain transition-all duration-300${mounted && resolvedTheme !== "dark" ? " brightness-0" : ""}`}
+              style={{ width: "auto" }}
+            />
             <div>
               <span className="font-bold text-sm text-foreground">Devnix</span>
               <span className="text-muted-foreground text-xs ml-1.5">/ Admin</span>
