@@ -66,15 +66,12 @@ export function PricingSection() {
   const inView = useInView(ref, { once: true, margin: "-80px" })
 
   const handlePlanClick = (planName: string) => {
-    const contactSection = document.getElementById("contato")
-    const subjectInput = document.getElementById("subject") as HTMLInputElement | null
-    if (subjectInput) {
-      subjectInput.value = `Interesse no plano ${planName}`
-      subjectInput.dispatchEvent(new Event("input", { bubbles: true }))
-    }
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: "smooth" })
-    }
+    // Dispatch custom event picked up by ContactSection
+    window.dispatchEvent(
+      new CustomEvent("devnix:plan-selected", {
+        detail: { plan: planName, subject: `Interesse no plano ${planName}` },
+      })
+    )
   }
 
   return (

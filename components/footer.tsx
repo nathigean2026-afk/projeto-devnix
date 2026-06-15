@@ -1,4 +1,5 @@
 import { Mail, GitBranch, AtSign, Link2 } from "lucide-react"
+import Image from "next/image"
 
 const footerLinks = {
   Serviços: [
@@ -16,7 +17,7 @@ const socials = [
   { Icon: GitBranch, href: "https://github.com", label: "GitHub" },
   { Icon: Link2, href: "https://linkedin.com", label: "LinkedIn" },
   { Icon: AtSign, href: "https://instagram.com", label: "Instagram" },
-  { Icon: Mail, href: "mailto:contato@devpro.com.br", label: "E-mail" },
+  { Icon: Mail, href: "mailto:contato@devnix.com.br", label: "E-mail" },
 ]
 
 export function Footer() {
@@ -34,7 +35,7 @@ export function Footer() {
           className="text-[clamp(80px,18vw,220px)] font-black text-foreground tracking-tight leading-none whitespace-nowrap"
           style={{ opacity: 0.025, letterSpacing: "-0.04em" }}
         >
-          Let&apos;s Build
+          Devnix
         </span>
       </div>
 
@@ -63,17 +64,17 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Brand col */}
           <div className="lg:col-span-2">
-            <a href="#" className="flex items-center gap-2 mb-5 w-fit group">
-              <div
-                className="size-7 rounded-lg flex items-center justify-center font-black text-sm transition-all duration-300 group-hover:scale-110"
-                style={{ background: "var(--foreground)", color: "var(--background)" }}
-              >
-                D
-              </div>
-              <span className="font-bold text-sm tracking-tight text-foreground">DevPro</span>
+            <a href="#" className="flex items-center gap-2 mb-5 w-fit group" aria-label="Devnix">
+              <Image
+                src="/logo-full.png"
+                alt="Devnix — Soluções Web Inteligentes"
+                width={130}
+                height={38}
+                className="object-contain"
+              />
             </a>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-xs mb-6">
-              Desenvolvimento web profissional. Sites, software, plataformas analíticas e soluções
+              Desenvolvimento web inteligente. Sites, software, plataformas analíticas e soluções
               digitais sob medida. Código 100% entregue ao cliente.
             </p>
             <div className="flex items-center gap-2">
@@ -113,13 +114,14 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-8 border-t border-border">
           <p className="text-xs text-muted-foreground opacity-50">
-            &copy; {new Date().getFullYear()} DevPro. Todos os direitos reservados.
+            &copy; {new Date().getFullYear()} Devnix. Todos os direitos reservados.
           </p>
           <p className="text-xs text-muted-foreground opacity-50">
-            Feito com <span className="opacity-80">&#9829;</span> por DevPro
+            Feito com <span className="opacity-80">&#9829;</span> por Devnix
           </p>
         </div>
       </div>
     </footer>
   )
 }
+

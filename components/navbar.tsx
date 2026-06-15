@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useTheme } from "next-themes"
 import { Sun, Moon, Menu, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import Image from "next/image"
 
 const links = [
   { label: "Serviços", href: "#servicos" },
@@ -55,14 +56,25 @@ export function Navbar() {
         >
           <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
             {/* Logo */}
-            <a href="#" className="flex items-center gap-2.5 group">
-              <div
-                className="size-7 rounded-lg flex items-center justify-center font-black text-sm transition-all duration-300 group-hover:scale-110 group-hover:rotate-3"
-                style={{ background: "var(--foreground)", color: "var(--background)" }}
-              >
-                D
-              </div>
-              <span className="font-bold text-sm tracking-tight">DevPro</span>
+            <a href="#" className="flex items-center gap-2.5 group" aria-label="Devnix — Soluções Web Inteligentes">
+              {/* Mobile: icon only */}
+              <Image
+                src="/logo-icon.png"
+                alt="Devnix"
+                width={32}
+                height={32}
+                className="object-contain block sm:hidden"
+                priority
+              />
+              {/* Desktop: full logo */}
+              <Image
+                src="/logo-full.png"
+                alt="Devnix — Soluções Web Inteligentes"
+                width={140}
+                height={40}
+                className="object-contain hidden sm:block"
+                priority
+              />
             </a>
 
             {/* Desktop nav */}
@@ -121,6 +133,10 @@ export function Navbar() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
           >
+            {/* Logo mobile */}
+            <div className="flex justify-center mb-4">
+              <Image src="/logo-full.png" alt="Devnix" width={160} height={48} className="object-contain" />
+            </div>
             <nav className="flex flex-col mt-8">
               {links.map((l, i) => (
                 <motion.a
@@ -153,3 +169,4 @@ export function Navbar() {
     </>
   )
 }
+

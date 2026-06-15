@@ -15,10 +15,11 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'DevPro | Desenvolvimento Web & Software Personalizado',
+  title: 'Devnix | Soluções Web Inteligentes',
   description:
-    'Desenvolvimento web profissional: sites, software personalizado, plataformas analíticas, landing pages e blogs. Soluções sob medida para o seu negócio.',
+    'Devnix — Soluções Web Inteligentes. Desenvolvimento de sites, software personalizado, plataformas analíticas, landing pages e e-commerce sob medida para o seu negócio.',
   generator: 'v0.app',
+  keywords: ['desenvolvimento web', 'software personalizado', 'devnix', 'sites profissionais', 'soluções web'],
 }
 
 export const viewport: Viewport = {

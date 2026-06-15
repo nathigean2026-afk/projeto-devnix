@@ -2,39 +2,66 @@
 
 import { useRef, useState, useEffect } from "react"
 import { motion, useInView } from "framer-motion"
-import { Send, Mail, GitBranch, AtSign, Link2, CheckCircle, Loader2 } from "lucide-react"
+import { Send, Mail, GitBranch, AtSign, Link2, CheckCircle, Loader2, Phone, MessageSquare } from "lucide-react"
+import { submitLead } from "@/app/actions/leads"
 
 const contactLinks = [
-  { icon: Mail, label: "E-mail", value: "contato@devpro.com.br", href: "mailto:contato@devpro.com.br" },
-  { icon: GitBranch, label: "GitHub", value: "github.com/devpro", href: "https://github.com" },
-  { icon: Link2, label: "LinkedIn", value: "linkedin.com/in/devpro", href: "https://linkedin.com" },
-  { icon: AtSign, label: "Instagram", value: "@devpro.dev", href: "https://instagram.com" },
+  { icon: Mail, label: "E-mail", value: "contato@devnix.com.br", href: "mailto:contato@devnix.com.br" },
+  { icon: GitBranch, label: "GitHub", value: "github.com/devnix", href: "https://github.com" },
+  { icon: Link2, label: "LinkedIn", value: "linkedin.com/in/devnix", href: "https://linkedin.com" },
+  { icon: AtSign, label: "Instagram", value: "@devnix.dev", href: "https://instagram.com" },
 ]
+
+type FormData = {
+  name: string
+  email: string
+  phone: string
+  whatsapp: string
+  subject: string
+  message: string
+  plan: string
+}
 
 export function ContactSection() {
   const ref = useRef<HTMLElement>(null)
   const inView = useInView(ref, { once: true, margin: "-80px" })
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" })
-  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle")
+  const [form, setForm] = useState<FormData>({
+    name: "", email: "", phone: "", whatsapp: "", subject: "", message: "", plan: "",
+  })
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
 
   // Listen for plan selection from PricingSection
   useEffect(() => {
-    const subjectEl = document.getElementById("subject") as HTMLInputElement | null
-    if (!subjectEl) return
-    const handler = () => {
-      setForm((prev) => ({ ...prev, subject: subjectEl.value }))
+    const handler = (e: CustomEvent<{ plan: string; subject: string }>) => {
+      setForm(prev => ({ ...prev, plan: e.detail.plan, subject: e.detail.subject }))
+      // Scroll to section
+      const el = document.getElementById("contato")
+      el?.scrollIntoView({ behavior: "smooth", block: "start" })
     }
-    subjectEl.addEventListener("input", handler)
-    return () => subjectEl.removeEventListener("input", handler)
+    window.addEventListener("devnix:plan-selected" as never, handler as EventListener)
+    return () => window.removeEventListener("devnix:plan-selected" as never, handler as EventListener)
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setStatus("loading")
-    await new Promise((r) => setTimeout(r, 1400))
-    setStatus("success")
-    setForm({ name: "", email: "", subject: "", message: "" })
-    setTimeout(() => setStatus("idle"), 5000)
+    try {
+      await submitLead({
+        name: form.name,
+        email: form.email,
+        phone: form.phone || undefined,
+        whatsapp: form.whatsapp || undefined,
+        subject: form.subject || undefined,
+        message: form.message,
+        plan: form.plan || undefined,
+      })
+      setStatus("success")
+      setForm({ name: "", email: "", phone: "", whatsapp: "", subject: "", message: "", plan: "" })
+      setTimeout(() => setStatus("idle"), 6000)
+    } catch {
+      setStatus("error")
+      setTimeout(() => setStatus("idle"), 4000)
+    }
   }
 
   const inputCls =
@@ -96,41 +123,75 @@ export function ContactSection() {
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <h3 className="text-base font-bold text-foreground mb-2">Enviar mensagem</h3>
+
+                {/* Plano pré-selecionado */}
+                {form.plan && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-foreground/5 border border-foreground/10 text-xs text-foreground">
+                    <CheckCircle className="size-3.5 opacity-60 flex-shrink-0" />
+                    Plano selecionado: <strong>{form.plan}</strong>
+                    <button type="button" onClick={() => setForm(p => ({ ...p, plan: "" }))} className="ml-auto opacity-40 hover:opacity-70 transition">✕</button>
+                  </div>
+                )}
+
+                {/* Nome + Email */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
                     <label htmlFor="name" className="text-xs font-medium text-muted-foreground">Nome *</label>
-                    <input
-                      id="name" type="text" required value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      placeholder="João Silva" className={inputCls}
-                    />
+                    <input id="name" type="text" required value={form.name}
+                      onChange={e => setForm({ ...form, name: e.target.value })}
+                      placeholder="João Silva" className={inputCls} />
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label htmlFor="email" className="text-xs font-medium text-muted-foreground">E-mail *</label>
-                    <input
-                      id="email" type="email" required value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      placeholder="joao@empresa.com" className={inputCls}
-                    />
+                    <input id="email" type="email" required value={form.email}
+                      onChange={e => setForm({ ...form, email: e.target.value })}
+                      placeholder="joao@empresa.com" className={inputCls} />
                   </div>
                 </div>
+
+                {/* Telefone + WhatsApp */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="phone" className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                      <Phone className="size-3" /> Telefone
+                    </label>
+                    <input id="phone" type="tel" value={form.phone}
+                      onChange={e => setForm({ ...form, phone: e.target.value })}
+                      placeholder="(11) 9999-9999" className={inputCls} />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="whatsapp" className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                      <MessageSquare className="size-3" /> WhatsApp
+                    </label>
+                    <input id="whatsapp" type="tel" value={form.whatsapp}
+                      onChange={e => setForm({ ...form, whatsapp: e.target.value })}
+                      placeholder="(11) 9 9999-9999" className={inputCls} />
+                  </div>
+                </div>
+
+                {/* Assunto */}
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="subject" className="text-xs font-medium text-muted-foreground">Assunto *</label>
-                  <input
-                    id="subject" type="text" required value={form.subject}
-                    onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                    placeholder="Quero um site para minha empresa" className={inputCls}
-                  />
+                  <input id="subject" type="text" required value={form.subject}
+                    onChange={e => setForm({ ...form, subject: e.target.value })}
+                    placeholder="Quero um site para minha empresa" className={inputCls} />
                 </div>
+
+                {/* Mensagem */}
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="message" className="text-xs font-medium text-muted-foreground">Descreva seu projeto *</label>
-                  <textarea
-                    id="message" required value={form.message}
-                    onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  <textarea id="message" required value={form.message}
+                    onChange={e => setForm({ ...form, message: e.target.value })}
                     placeholder="Quanto mais detalhes, melhor a proposta que posso oferecer..."
-                    rows={5} className={`${inputCls} resize-none`}
-                  />
+                    rows={5} className={`${inputCls} resize-none`} />
                 </div>
+
+                {status === "error" && (
+                  <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+                    Erro ao enviar. Tente novamente.
+                  </p>
+                )}
+
                 <button
                   type="submit"
                   disabled={status === "loading"}
@@ -154,10 +215,7 @@ export function ContactSection() {
             animate={inView ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
             transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div
-              className="rounded-2xl border border-border p-6 flex-1"
-              style={{ background: "var(--background)" }}
-            >
+            <div className="rounded-2xl border border-border p-6 flex-1" style={{ background: "var(--background)" }}>
               <h3 className="text-sm font-bold text-foreground mb-3">Resposta garantida em 24h</h3>
               <p className="text-xs text-muted-foreground leading-relaxed mb-5">
                 Todo contato é respondido com uma proposta clara e sem taxas de consulta.
@@ -172,26 +230,16 @@ export function ContactSection() {
               </div>
             </div>
 
-            <div
-              className="rounded-2xl border border-border p-6"
-              style={{ background: "var(--background)" }}
-            >
+            <div className="rounded-2xl border border-border p-6" style={{ background: "var(--background)" }}>
               <h3 className="label-sm text-muted-foreground mb-4">Outros canais</h3>
               <div className="flex flex-col gap-2">
                 {contactLinks.map((opt) => {
                   const Icon = opt.icon
                   return (
-                    <a
-                      key={opt.label}
-                      href={opt.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <a key={opt.label} href={opt.href} target="_blank" rel="noopener noreferrer"
                       className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-secondary border border-transparent hover:border-border transition-all duration-200 group"
                     >
-                      <div
-                        className="size-8 rounded-lg border border-border flex items-center justify-center flex-shrink-0"
-                        style={{ background: "var(--secondary)" }}
-                      >
+                      <div className="size-8 rounded-lg border border-border flex items-center justify-center flex-shrink-0" style={{ background: "var(--secondary)" }}>
                         <Icon className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
                       </div>
                       <div>
