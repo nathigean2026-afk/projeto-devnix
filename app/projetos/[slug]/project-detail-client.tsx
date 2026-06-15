@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { ArrowLeft, CheckCircle, Clock, ArrowRight, ExternalLink } from "lucide-react"
 import { projects, type Project } from "@/lib/projects-data"
+import { BeforeAfterSlider } from "@/components/before-after-slider"
 
 const ease = [0.16, 1, 0.3, 1] as const
 
@@ -95,31 +96,49 @@ export function ProjectDetailClient({ project }: { project: Project }) {
                 </motion.div>
               </div>
 
-              {/* Cover visual */}
+              {/* Cover visual — before/after slider se disponível, senão placeholder */}
               <motion.div
-                className="relative h-64 lg:h-80 rounded-2xl border border-border overflow-hidden"
-                style={{ background: "var(--secondary)" }}
                 initial={{ opacity: 0, scale: 0.92 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.9, delay: 0.15, ease }}
               >
-                <div className="absolute inset-0 grid-pattern opacity-60" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span
-                    className="text-[clamp(60px,10vw,100px)] font-black text-foreground select-none"
-                    style={{ opacity: 0.04, letterSpacing: "-0.06em", lineHeight: 1 }}
+                {project.beforeAfter ? (
+                  <div className="flex flex-col gap-3">
+                    <BeforeAfterSlider
+                      beforeSrc={project.beforeAfter.before}
+                      afterSrc={project.beforeAfter.after}
+                      beforeLabel="Antes"
+                      afterLabel="Depois"
+                      aspectRatio="4/3"
+                    />
+                    <p className="text-xs text-muted-foreground text-center">
+                      Arraste para comparar o site antigo com o novo
+                    </p>
+                  </div>
+                ) : (
+                  <div
+                    className="relative h-64 lg:h-80 rounded-2xl border border-border overflow-hidden"
+                    style={{ background: "var(--secondary)" }}
                   >
-                    {project.category.split(" ")[0].toUpperCase()}
-                  </span>
-                </div>
-                <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-1.5">
-                  {project.stack.slice(0, 4).map((s) => (
-                    <span key={s} className="label-sm border border-border px-2 py-0.5 rounded text-muted-foreground font-mono backdrop-blur-sm"
-                      style={{ fontSize: "9px", background: "var(--background)" }}>
-                      {s}
-                    </span>
-                  ))}
-                </div>
+                    <div className="absolute inset-0 grid-pattern opacity-60" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span
+                        className="text-[clamp(60px,10vw,100px)] font-black text-foreground select-none"
+                        style={{ opacity: 0.04, letterSpacing: "-0.06em", lineHeight: 1 }}
+                      >
+                        {project.category.split(" ")[0].toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-1.5">
+                      {project.stack.slice(0, 4).map((s) => (
+                        <span key={s} className="label-sm border border-border px-2 py-0.5 rounded text-muted-foreground font-mono backdrop-blur-sm"
+                          style={{ fontSize: "9px", background: "var(--background)" }}>
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </motion.div>
             </div>
           </div>

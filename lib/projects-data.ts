@@ -10,6 +10,10 @@ export const projects = [
     col: "lg:col-span-2",
     cover: "barbearia",
     liveUrl: "https://v0-maktubebarbearia.vercel.app",
+    beforeAfter: {
+      before: "/images/maktub-before.png",
+      after: "/images/maktub-after.png",
+    },
     challenge:
       "A Maktub Barbearia precisava de uma presença digital profissional que refletisse a identidade premium do espaço, facilitar o agendamento online dos clientes e apresentar os serviços com preços de forma clara, substituindo o contato exclusivo por WhatsApp.",
     solution:
@@ -151,4 +155,7 @@ export const projects = [
   },
 ]
 
-export type Project = (typeof projects)[number] & { liveUrl?: string }
+export type Project = (typeof projects)[number] & {
+  liveUrl?: string
+  beforeAfter?: { before: string; after: string }
+}
