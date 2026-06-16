@@ -65,7 +65,7 @@ export function Navbar() {
                 width={88}
                 height={88}
                 className={`object-contain block sm:hidden transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
-                style={{ height: "auto", maxHeight: "36px" }}
+                style={{ width: "auto", height: "auto", maxHeight: "36px" }}
                 priority
               />
               {/* Desktop: full logo */}
@@ -75,7 +75,7 @@ export function Navbar() {
                 width={260}
                 height={75}
                 className={`object-contain hidden sm:block transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
-                style={{ height: "auto" }}
+                style={{ width: "auto", height: "auto", maxHeight: "32px" }}
                 priority
               />
             </a>
@@ -154,7 +154,7 @@ export function Navbar() {
                 width={200}
                 height={58}
                 className={`object-contain transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
-                style={{ height: "auto" }}
+                style={{ width: "auto", height: "auto", maxHeight: "40px" }}
               />
             </div>
             <nav className="flex flex-col mt-8">

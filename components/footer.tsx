@@ -80,7 +80,7 @@ export function Footer() {
                 width={160}
                 height={46}
                 className={`object-contain transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
-                style={{ height: "auto" }}
+                style={{ width: "auto", height: "auto", maxHeight: "38px" }}
               />
             </a>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-xs mb-6">
