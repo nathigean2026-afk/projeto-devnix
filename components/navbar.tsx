@@ -5,13 +5,14 @@ import { useTheme } from "next-themes"
 import { Sun, Moon, Menu, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
+import Link from "next/link"
 
 const links = [
   { label: "Serviços", href: "#servicos" },
   { label: "Processo", href: "#processo" },
   { label: "Projetos", href: "#projetos" },
   { label: "Preços", href: "#precos" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Glossário", href: "/glossario", external: true },
   { label: "Contato", href: "#contato" },
 ]
 
@@ -81,15 +82,25 @@ export function Navbar() {
 
             {/* Desktop nav */}
             <nav className="hidden md:flex items-center gap-8">
-              {links.map((l) => (
-                <a
-                  key={l.href}
-                  href={l.href}
-                  className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors duration-200"
-                >
-                  {l.label}
-                </a>
-              ))}
+              {links.map((l) =>
+                l.external ? (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors duration-200"
+                  >
+                    {l.label}
+                  </Link>
+                ) : (
+                  <a
+                    key={l.href}
+                    href={l.href}
+                    className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors duration-200"
+                  >
+                    {l.label}
+                  </a>
+                )
+              )}
             </nav>
 
             {/* Actions */}
@@ -147,20 +158,32 @@ export function Navbar() {
               />
             </div>
             <nav className="flex flex-col mt-8">
-              {links.map((l, i) => (
-                <motion.a
-                  key={l.href}
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  className="text-5xl font-black py-3 border-b border-border hover:text-muted-foreground transition-colors"
-                  style={{ letterSpacing: "-0.03em" }}
-                  initial={{ opacity: 0, x: -24 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.07, ease: [0.23, 1, 0.32, 1] }}
-                >
-                  {l.label}
-                </motion.a>
-              ))}
+              {links.map((l, i) =>
+                l.external ? (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setOpen(false)}
+                    className="text-5xl font-black py-3 border-b border-border hover:text-muted-foreground transition-colors"
+                    style={{ letterSpacing: "-0.03em" }}
+                  >
+                    {l.label}
+                  </Link>
+                ) : (
+                  <motion.a
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setOpen(false)}
+                    className="text-5xl font-black py-3 border-b border-border hover:text-muted-foreground transition-colors"
+                    style={{ letterSpacing: "-0.03em" }}
+                    initial={{ opacity: 0, x: -24 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.07, ease: [0.23, 1, 0.32, 1] }}
+                  >
+                    {l.label}
+                  </motion.a>
+                )
+              )}
             </nav>
             <div className="mt-auto">
               <a

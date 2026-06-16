@@ -4,6 +4,7 @@ import { StatsSection } from "@/components/stats-section"
 import { ServicesSection } from "@/components/services-section"
 import { ProcessSection } from "@/components/process-section"
 import { ProjectsSection } from "@/components/projects-section"
+import { GlossaryPreview } from "@/components/glossary-preview"
 import { TestimonialsSection } from "@/components/testimonials-section"
 import { PricingSection } from "@/components/pricing-section"
 import { FaqSection } from "@/components/faq-section"
@@ -32,6 +33,9 @@ export default function Home() {
         </CosmicReveal>
         <CosmicReveal delay={0}>
           <ProjectsSection />
+        </CosmicReveal>
+        <CosmicReveal delay={0}>
+          <GlossaryPreview />
         </CosmicReveal>
         <CosmicReveal delay={0}>
           <TestimonialsSection />

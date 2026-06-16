@@ -125,8 +125,8 @@ function ProjectCover({ cover, title }: { cover: string; title: string }) {
   )
 }
 
-// Show only first 3 on homepage
-const PREVIEW_COUNT = 3
+// Show first 4 on homepage
+const PREVIEW_COUNT = 4
 
 export function ProjectsSection() {
   const ref = useRef<HTMLElement>(null)
@@ -169,9 +169,9 @@ export function ProjectsSection() {
           </motion.p>
         </div>
 
-        {/* Grid preview — 3 cards */}
+        {/* Grid preview — 4 cards, 2×2 on desktop */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border rounded-2xl overflow-hidden"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-border rounded-2xl overflow-hidden"
           variants={containerVariants}
           initial="hidden"
           animate={inView ? "visible" : "hidden"}
