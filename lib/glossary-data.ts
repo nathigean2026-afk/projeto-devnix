@@ -142,7 +142,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     category: "Marketing & Vendas",
     what: "Software (e processo) que centraliza histórico de cada cliente e lead: contatos, conversas, pedidos, oportunidades.",
     practice:
-      "Vendedor abre o CRM e vê: o cliente comprou em 2022, abriu chamado em janeiro, pediu cotação em março. Em vez de "como posso ajudar?", começa a conversa do ponto certo.",
+      "Vendedor abre o CRM e vê: o cliente comprou em 2022, abriu chamado em janeiro, pediu cotação em março. Em vez de 'como posso ajudar?', começa a conversa do ponto certo.",
     why: "Memória organizacional vale ouro. Sem CRM, o vendedor que sair leva metade do relacionamento na cabeça.",
     related: ["Pipeline de Vendas", "Customer Success"],
   },
