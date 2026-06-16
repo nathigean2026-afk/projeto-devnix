@@ -61,10 +61,10 @@ export function Navbar() {
               <Image
                 src="/logo-icon.png"
                 alt="Devnix"
-                width={56}
-                height={56}
+                width={88}
+                height={88}
                 className={`object-contain block sm:hidden transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
-                style={{ height: "auto" }}
+                style={{ height: "auto", maxHeight: "36px" }}
                 priority
               />
               {/* Desktop: full logo */}

@@ -1,5 +1,9 @@
+"use client"
+
 import { Mail, GitBranch, AtSign, Link2 } from "lucide-react"
 import Image from "next/image"
+import { useTheme } from "next-themes"
+import { useState, useEffect } from "react"
 
 const footerLinks = {
   Serviços: [
@@ -21,6 +25,11 @@ const socials = [
 ]
 
 export function Footer() {
+  const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  const isDark = resolvedTheme === "dark"
+
   return (
     <footer
       className="relative overflow-hidden border-t border-border"
@@ -68,9 +77,9 @@ export function Footer() {
               <Image
                 src="/logo-full.png"
                 alt="Devnix — Soluções Web Inteligentes"
-                width={130}
-                height={38}
-                className="object-contain"
+                width={160}
+                height={46}
+                className={`object-contain transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
                 style={{ height: "auto" }}
               />
             </a>
