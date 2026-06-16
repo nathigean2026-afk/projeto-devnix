@@ -35,6 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
+      data-scroll-behavior="smooth"
       className={`${inter.variable} ${geistMono.variable} bg-background`}
       suppressHydrationWarning
     >

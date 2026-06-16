@@ -59,7 +59,7 @@
   --accent: #1a1a1a;
   --accent-foreground: #f2f2f2;
   --destructive: oklch(0.65 0.2 22);
-  --border: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.11);
   --input: rgba(255, 255, 255, 0.06);
   --ring: rgba(255, 255, 255, 0.3);
   --radius: 0.625rem;
@@ -203,16 +203,78 @@
   background-size: 28px 28px;
 }
 
+/* --- GLOSSARY NEON CARD --------------------------------- */
+.glossary-neon-card {
+  transition: box-shadow 0.35s ease, border-color 0.35s ease, transform 0.35s ease;
+}
+.glossary-neon-card:hover { transform: translateY(-3px); }
+
+/* card background & border — dark (default) */
+.glossary-term-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(59,130,246,0.18);
+}
+.light .glossary-term-card {
+  background: rgba(0,0,0,0.03);
+  border: 1px solid rgba(22,163,74,0.2);
+}
+
+/* dot color */
+.glossary-dot { background: #3b82f6; }
+.light .glossary-dot { background: #16a34a; }
+
+/* label & term text */
+.glossary-label { color: #ffffff; }
+.light .glossary-label { color: #000000; }
+.glossary-term-text { color: #ffffff; }
+.light .glossary-term-text { color: #000000; }
+
+/* category pill */
+.glossary-pill {
+  border-color: rgba(59,130,246,0.2);
+  color: rgba(255,255,255,0.7);
+  background: rgba(59,130,246,0.07);
+}
+.light .glossary-pill {
+  border-color: rgba(22,163,74,0.25);
+  color: rgba(0,0,0,0.7);
+  background: rgba(22,163,74,0.07);
+}
+
+/* fade overlays */
+.glossary-fade-top {
+  background: linear-gradient(to bottom, var(--background), transparent);
+}
+.glossary-fade-bottom {
+  background: linear-gradient(to top, var(--background), transparent);
+}
+
+/* neon glow */
+:root .glossary-neon-card {
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.12), 0 0 14px rgba(59,130,246,0.07);
+}
+:root .glossary-neon-card:hover {
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.5), 0 0 20px rgba(59,130,246,0.28), 0 0 48px rgba(59,130,246,0.12);
+  border-color: rgba(59,130,246,0.5) !important;
+}
+.light .glossary-neon-card {
+  box-shadow: 0 0 0 1px rgba(22,163,74,0.12), 0 0 12px rgba(22,163,74,0.06);
+}
+.light .glossary-neon-card:hover {
+  box-shadow: 0 0 0 1px rgba(22,163,74,0.42), 0 0 18px rgba(22,163,74,0.22), 0 0 40px rgba(22,163,74,0.09);
+  border-color: rgba(22,163,74,0.42) !important;
+}
+
 /* ─── SERVICE CARD ──────────────────────────────────────── */
 .service-card {
   transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 .service-card:hover {
-  border-color: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
   box-shadow:
-    0 0 0 1px rgba(255,255,255,0.06),
-    0 20px 60px rgba(0,0,0,0.6),
-    inset 0 1px 0 rgba(255,255,255,0.06);
+    0 0 0 1px rgba(255,255,255,0.08),
+    0 20px 60px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.07);
   transform: translateY(-6px);
 }
 .light .service-card:hover {
@@ -220,6 +282,14 @@
   box-shadow:
     0 0 0 1px rgba(0,0,0,0.06),
     0 20px 60px rgba(0,0,0,0.12);
+}
+
+/* Dark mode: cards precisam de borda mais visível */
+.dark-card-border {
+  border-color: rgba(255,255,255,0.10) !important;
+}
+.light .dark-card-border {
+  border-color: rgba(0,0,0,0.09) !important;
 }
 
 /* ─── NEON SWEEP CARD ───────────────────────────────────── */
@@ -447,7 +517,7 @@
 /* ─── MAGNETIC BUTTON ───────────────────────────────────── */
 .magnetic { transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1); }
 
-/* ─── REVEAL LINES ──────────────────────────────────────── */
+/* ─── REVEAL LINES ───────────���──────────────────────────── */
 .line-reveal {
   overflow: hidden;
   display: block;
