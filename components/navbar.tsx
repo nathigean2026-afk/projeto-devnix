@@ -75,7 +75,7 @@ export function Navbar() {
                 width={260}
                 height={75}
                 className={`object-contain hidden sm:block transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
-                style={{ width: "auto", height: "auto", maxHeight: "32px" }}
+                style={{ width: "auto", height: "auto", maxHeight: "48px" }}
                 priority
               />
             </a>
