@@ -203,6 +203,26 @@
   background-size: 28px 28px;
 }
 
+/* --- GLOSSARY NEON CARD --------------------------------- */
+.glossary-neon-card {
+  transition: box-shadow 0.35s ease, border-color 0.35s ease, transform 0.35s ease;
+}
+.glossary-neon-card:hover { transform: translateY(-3px); }
+:root .glossary-neon-card {
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.12), 0 0 14px rgba(59,130,246,0.07);
+}
+:root .glossary-neon-card:hover {
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.5), 0 0 20px rgba(59,130,246,0.28), 0 0 48px rgba(59,130,246,0.12);
+  border-color: rgba(59,130,246,0.5) !important;
+}
+.light .glossary-neon-card {
+  box-shadow: 0 0 0 1px rgba(22,163,74,0.12), 0 0 12px rgba(22,163,74,0.06);
+}
+.light .glossary-neon-card:hover {
+  box-shadow: 0 0 0 1px rgba(22,163,74,0.42), 0 0 18px rgba(22,163,74,0.22), 0 0 40px rgba(22,163,74,0.09);
+  border-color: rgba(22,163,74,0.42) !important;
+}
+
 /* ─── SERVICE CARD ──────────────────────────────────────── */
 .service-card {
   transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);

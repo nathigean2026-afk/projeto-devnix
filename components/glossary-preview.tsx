@@ -1,36 +1,78 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
-import { glossaryTerms, CATEGORY_COLORS, type GlossaryCategory } from "@/lib/glossary-data"
+import { glossaryTerms, type GlossaryCategory } from "@/lib/glossary-data"
+import { useTheme } from "next-themes"
 
-// Pick a balanced mix of terms for the ticker
-const TICKER_TERMS = glossaryTerms.slice(0, 18)
+// Pick a balanced mix across all 5 categories — 3-4 terms each
+function buildBalancedTerms() {
+  const cats: GlossaryCategory[] = [
+    "Marketing & Vendas",
+    "Finanças",
+    "Gestão & Estratégia",
+    "Operações & Qualidade",
+    "Produto & Cliente",
+  ]
+  const perCat: Record<string, typeof glossaryTerms> = {}
+  for (const cat of cats) {
+    perCat[cat] = glossaryTerms.filter((t) => t.category === cat)
+  }
+  // Interleave: take one from each category in round-robin until we have 24
+  const result: typeof glossaryTerms = []
+  let i = 0
+  while (result.length < 24) {
+    const cat = cats[i % cats.length]
+    const idx = Math.floor(i / cats.length)
+    if (perCat[cat][idx]) result.push(perCat[cat][idx])
+    i++
+    if (i > 200) break
+  }
+  return result
+}
+
+const TICKER_TERMS = buildBalancedTerms()
 
 function TermCard({ term, category }: { term: string; category: GlossaryCategory }) {
-  const colors = CATEGORY_COLORS[category]
+  const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  const isDark = !mounted || resolvedTheme === "dark"
+
+  // Unified dot: blue in dark, green in light
+  const dotColor = isDark ? "#3b82f6" : "#16a34a"
+  const labelColor = isDark ? "#ffffff" : "#000000"
+  const catShort = category.split(" & ")[0]
+
   return (
-    <div className="flex flex-col gap-2 p-4 rounded-xl border border-border bg-background/60 backdrop-blur-sm w-52 shrink-0">
+    <div
+      className="glossary-neon-card flex flex-col gap-2 p-4 rounded-xl w-52 shrink-0 relative"
+      style={{
+        background: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)",
+        border: isDark ? "1px solid rgba(59,130,246,0.18)" : "1px solid rgba(22,163,74,0.2)",
+      }}
+    >
       <div className="flex items-center gap-1.5">
         <span
           className="w-1.5 h-1.5 rounded-full shrink-0"
-          style={{ background: colors.dot }}
+          style={{ background: dotColor }}
         />
         <span
           className="text-[9px] font-bold tracking-widest uppercase"
-          style={{ color: colors.dot }}
+          style={{ color: labelColor, opacity: 0.7 }}
         >
-          {category.split(" & ")[0]}
+          {catShort}
         </span>
       </div>
-      <p className="text-xs font-semibold text-foreground leading-tight line-clamp-2">{term}</p>
+      <p className="text-xs font-semibold leading-tight line-clamp-2"
+        style={{ color: labelColor }}
+      >{term}</p>
     </div>
   )
 }
 
-// Column of cards scrolling up or down
 function ScrollColumn({
   terms,
   direction,
@@ -42,19 +84,21 @@ function ScrollColumn({
 }) {
   const doubled = [...terms, ...terms]
   const isUp = direction === "up"
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === "dark"
+  const fadeColor = isDark ? "var(--background)" : "var(--background)"
 
   return (
-    <div className="relative overflow-hidden" style={{ height: "380px" }}>
-      {/* Top/bottom fade */}
-      <div className="absolute top-0 left-0 right-0 h-16 z-10 pointer-events-none"
-        style={{ background: "linear-gradient(to bottom, var(--background), transparent)" }} />
-      <div className="absolute bottom-0 left-0 right-0 h-16 z-10 pointer-events-none"
-        style={{ background: "linear-gradient(to top, var(--background), transparent)" }} />
+    <div className="relative overflow-hidden" style={{ height: "420px" }}>
+      <div className="absolute top-0 left-0 right-0 h-20 z-10 pointer-events-none"
+        style={{ background: `linear-gradient(to bottom, ${fadeColor}, transparent)` }} />
+      <div className="absolute bottom-0 left-0 right-0 h-20 z-10 pointer-events-none"
+        style={{ background: `linear-gradient(to top, ${fadeColor}, transparent)` }} />
 
       <motion.div
         className="flex flex-col gap-3"
         animate={{
-          y: isUp ? [0, -(terms.length * 67)] : [-(terms.length * 67), 0],
+          y: isUp ? [0, -(terms.length * 71)] : [-(terms.length * 71), 0],
         }}
         transition={{
           duration: speed,
@@ -74,19 +118,22 @@ function ScrollColumn({
 export function GlossaryPreview() {
   const ref = useRef<HTMLElement>(null)
   const [visible, setVisible] = useState(false)
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === "dark"
 
   useEffect(() => {
     const obs = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) setVisible(true) },
-      { threshold: 0.15 }
+      { threshold: 0.1 }
     )
     if (ref.current) obs.observe(ref.current)
     return () => obs.disconnect()
   }, [])
 
-  const col1 = TICKER_TERMS.slice(0, 6)
-  const col2 = TICKER_TERMS.slice(6, 12)
-  const col3 = TICKER_TERMS.slice(12, 18)
+  // 3 columns, 8 terms each (24 total, balanced across 5 categories)
+  const col1 = TICKER_TERMS.slice(0, 8)
+  const col2 = TICKER_TERMS.slice(8, 16)
+  const col3 = TICKER_TERMS.slice(16, 24)
 
   return (
     <section ref={ref} className="relative py-32 overflow-hidden">
@@ -117,17 +164,22 @@ export function GlossaryPreview() {
               {glossaryTerms.length} termos de negócios explicados de forma direta — sem enrolação, com exemplos reais. Marketing, Finanças, Gestão, Operações e Produto.
             </p>
 
-            <div className="flex flex-wrap gap-3 mb-10">
-              {(["Marketing & Vendas", "Finanças", "Gestão & Estratégia"] as GlossaryCategory[]).map((cat) => {
-                const c = CATEGORY_COLORS[cat]
+            {/* Category pills — unified dot style */}
+            <div className="flex flex-wrap gap-2 mb-10">
+              {(["Marketing & Vendas", "Finanças", "Gestão & Estratégia", "Operações & Qualidade", "Produto & Cliente"] as GlossaryCategory[]).map((cat) => {
+                const dotColor = isDark ? "#3b82f6" : "#16a34a"
                 return (
                   <span
                     key={cat}
                     className="flex items-center gap-1.5 text-[10px] font-semibold px-3 py-1.5 rounded-full border tracking-wide"
-                    style={{ borderColor: c.dot + "44", color: c.dot, background: c.dot + "15" }}
+                    style={{
+                      borderColor: isDark ? "rgba(59,130,246,0.2)" : "rgba(22,163,74,0.25)",
+                      color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)",
+                      background: isDark ? "rgba(59,130,246,0.07)" : "rgba(22,163,74,0.07)",
+                    }}
                   >
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: c.dot }} />
-                    {cat}
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: dotColor }} />
+                    {cat.split(" & ")[0]}
                   </span>
                 )
               })}
@@ -149,14 +201,14 @@ export function GlossaryPreview() {
             animate={visible ? { opacity: 1 } : {}}
             transition={{ duration: 1, delay: 0.3 }}
           >
-            <ScrollColumn terms={col1} direction="up" speed={22} />
-            <ScrollColumn terms={col2} direction="down" speed={28} />
-            <ScrollColumn terms={col3} direction="up" speed={19} />
+            <ScrollColumn terms={col1} direction="up" speed={26} />
+            <ScrollColumn terms={col2} direction="down" speed={32} />
+            <ScrollColumn terms={col3} direction="up" speed={22} />
           </motion.div>
 
-          {/* Mobile: single horizontal scroll */}
+          {/* Mobile: horizontal scroll */}
           <motion.div
-            className="flex lg:hidden overflow-x-auto gap-3 pb-2 -mx-6 px-6 scrollbar-hide"
+            className="flex lg:hidden overflow-x-auto gap-3 pb-2 -mx-6 px-6"
             style={{ scrollbarWidth: "none" }}
             initial={{ opacity: 0, y: 16 }}
             animate={visible ? { opacity: 1, y: 0 } : {}}
@@ -171,3 +223,4 @@ export function GlossaryPreview() {
     </section>
   )
 }
+
