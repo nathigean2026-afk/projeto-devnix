@@ -65,7 +65,7 @@ export function Navbar() {
                 width={88}
                 height={88}
                 className={`object-contain block sm:hidden transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
-                style={{ width: "auto", height: "auto", maxHeight: "36px" }}
+                style={{ width: "auto", height: "auto", maxHeight: "44px" }}
                 priority
               />
               {/* Desktop: full logo */}
@@ -146,17 +146,6 @@ export function Navbar() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
           >
-            {/* Logo mobile */}
-            <div className="flex justify-center mb-4">
-              <Image
-                src="/logo-full.png"
-                alt="Devnix"
-                width={200}
-                height={58}
-                className={`object-contain transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
-                style={{ width: "auto", height: "auto", maxHeight: "40px" }}
-              />
-            </div>
             <nav className="flex flex-col mt-8">
               {links.map((l, i) =>
                 l.external ? (
