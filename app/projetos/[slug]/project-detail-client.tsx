@@ -109,6 +109,23 @@ export function ProjectDetailClient({ project }: { project: Project }) {
                     beforeLabel="Antes"
                     afterLabel="Depois"
                   />
+                ) : (project as { image?: string }).image ? (
+                  <div className="relative h-64 lg:h-80 rounded-2xl border border-border overflow-hidden">
+                    <img
+                      src={(project as { image?: string }).image}
+                      alt={`Screenshot do projeto ${project.title}`}
+                      className="absolute inset-0 w-full h-full object-cover object-top"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-1.5">
+                      {project.stack.slice(0, 4).map((s) => (
+                        <span key={s} className="label-sm border border-white/20 px-2 py-0.5 rounded text-white/70 font-mono backdrop-blur-sm"
+                          style={{ fontSize: "9px", background: "rgba(0,0,0,0.4)" }}>
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 ) : (
                   <div
                     className="relative h-64 lg:h-80 rounded-2xl border border-border overflow-hidden"

@@ -36,6 +36,7 @@ export const projects = [
     tech: ["Next.js", "PostgreSQL", "TypeScript"],
     col: "lg:col-span-2",
     cover: "saas",
+    image: "/images/cover-saas.png",
     challenge:
       "Uma empresa de médio porte precisava substituir planilhas desorganizadas por um sistema centralizado que permitisse múltiplos usuários, controle de estoque em tempo real e geração automática de relatórios gerenciais.",
     solution:
@@ -57,6 +58,7 @@ export const projects = [
     tech: ["React", "Stripe", "Node.js"],
     col: "",
     cover: "ecommerce",
+    image: "/images/cover-ecommerce.png",
     challenge:
       "Uma marca de moda independente precisava de uma loja online que transmitisse sua identidade visual única, suportasse pagamentos seguros e tivesse um painel admin intuitivo para gerenciar produtos e pedidos sem depender de terceiros.",
     solution:
@@ -78,6 +80,7 @@ export const projects = [
     tech: ["React", "D3.js", "SQL"],
     col: "",
     cover: "dashboard",
+    image: "/images/cover-dashboard.png",
     challenge:
       "Um grupo empresarial com múltiplas filiais precisava consolidar dados de diferentes sistemas legados (ERP, CRM, planilhas) em uma única visão executiva, com atualização em tempo real e exportação para apresentações.",
     solution:
@@ -99,6 +102,7 @@ export const projects = [
     tech: ["Next.js", "Mapbox", "Prisma"],
     col: "",
     cover: "portal",
+    image: "/images/cover-portal.png",
     challenge:
       "Uma imobiliária regional queria digitalizar toda sua operação: substituir o atendimento por WhatsApp por um portal moderno com busca georreferenciada, tour virtual dos imóveis e CRM próprio para gestão de leads.",
     solution:
@@ -120,6 +124,7 @@ export const projects = [
     tech: ["Next.js", "Framer Motion"],
     col: "",
     cover: "landing",
+    image: "/images/cover-landing.png",
     challenge:
       "Uma startup SaaS precisava de uma landing page que comunicasse claramente o valor do produto, transmitisse credibilidade para potenciais clientes corporativos e convertesse visitantes em leads qualificados para o time de vendas.",
     solution:
@@ -141,6 +146,7 @@ export const projects = [
     tech: ["Next.js", "MDX", "Algolia"],
     col: "lg:col-span-2",
     cover: "blog",
+    image: "/images/cover-blog.png",
     challenge:
       "Um especialista em finanças pessoais queria publicar conteúdo de forma independente, sem depender de plataformas como Medium ou WordPress, com controle total sobre SEO, monetização e design.",
     solution:

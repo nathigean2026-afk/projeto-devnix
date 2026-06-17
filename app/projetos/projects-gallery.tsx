@@ -110,7 +110,7 @@ export function ProjectsGallery() {
                 />
 
                 {/* Cover */}
-                <ProjectCover cover={p.cover} title={p.title} />
+                <ProjectCover cover={p.cover} title={p.title} image={(p as { image?: string }).image} />
 
                 {/* Hover overlay */}
                 <div className="absolute top-0 left-0 right-0 h-44 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
