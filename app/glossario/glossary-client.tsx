@@ -302,13 +302,13 @@ export function GlossaryClient() {
         </div>
       </section>
 
-      {/* Sticky filters */}
-      <div className="sticky top-0 z-40 border-b border-border" style={{ background: "var(--background)/95", backdropFilter: "blur(12px)" }}>
-        <div className="max-w-7xl mx-auto px-6 py-4">
+      {/* Sticky filters — z-10 so it stays below the navbar (z-50) and menu overlay (z-60) */}
+      <div className="sticky top-0 z-10 border-b border-border" style={{ background: "var(--background)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           {/* Row 1: search + categories */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3">
             {/* Search */}
-            <div className="relative flex-1 min-w-48 max-w-sm">
+            <div className="relative w-full sm:flex-1 sm:min-w-48 sm:max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
@@ -321,7 +321,7 @@ export function GlossaryClient() {
             </div>
 
             {/* Category filters */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {CATEGORIES.map((cat) => {
                 const c = CATEGORY_COLORS[cat]
                 const active = activeCategory === cat
@@ -329,14 +329,14 @@ export function GlossaryClient() {
                   <button
                     key={cat}
                     onClick={() => setActiveCategory(active ? null : cat)}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-full border text-[10px] font-bold tracking-wide uppercase transition-all duration-200"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-[9px] font-bold tracking-wide uppercase transition-all duration-200"
                     style={
                       active
                         ? { background: c.dot, color: "#fff", borderColor: c.dot }
                         : { borderColor: c.dot + "55", color: c.dot, background: c.dot + "12" }
                     }
                   >
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: active ? "#fff" : c.dot }} />
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: active ? "#fff" : c.dot }} />
                     {cat.split(" & ")[0]}
                   </button>
                 )
@@ -345,7 +345,7 @@ export function GlossaryClient() {
               {(query || activeCategory || activeLetter) && (
                 <button
                   onClick={handleClear}
-                  className="flex items-center gap-1 px-3 py-2 rounded-full border border-border text-[10px] font-bold tracking-wide uppercase text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-border text-[9px] font-bold tracking-wide uppercase text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <X className="size-3" /> Limpar
                 </button>
@@ -353,13 +353,13 @@ export function GlossaryClient() {
             </div>
 
             {/* Count */}
-            <span className="ml-auto text-[10px] font-bold tracking-widest uppercase text-muted-foreground whitespace-nowrap">
+            <span className="hidden sm:block ml-auto text-[10px] font-bold tracking-widest uppercase text-muted-foreground whitespace-nowrap">
               {filtered.length} termo{filtered.length !== 1 ? "s" : ""}
             </span>
           </div>
 
-          {/* Row 2: alphabet */}
-          <div className="flex flex-wrap gap-1 mt-3">
+          {/* Row 2: alphabet — scrollable on mobile */}
+          <div className="flex overflow-x-auto gap-0.5 mt-2 pb-0.5 -mx-1 px-1" style={{ scrollbarWidth: "none" }}>
             {allLetters.map((letter) => {
               const hasTerms = !!letterIndex[letter]
               const isActive = activeLetter === letter
@@ -368,7 +368,7 @@ export function GlossaryClient() {
                   key={letter}
                   onClick={() => hasTerms && handleLetterClick(letter)}
                   disabled={!hasTerms}
-                  className={`w-7 h-7 text-xs font-semibold rounded transition-all duration-150 ${
+                  className={`shrink-0 w-6 h-6 text-[11px] font-semibold rounded transition-all duration-150 ${
                     isActive
                       ? "text-background"
                       : hasTerms
@@ -386,7 +386,7 @@ export function GlossaryClient() {
       </div>
 
       {/* Terms list */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {sortedLetters.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <p className="text-2xl font-bold text-foreground mb-2">Nenhum termo encontrado</p>

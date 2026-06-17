@@ -36,6 +36,12 @@ export const projects = [
     tech: ["Next.js", "PostgreSQL", "TypeScript"],
     col: "lg:col-span-2",
     cover: "saas",
+    image: "/images/cover-saas.png",
+    screenshots: [
+      { src: "/images/saas-screen-1.png", caption: "Dashboard principal com KPIs e gráfico de receita" },
+      { src: "/images/saas-screen-2.png", caption: "Módulo de controle de estoque e produtos" },
+      { src: "/images/saas-screen-3.png", caption: "Analytics de vendas por período e categoria" },
+    ],
     challenge:
       "Uma empresa de médio porte precisava substituir planilhas desorganizadas por um sistema centralizado que permitisse múltiplos usuários, controle de estoque em tempo real e geração automática de relatórios gerenciais.",
     solution:
@@ -57,6 +63,12 @@ export const projects = [
     tech: ["React", "Stripe", "Node.js"],
     col: "",
     cover: "ecommerce",
+    image: "/images/cover-ecommerce.png",
+    screenshots: [
+      { src: "/images/ecommerce-screen-1.png", caption: "Homepage com hero e vitrine de produtos" },
+      { src: "/images/ecommerce-screen-2.png", caption: "Página de produto com seletor de tamanho e cor" },
+      { src: "/images/ecommerce-screen-3.png", caption: "Painel admin de gestão de pedidos" },
+    ],
     challenge:
       "Uma marca de moda independente precisava de uma loja online que transmitisse sua identidade visual única, suportasse pagamentos seguros e tivesse um painel admin intuitivo para gerenciar produtos e pedidos sem depender de terceiros.",
     solution:
@@ -78,6 +90,11 @@ export const projects = [
     tech: ["React", "D3.js", "SQL"],
     col: "",
     cover: "dashboard",
+    image: "/images/cover-dashboard.png",
+    screenshots: [
+      { src: "/images/dashboard-screen-1.png", caption: "Visão executiva com KPIs consolidados de todas as filiais" },
+      { src: "/images/dashboard-screen-2.png", caption: "Análise comparativa entre filiais e exportação de relatórios" },
+    ],
     challenge:
       "Um grupo empresarial com múltiplas filiais precisava consolidar dados de diferentes sistemas legados (ERP, CRM, planilhas) em uma única visão executiva, com atualização em tempo real e exportação para apresentações.",
     solution:
@@ -99,6 +116,11 @@ export const projects = [
     tech: ["Next.js", "Mapbox", "Prisma"],
     col: "",
     cover: "portal",
+    image: "/images/cover-portal.png",
+    screenshots: [
+      { src: "/images/portal-screen-1.png", caption: "Busca de imóveis com filtros avançados e grid de resultados" },
+      { src: "/images/portal-screen-2.png", caption: "Página do imóvel com galeria, mapa e agendamento de visita" },
+    ],
     challenge:
       "Uma imobiliária regional queria digitalizar toda sua operação: substituir o atendimento por WhatsApp por um portal moderno com busca georreferenciada, tour virtual dos imóveis e CRM próprio para gestão de leads.",
     solution:
@@ -120,6 +142,11 @@ export const projects = [
     tech: ["Next.js", "Framer Motion"],
     col: "",
     cover: "landing",
+    image: "/images/cover-landing.png",
+    screenshots: [
+      { src: "/images/landing-screen-1.png", caption: "Hero section com CTA de alta conversão" },
+      { src: "/images/landing-screen-2.png", caption: "Seção de pricing com planos e toggle mensal/anual" },
+    ],
     challenge:
       "Uma startup SaaS precisava de uma landing page que comunicasse claramente o valor do produto, transmitisse credibilidade para potenciais clientes corporativos e convertesse visitantes em leads qualificados para o time de vendas.",
     solution:
@@ -141,6 +168,11 @@ export const projects = [
     tech: ["Next.js", "MDX", "Algolia"],
     col: "lg:col-span-2",
     cover: "blog",
+    image: "/images/cover-blog.png",
+    screenshots: [
+      { src: "/images/blog-screen-1.png", caption: "Homepage com artigo em destaque e grid de posts" },
+      { src: "/images/blog-screen-2.png", caption: "Página de artigo com tipografia otimizada e sidebar" },
+    ],
     challenge:
       "Um especialista em finanças pessoais queria publicar conteúdo de forma independente, sem depender de plataformas como Medium ou WordPress, com controle total sobre SEO, monetização e design.",
     solution:
@@ -159,4 +191,5 @@ export const projects = [
 export type Project = (typeof projects)[number] & {
   liveUrl?: string
   beforeAfter?: { before: string; after: string }
+  screenshots?: { src: string; caption: string }[]
 }

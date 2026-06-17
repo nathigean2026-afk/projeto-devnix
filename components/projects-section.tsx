@@ -2,9 +2,9 @@
 
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
-import { ArrowRight, ExternalLink } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import Link from "next/link"
-import { projects } from "@/lib/projects-data"
+import type { ProjectRow } from "@/lib/db/schema"
 
 const containerVariants = {
   hidden: {},
@@ -104,17 +104,14 @@ const COVERS: Record<string, { gradient: string; icon: React.ReactNode }> = {
 
 function ProjectCover({ cover, title }: { cover: string; title: string }) {
   const c = COVERS[cover] ?? COVERS.saas
+
   return (
     <div className={`h-44 relative overflow-hidden bg-gradient-to-br ${c.gradient} flex items-center justify-center`}>
-      {/* Grid overlay */}
       <div className="absolute inset-0 grid-pattern opacity-30" />
-      {/* Subtle glow */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-      {/* Icon */}
       <div className="relative text-white/70 drop-shadow-lg">
         {c.icon}
       </div>
-      {/* Subtle title watermark */}
       <span
         className="absolute bottom-3 right-4 text-[9px] font-bold tracking-[0.2em] uppercase text-white/25 select-none"
         aria-hidden="true"
@@ -128,7 +125,7 @@ function ProjectCover({ cover, title }: { cover: string; title: string }) {
 // Show first 4 on homepage
 const PREVIEW_COUNT = 4
 
-export function ProjectsSection() {
+export function ProjectsSection({ projects = [] }: { projects?: ProjectRow[] }) {
   const ref = useRef<HTMLElement>(null)
   const inView = useInView(ref, { once: true, margin: "-80px" })
   const preview = projects.slice(0, PREVIEW_COUNT)
@@ -189,7 +186,7 @@ export function ProjectsSection() {
               />
 
               {/* Cover */}
-              <ProjectCover cover={p.cover} title={p.title} />
+                <ProjectCover cover={p.cover} title={p.title} />
 
               {/* "Ver projeto" on hover overlay */}
               <div className="absolute top-0 left-0 right-0 h-44 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
@@ -210,7 +207,7 @@ export function ProjectsSection() {
                 <h3 className="text-sm font-semibold text-foreground">{p.title}</h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
                 <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
-                  {p.tech.map((t) => (
+                  {(p.tech as string[]).map((t) => (
                     <span
                       key={t}
                       className="label-sm border border-border px-2 py-0.5 rounded text-muted-foreground font-mono"

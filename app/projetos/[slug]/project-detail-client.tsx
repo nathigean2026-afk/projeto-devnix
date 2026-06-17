@@ -1,15 +1,125 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-import { ArrowLeft, CheckCircle, Clock, ArrowRight, ExternalLink } from "lucide-react"
-import { projects, type Project } from "@/lib/projects-data"
+import { ArrowLeft, CheckCircle, Clock, ArrowRight, ExternalLink, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { useState } from "react"
+import type { ProjectRow } from "@/lib/db/schema"
 import { BeforeAfterSlider } from "@/components/before-after-slider"
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-export function ProjectDetailClient({ project }: { project: Project }) {
-  const others = projects.filter((p) => p.slug !== project.slug).slice(0, 3)
+function ScreenshotGallery({ screenshots }: { screenshots: { src: string; caption: string }[] }) {
+  const [lightbox, setLightbox] = useState<number | null>(null)
+
+  const prev = () => setLightbox((i) => (i === null ? null : (i - 1 + screenshots.length) % screenshots.length))
+  const next = () => setLightbox((i) => (i === null ? null : (i + 1) % screenshots.length))
+
+  return (
+    <>
+      {/* Grid */}
+      <div className={`grid gap-4 ${screenshots.length === 2 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"}`}>
+        {screenshots.map((s, i) => (
+          <motion.button
+            key={s.src}
+            onClick={() => setLightbox(i)}
+            className="group relative rounded-2xl overflow-hidden border border-border text-left cursor-zoom-in"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.6, delay: i * 0.1, ease }}
+            whileHover={{ scale: 1.015 }}
+          >
+            <img
+              src={s.src}
+              alt={s.caption}
+              className="w-full aspect-video object-cover object-top transition-transform duration-500 group-hover:scale-105"
+            />
+            {/* overlay on hover */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
+              <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-white text-xs font-semibold tracking-wide bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                Ver em tela cheia
+              </span>
+            </div>
+            {/* caption */}
+            <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/80 to-transparent">
+              <p className="text-[10px] text-white/70 leading-snug">{s.caption}</p>
+            </div>
+          </motion.button>
+        ))}
+      </div>
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightbox !== null && (
+          <motion.div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            style={{ background: "rgba(0,0,0,0.92)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLightbox(null)}
+          >
+            <motion.div
+              className="relative max-w-5xl w-full"
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              transition={{ duration: 0.25, ease }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={screenshots[lightbox].src}
+                alt={screenshots[lightbox].caption}
+                className="w-full rounded-2xl border border-white/10 shadow-2xl"
+              />
+              {/* Caption */}
+              <p className="text-center text-sm text-white/60 mt-3">{screenshots[lightbox].caption}</p>
+              {/* Counter */}
+              <p className="text-center text-[10px] text-white/30 mt-1 tracking-widest">
+                {lightbox + 1} / {screenshots.length}
+              </p>
+
+              {/* Close */}
+              <button
+                onClick={() => setLightbox(null)}
+                className="absolute -top-4 -right-4 size-9 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <X className="size-4 text-white" />
+              </button>
+
+              {/* Prev / Next */}
+              {screenshots.length > 1 && (
+                <>
+                  <button
+                    onClick={prev}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 size-10 rounded-full flex items-center justify-center bg-black/60 hover:bg-black/80 transition-colors border border-white/10"
+                  >
+                    <ChevronLeft className="size-5 text-white" />
+                  </button>
+                  <button
+                    onClick={next}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 size-10 rounded-full flex items-center justify-center bg-black/60 hover:bg-black/80 transition-colors border border-white/10"
+                  >
+                    <ChevronRight className="size-5 text-white" />
+                  </button>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  )
+}
+
+export function ProjectDetailClient({ project, allProjects = [] }: { project: ProjectRow; allProjects?: ProjectRow[] }) {
+  const others = allProjects.filter((p) => p.slug !== project.slug).slice(0, 3)
+  const screenshots = (project.screenshots as { src: string; caption: string }[]) ?? []
+  const results = (project.results as string[]) ?? []
+  const stack = (project.stack as string[]) ?? []
+  const tech = (project.tech as string[]) ?? []
+  const beforeAfter = project.beforeAfter as { before: string; after: string } | null
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -102,10 +212,10 @@ export function ProjectDetailClient({ project }: { project: Project }) {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.9, delay: 0.15, ease }}
               >
-                {project.beforeAfter ? (
+                {beforeAfter ? (
                   <BeforeAfterSlider
-                    beforeSrc={project.beforeAfter.before}
-                    afterSrc={project.beforeAfter.after}
+                    beforeSrc={beforeAfter.before}
+                    afterSrc={beforeAfter.after}
                     beforeLabel="Antes"
                     afterLabel="Depois"
                   />
@@ -124,7 +234,7 @@ export function ProjectDetailClient({ project }: { project: Project }) {
                       </span>
                     </div>
                     <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-1.5">
-                      {project.stack.slice(0, 4).map((s) => (
+                      {stack.slice(0, 4).map((s) => (
                         <span key={s} className="label-sm border border-border px-2 py-0.5 rounded text-muted-foreground font-mono backdrop-blur-sm"
                           style={{ fontSize: "9px", background: "var(--background)" }}>
                           {s}
@@ -183,7 +293,7 @@ export function ProjectDetailClient({ project }: { project: Project }) {
                   <span className="label-sm text-muted-foreground uppercase tracking-wider" style={{ fontSize: "9px" }}>Resultados</span>
                 </div>
                 <ul className="flex flex-col gap-3">
-                  {project.results.map((r) => (
+                  {results.map((r) => (
                     <li key={r} className="flex items-start gap-2.5">
                       <CheckCircle className="size-3.5 text-foreground opacity-50 mt-0.5 flex-shrink-0" />
                       <span className="text-sm text-muted-foreground leading-relaxed">{r}</span>
@@ -194,6 +304,30 @@ export function ProjectDetailClient({ project }: { project: Project }) {
             </div>
           </div>
         </section>
+
+        {/* Screenshots */}
+        {screenshots.length > 0 && (
+          <section className="py-20 border-b border-border">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="mb-8"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-px w-6 bg-foreground opacity-20" />
+                  <p className="label-sm text-muted-foreground">Como ficou</p>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                  O projeto por dentro
+                </h2>
+              </motion.div>
+              <ScreenshotGallery screenshots={screenshots} />
+            </div>
+          </section>
+        )}
 
         {/* Stack */}
         <section className="py-20 border-b border-border">
@@ -206,7 +340,7 @@ export function ProjectDetailClient({ project }: { project: Project }) {
             >
               <p className="label-sm text-muted-foreground mb-6">Stack utilizada</p>
               <div className="flex flex-wrap gap-2">
-                {project.stack.map((s) => (
+                {stack.map((s) => (
                   <span key={s}
                     className="px-4 py-2 rounded-xl border border-border text-sm text-foreground font-mono"
                     style={{ background: "var(--secondary)" }}>

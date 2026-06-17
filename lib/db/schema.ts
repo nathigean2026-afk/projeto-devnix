@@ -1,6 +1,7 @@
 import {
   boolean,
   integer,
+  jsonb,
   pgTable,
   serial,
   text,
@@ -75,3 +76,37 @@ export const leads = pgTable("leads", {
 
 export type Lead = typeof leads.$inferSelect
 export type NewLead = typeof leads.$inferInsert
+
+// ── Projects table ───────────────────────────────────────────────────────────
+// Each row stores a full project. JSON columns hold arrays of strings/objects.
+export const projects_db = pgTable("projects", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  category: text("category").notNull(),
+  desc: text("desc").notNull(),
+  cover: text("cover").notNull().default("saas"), // key in COVERS map
+  // tech stack badges
+  tech: jsonb("tech").notNull().default([]).$type<string[]>(),
+  // challenge / solution / results
+  challenge: text("challenge"),
+  solution: text("solution"),
+  results: jsonb("results").notNull().default([]).$type<string[]>(),
+  duration: text("duration"),
+  // full stack list
+  stack: jsonb("stack").notNull().default([]).$type<string[]>(),
+  // optional live url
+  liveUrl: text("liveUrl"),
+  // before/after: stored as JSON { before: url, after: url } or null
+  beforeAfter: jsonb("beforeAfter").$type<{ before: string; after: string } | null>(),
+  // gallery screenshots: [{ src, caption }]
+  screenshots: jsonb("screenshots").notNull().default([]).$type<{ src: string; caption: string }[]>(),
+  // layout hint for homepage grid
+  col: text("col").default(""),
+  published: boolean("published").notNull().default(true),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+})
+
+export type ProjectRow = typeof projects_db.$inferSelect
+export type NewProject = typeof projects_db.$inferInsert
