@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useTransition, useRef } from "react"
+import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import {
-  Plus, Pencil, Trash2, Eye, EyeOff, Save, X, ChevronDown, ChevronUp,
-  GripVertical, ImagePlus, Layers, ArrowUpDown, ExternalLink,
+  Plus, Pencil, Trash2, Eye, Save, X,
+  ImagePlus, ExternalLink,
 } from "lucide-react"
-import { createProject, updateProject, deleteProject } from "@/app/actions/projects"
+import { createProject, updateProject, deleteProject, getProjects } from "@/app/actions/projects"
 import type { ProjectRow } from "@/lib/db/schema"
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -160,7 +161,7 @@ function rowToForm(p: ProjectRow): ProjectFormState {
 
 // ── Main form modal ──────────────────────────────────────────────────────────
 function ProjectFormModal({
-  initial, mode, onClose, onSaved,
+  initial, mode, editId, onClose, onSaved,
 }: {
   initial: ProjectFormState
   mode: "create" | "edit"
@@ -208,13 +209,13 @@ function ProjectFormModal({
       try {
         if (mode === "create") {
           await createProject(payload)
-        } else {
-          await updateProject((initial as any)._id, payload)
+        } else if (editId !== undefined) {
+          await updateProject(editId, payload)
         }
         onSaved()
         onClose()
-      } catch (e: any) {
-        setError(e.message ?? "Erro ao salvar")
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : "Erro ao salvar")
       }
     })
   }
@@ -434,12 +435,14 @@ function ProjectFormModal({
 
 // ── Main ProjectsAdmin component ─────────────────────────────────────────────
 export function ProjectsAdmin({ initialProjects }: { initialProjects: ProjectRow[] }) {
+  const router = useRouter()
   const [projects, setProjects] = useState<ProjectRow[]>(initialProjects)
   const [modal, setModal] = useState<{ mode: "create" | "edit"; project?: ProjectRow } | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  const reload = () => {
-    // Optimistic: just close — page revalidation handles the rest
+  const reload = async () => {
+    const fresh = await getProjects()
+    setProjects(fresh)
   }
 
   const handleDelete = (p: ProjectRow) => {
@@ -449,11 +452,6 @@ export function ProjectsAdmin({ initialProjects }: { initialProjects: ProjectRow
       setProjects((prev) => prev.filter((x) => x.id !== p.id))
     })
   }
-
-  const formForEdit = (p: ProjectRow): ProjectFormState & { _id: number } => ({
-    ...rowToForm(p),
-    _id: p.id,
-  })
 
   return (
     <div className="p-4 sm:p-6">
@@ -513,25 +511,36 @@ export function ProjectsAdmin({ initialProjects }: { initialProjects: ProjectRow
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-1">
                     {p.liveUrl && (
-                      <a href={p.liveUrl} target="_blank" rel="noopener noreferrer"
-                        className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors">
+                      <a
+                        href={p.liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
+                        title="Ver site ao vivo"
+                      >
                         <ExternalLink className="size-3" />
                       </a>
                     )}
-                    <a href={`/projetos/${p.slug}`} target="_blank" rel="noopener noreferrer"
-                      className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors">
+                    {/* Preview: navigate within the same frame to avoid proxy unauthorized */}
+                    <button
+                      onClick={() => router.push(`/projetos/${p.slug}`)}
+                      className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
+                      title="Visualizar página do projeto"
+                    >
                       <Eye className="size-3" />
-                    </a>
+                    </button>
                     <button
                       onClick={() => setModal({ mode: "edit", project: p })}
-                      className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
+                      className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-blue-400 transition-colors"
+                      title="Editar projeto"
                     >
                       <Pencil className="size-3" />
                     </button>
                     <button
                       onClick={() => handleDelete(p)}
                       disabled={isPending}
-                      className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-red-400 transition-colors"
+                      className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-red-400 transition-colors disabled:opacity-40"
+                      title="Excluir projeto"
                     >
                       <Trash2 className="size-3" />
                     </button>
@@ -556,7 +565,7 @@ export function ProjectsAdmin({ initialProjects }: { initialProjects: ProjectRow
           <ProjectFormModal
             key={modal.project?.id ?? "new"}
             mode={modal.mode}
-            initial={modal.project ? formForEdit(modal.project) : blankForm()}
+            initial={modal.project ? rowToForm(modal.project) : blankForm()}
             editId={modal.project?.id}
             onClose={() => setModal(null)}
             onSaved={reload}
