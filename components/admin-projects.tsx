@@ -226,9 +226,9 @@ function ProjectFormModal({
   ] as const
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-start justify-center p-4 overflow-y-auto" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }}>
+    <div className="fixed inset-0 z-[200] flex items-start justify-center p-0 sm:p-4 overflow-y-auto" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }}>
       <motion.div
-        className="w-full max-w-2xl rounded-2xl border border-border shadow-2xl my-8"
+        className="w-full sm:max-w-2xl sm:rounded-2xl rounded-none border-0 sm:border border-border shadow-2xl sm:my-8 min-h-screen sm:min-h-0"
         style={{ background: "var(--background)" }}
         initial={{ opacity: 0, y: 24, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -236,7 +236,7 @@ function ProjectFormModal({
         transition={{ duration: 0.25 }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border">
           <div>
             <h2 className="font-bold text-foreground">{mode === "create" ? "Novo Projeto" : `Editar: ${initial.title}`}</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -249,12 +249,12 @@ function ProjectFormModal({
         </div>
 
         {/* Section tabs */}
-        <div className="flex border-b border-border px-6">
+        <div className="flex border-b border-border px-4 sm:px-6 overflow-x-auto scrollbar-none">
           {SECTIONS.map((s) => (
             <button
               key={s.key}
               onClick={() => setSection(s.key)}
-              className={`py-3 px-1 mr-6 text-xs font-semibold tracking-wide border-b-2 transition-colors ${
+              className={`py-3 px-1 mr-4 sm:mr-6 text-xs font-semibold tracking-wide border-b-2 transition-colors whitespace-nowrap ${
                 section === s.key ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -264,11 +264,11 @@ function ProjectFormModal({
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-5">
+        <div className="p-4 sm:p-6 space-y-5">
           {section === "basic" && (
             <>
               {/* Title + slug */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="label-sm text-muted-foreground mb-1.5 block text-[11px] uppercase tracking-wider">Título *</label>
                   <input value={form.title} onChange={(e) => handleTitleChange(e.target.value)}
@@ -284,7 +284,7 @@ function ProjectFormModal({
               </div>
 
               {/* Category + Duration */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="label-sm text-muted-foreground mb-1.5 block text-[11px] uppercase tracking-wider">Categoria *</label>
                   <input value={form.category} onChange={(e) => set("category", e.target.value)}
@@ -307,8 +307,8 @@ function ProjectFormModal({
                   className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-secondary/50 focus:outline-none focus:border-foreground/30 resize-none" />
               </div>
 
-              {/* Cover + Published */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Cover + liveUrl */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="label-sm text-muted-foreground mb-1.5 block text-[11px] uppercase tracking-wider">Capa (cor/ícone)</label>
                   <select value={form.cover} onChange={(e) => set("cover", e.target.value)}
@@ -456,16 +456,16 @@ export function ProjectsAdmin({ initialProjects }: { initialProjects: ProjectRow
   })
 
   return (
-    <div>
+    <div className="p-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between mb-6">
         <div>
           <h2 className="text-lg font-bold text-foreground">Projetos</h2>
           <p className="text-xs text-muted-foreground mt-0.5">{projects.length} projetos — clique em um para editar</p>
         </div>
         <button
           onClick={() => setModal({ mode: "create" })}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide uppercase transition-all hover:opacity-80"
+          className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 sm:py-2.5 rounded-xl text-xs font-bold tracking-wide uppercase transition-all hover:opacity-80"
           style={{ background: "var(--foreground)", color: "var(--background)" }}
         >
           <Plus className="size-3.5" /> Novo Projeto
