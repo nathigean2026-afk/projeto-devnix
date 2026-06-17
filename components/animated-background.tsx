@@ -99,37 +99,34 @@ export function AnimatedBackground() {
     function spawnWebNodes(cx: number, cy: number, count: number) {
       const slots = MAX_NODES - nodesRef.current.length
       const add   = Math.min(count, Math.max(slots, 0))
+
       for (let i = 0; i < add; i++) {
-        const angle = (i / add) * Math.PI * 2 + Math.random() * 0.8
+        // Cada nó nasce em posição já espalhada ao redor do clique
+        // Raio: entre CONNECT_D*0.15 e CONNECT_D*0.9
+        // Assim já estão dentro do alcance de conexão entre si — teia forma na hora
+        const angle  = (i / add) * Math.PI * 2 + (Math.random() - 0.5) * 1.2
+        const birthR = CONNECT_D * (0.15 + Math.random() * 0.75)
+        const bx = Math.max(8, Math.min(w - 8, cx + Math.cos(angle) * birthR))
+        const by = Math.max(8, Math.min(h - 8, cy + Math.sin(angle) * birthR))
 
-        // Cada nó já nasce ESPALHADO ao redor do clique — não todos no mesmo ponto.
-        // Raio de nascimento: entre 30px e CONNECT_D*0.7 para que já estejam
-        // dentro do alcance de conexão e formem teia imediatamente.
-        const birthR = CONNECT_D * (0.2 + Math.random() * 0.7)
-        const bx = Math.max(4, Math.min(w - 4, cx + Math.cos(angle) * birthR))
-        const by = Math.max(4, Math.min(h - 4, cy + Math.sin(angle) * birthR))
+        // Velocidade: baixa e aleatória (como nós base) — NÃO aponta para longe.
+        // O nó vai flutuar livremente após nascer, igual a qualquer outro nó da teia.
+        const baseSpd = mobile ? 0.18 : 0.25
+        const vx = (Math.random() - 0.5) * baseSpd * 2
+        const vy = (Math.random() - 0.5) * baseSpd * 2
 
-        // Destino (originX/Y): ainda mais afastado — nó continua derivando após nascer
-        const driftR = CONNECT_D * (0.8 + Math.random() * 1.0)
-        const ox = Math.max(4, Math.min(w - 4, cx + Math.cos(angle) * driftR))
-        const oy = Math.max(4, Math.min(h - 4, cy + Math.sin(angle) * driftR))
-
-        // Velocidade aponta para o destino final
-        const dx = ox - bx
-        const dy = oy - by
-        const len = Math.sqrt(dx * dx + dy * dy) || 1
-        const spd = mobile ? 0.5 + Math.random() * 0.5 : 0.6 + Math.random() * 0.8
-
+        // originX/Y = posição de nascimento — nó flutua ao redor dali,
+        // não é puxado de volta a um ponto distante
         nodesRef.current.push({
           x: bx, y: by,
-          vx: (dx / len) * spd,
-          vy: (dy / len) * spd,
-          size: 1.6 + Math.random() * 2.0,
-          opacity: 0.65 + Math.random() * 0.30,
-          originX: ox, originY: oy,
+          vx, vy,
+          size:       1.4 + Math.random() * 2.2,
+          opacity:    0.55 + Math.random() * 0.35,
+          originX:    bx,
+          originY:    by,
           spawnAlpha: 0,
-          glow: 1.0,
-          glowDir: -1,
+          glow:       1.0,
+          glowDir:    -1,
         })
       }
     }
@@ -168,11 +165,13 @@ export function AnimatedBackground() {
         if (p.glow <= 0) { p.glow = 0; p.glowDir =  1 }
 
         if (p.spawnAlpha < 1) {
-          // Nó recém-nascido: fade-in rápido, mantém velocidade para se espalhar
-          p.spawnAlpha = Math.min(p.spawnAlpha + 0.055, 1)
-          // Fricção menor aqui para o nó percorrer distância antes de parar
-          p.vx *= 0.980
-          p.vy *= 0.980
+          // Fade-in: 0→1 em ~25 frames (~0.4s a 60fps)
+          p.spawnAlpha = Math.min(p.spawnAlpha + 0.04, 1)
+          // Mesma física dos nós base desde o início — sem tratamento especial
+          p.vx += (p.originX - p.x) * RETURN_SPD
+          p.vy += (p.originY - p.y) * RETURN_SPD
+          p.vx *= FRICTION
+          p.vy *= FRICTION
         } else {
           // Nó estável: repulsão hover + retorno à origem
           if (!mobile) {
