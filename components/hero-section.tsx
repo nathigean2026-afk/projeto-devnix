@@ -1,12 +1,12 @@
 "use client"
 
-import { useRef, useEffect, useCallback } from "react"
+import { useRef, useEffect, useCallback, useState } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, ArrowDown } from "lucide-react"
 
 const TAGS = ["Sites", "Software", "E-commerce", "Plataformas", "Landing Pages", "Blogs", "Sistemas", "APIs"]
 
-// ─── Canvas: floating dots + constellation lines + click burst ───────────────
+// FloatingDots — só instanciado em desktop (>=768px)
 function FloatingDots() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -16,7 +16,6 @@ function FloatingDots() {
     const rect = canvas.getBoundingClientRect()
     const cx = e.clientX - rect.left
     const cy = e.clientY - rect.top
-    // Inject burst particles into the existing dots array
     ;(canvas as HTMLCanvasElement & { __inject?: (x: number, y: number) => void }).__inject?.(cx, cy)
   }, [])
 
@@ -59,18 +58,14 @@ function FloatingDots() {
       H = canvas!.offsetHeight
       canvas!.width = W
       canvas!.height = H
-      dots = Array.from({ length: 160 }, () => makeDot())
+      dots = Array.from({ length: 120 }, () => makeDot())
     }
 
-    const MAX_DOTS = 400
-    // Pool of burst dots sorted by age — oldest index = 0
+    const MAX_DOTS = 300
     const burstPool: Dot[] = []
 
-    // When click happens: spawn new burst dots.
-    // They keep their velocity forever (slow over time) and join the normal
-    // pool permanently — they never die. If over MAX_DOTS, evict the oldest burst.
     ;(canvas as HTMLCanvasElement & { __inject?: (x: number, y: number) => void }).__inject = (x, y) => {
-      const count = Math.floor(Math.random() * 20 + 14)
+      const count = Math.floor(Math.random() * 16 + 10)
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2
         const speed = Math.random() * 2.8 + 0.8
@@ -87,7 +82,6 @@ function FloatingDots() {
         burstPool.push(d)
         dots.push(d)
       }
-      // Evict oldest burst dots if over limit
       while (dots.length > MAX_DOTS && burstPool.length > 0) {
         const evict = burstPool.shift()!
         const idx = dots.indexOf(evict)
@@ -95,54 +89,30 @@ function FloatingDots() {
       }
     }
 
-    const CONNECT_DIST = 100
-
+    // Sem linhas de conexão — O(n²) removido, apenas pontos
     function draw() {
       ctx!.clearRect(0, 0, W, H)
-
       const isDark = document.documentElement.classList.contains("dark") ||
         !document.documentElement.classList.contains("light")
       const color = isDark ? "255,255,255" : "0,0,0"
       const alphaMultiplier = isDark ? 1 : 2.8
 
-      // Draw connection lines between nearby dots
-      for (let i = 0; i < dots.length; i++) {
-        for (let j = i + 1; j < dots.length; j++) {
-          const dx = dots[i].x - dots[j].x
-          const dy = dots[i].y - dots[j].y
-          const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist < CONNECT_DIST) {
-            const lineAlpha = (1 - dist / CONNECT_DIST) * 0.12 * alphaMultiplier
-            ctx!.strokeStyle = `rgba(${color},${lineAlpha.toFixed(3)})`
-            ctx!.lineWidth = 0.5
-            ctx!.beginPath()
-            ctx!.moveTo(dots[i].x, dots[i].y)
-            ctx!.lineTo(dots[j].x, dots[j].y)
-            ctx!.stroke()
-          }
-        }
-      }
-
-      // Update + draw every dot
       for (const d of dots) {
-        // Decelerate burst dots — once slow enough they become ambient
         if (d.burst) {
           d.vx *= 0.97
           d.vy *= 0.97
           const speed = Math.sqrt(d.vx * d.vx + d.vy * d.vy)
-          if (speed < 0.35) d.burst = false // graduate to normal dot
+          if (speed < 0.35) d.burst = false
         }
 
         d.x += d.vx
         d.y += d.vy
 
-        // Wrap around edges for all dots
         if (d.x < -4) d.x = W + 4
         if (d.x > W + 4) d.x = -4
         if (d.y < -4) d.y = H + 4
         if (d.y > H + 4) d.y = -4
 
-        // Breathe alpha
         if (Math.abs(d.alpha - d.targetAlpha) < d.alphaSpeed) {
           d.targetAlpha = Math.random() * 0.55 + 0.12
         }
@@ -159,13 +129,17 @@ function FloatingDots() {
     }
 
     resize()
-    draw()
+    // Adiar início da animação para após o LCP — não bloquear o thread no carregamento
+    const startTimer = setTimeout(() => {
+      draw()
+    }, 600)
 
     const ro = new ResizeObserver(resize)
     ro.observe(canvas)
     canvas.addEventListener("click", handleClick as EventListener)
 
     return () => {
+      clearTimeout(startTimer)
       cancelAnimationFrame(animId)
       ro.disconnect()
       canvas.removeEventListener("click", handleClick as EventListener)
@@ -188,6 +162,12 @@ export function HeroSection() {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "25%"])
   const fadeOut = useTransform(scrollYProgress, [0, 0.7], [1, 0])
 
+  // Detecta se é desktop para renderizar o canvas de pontos
+  const [isDesktop, setIsDesktop] = useState(false)
+  useEffect(() => {
+    setIsDesktop(window.innerWidth >= 768)
+  }, [])
+
   return (
     <section
       ref={ref}
@@ -197,31 +177,24 @@ export function HeroSection() {
       {/* Grid pattern */}
       <div className="absolute inset-0 grid-pattern pointer-events-none" aria-hidden="true" style={{ zIndex: 0 }} />
 
-      {/* Animated floating dots — z-index 1, cursor crosshair */}
-      <FloatingDots />
+      {/* FloatingDots apenas no desktop — em mobile o canvas consome muito CPU */}
+      {isDesktop && <FloatingDots />}
 
-      {/* Corner glows */}
+      {/* Corner glows — substituído por versão CSS sem filter:blur */}
       <div
         aria-hidden="true"
-        className="hero-glow w-[600px] h-[600px] -top-32 -left-32 opacity-[0.04] pointer-events-none"
-        style={{ background: "radial-gradient(circle, #3b82f6 0%, transparent 70%)", zIndex: 0 }}
-      />
-      <div
-        aria-hidden="true"
-        className="hero-glow w-[500px] h-[500px] -bottom-20 -right-20 opacity-[0.03] pointer-events-none"
-        style={{ background: "radial-gradient(circle, #6366f1 0%, transparent 70%)", zIndex: 0 }}
+        className="hero-glow-simple pointer-events-none"
+        style={{ zIndex: 0 }}
       />
 
       <motion.div
         style={{ y, opacity: fadeOut }}
         className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-28 w-full pointer-events-none"
       >
-        {/* Tag line */}
-        <motion.div
-          className="flex items-center gap-3 mb-10 pointer-events-auto"
-          initial={{ opacity: 0, x: -16 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+        {/* Tag line — visível imediatamente, sem opacity:0 inicial */}
+        <div
+          className="flex items-center gap-3 mb-10 pointer-events-auto animate-fade-in"
+          style={{ animationDelay: "0ms", animationFillMode: "both" }}
         >
           <span
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border text-muted-foreground"
@@ -230,23 +203,26 @@ export function HeroSection() {
             <span className="size-1.5 rounded-full bg-foreground opacity-60 animate-pulse" />
             <span className="label-sm">Desenvolvedor Full-Stack · Disponível</span>
           </span>
-        </motion.div>
+        </div>
 
-        {/* Main headline */}
+        {/* Main headline — texto SEMPRE visível para o LCP ser detectado imediatamente
+            A animação de entrada usa CSS puro (não bloqueia Lighthouse) */}
         <div className="overflow-hidden mb-1">
-          <motion.h1
-            className="text-display text-foreground"
-            style={{ fontSize: "clamp(54px,10vw,136px)", lineHeight: 0.9, letterSpacing: "-0.04em" }}
-            initial={{ y: 80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.9, delay: 0.15, ease: "easeOut" }}
+          <h1
+            className="text-display text-foreground hero-h1-slide"
+            style={{
+              fontSize: "clamp(54px,10vw,136px)",
+              lineHeight: 0.9,
+              letterSpacing: "-0.04em",
+              animationDelay: "0ms",
+            }}
           >
             Seu site
-          </motion.h1>
+          </h1>
         </div>
         <div className="overflow-hidden mb-1">
-          <motion.h1
-            className="text-display"
+          <h1
+            className="text-display hero-h1-slide"
             style={{
               fontSize: "clamp(54px,10vw,136px)",
               lineHeight: 0.9,
@@ -254,32 +230,30 @@ export function HeroSection() {
               color: "transparent",
               WebkitTextStroke: "1.5px var(--foreground)",
               opacity: 0.45,
+              animationDelay: "60ms",
             }}
-            initial={{ y: 80, opacity: 0 }}
-            animate={{ y: 0, opacity: 0.45 }}
-            transition={{ duration: 0.9, delay: 0.22, ease: "easeOut" }}
           >
             é sua
-          </motion.h1>
+          </h1>
         </div>
         <div className="overflow-hidden">
-          <motion.h1
-            className="text-display text-foreground"
-            style={{ fontSize: "clamp(54px,10vw,136px)", lineHeight: 0.9, letterSpacing: "-0.04em" }}
-            initial={{ y: 80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.9, delay: 0.29, ease: "easeOut" }}
+          <h1
+            className="text-display text-foreground hero-h1-slide"
+            style={{
+              fontSize: "clamp(54px,10vw,136px)",
+              lineHeight: 0.9,
+              letterSpacing: "-0.04em",
+              animationDelay: "120ms",
+            }}
           >
             identidade.
-          </motion.h1>
+          </h1>
         </div>
 
         {/* Sub row */}
-        <motion.div
-          className="flex flex-col md:flex-row md:items-end justify-between gap-8 mt-14 pointer-events-auto"
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.55, ease: "easeOut" }}
+        <div
+          className="flex flex-col md:flex-row md:items-end justify-between gap-8 mt-14 pointer-events-auto animate-fade-in-up"
+          style={{ animationDelay: "200ms", animationFillMode: "both" }}
         >
           <p className="text-base md:text-lg text-muted-foreground max-w-md leading-relaxed">
             Construo sites, software e plataformas que pertencem a você. Código-fonte
@@ -301,14 +275,12 @@ export function HeroSection() {
               Ver Serviços
             </a>
           </div>
-        </motion.div>
+        </div>
 
         {/* Marquee tags strip */}
-        <motion.div
-          className="mt-16 overflow-hidden"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.85, ease: "easeOut" }}
+        <div
+          className="mt-16 overflow-hidden animate-fade-in"
+          style={{ animationDelay: "600ms", animationFillMode: "both" }}
           aria-hidden="true"
         >
           <div className="flex w-max marquee-track">
@@ -319,15 +291,13 @@ export function HeroSection() {
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       </motion.div>
 
       {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10 pointer-events-none"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 0.6 }}
+      <div
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10 pointer-events-none animate-fade-in"
+        style={{ animationDelay: "1200ms", animationFillMode: "both" }}
         aria-hidden="true"
       >
         <span className="label-sm text-muted-foreground">Clique para interagir</span>
@@ -337,7 +307,7 @@ export function HeroSection() {
         >
           <ArrowDown className="size-4 text-muted-foreground" />
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   )
 }

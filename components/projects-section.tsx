@@ -112,12 +112,6 @@ function ProjectCover({ cover, title }: { cover: string; title: string }) {
       <div className="relative text-white/70 drop-shadow-lg">
         {c.icon}
       </div>
-      <span
-        className="absolute bottom-3 right-4 text-[9px] font-bold tracking-[0.2em] uppercase text-white/25 select-none"
-        aria-hidden="true"
-      >
-        {title}
-      </span>
     </div>
   )
 }
