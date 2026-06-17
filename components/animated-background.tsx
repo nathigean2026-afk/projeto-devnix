@@ -100,23 +100,36 @@ export function AnimatedBackground() {
       const slots = MAX_NODES - nodesRef.current.length
       const add   = Math.min(count, Math.max(slots, 0))
       for (let i = 0; i < add; i++) {
-        const angle = Math.random() * Math.PI * 2
-        // Destino final (originX/Y): espalhado ao redor do clique
-        const spread = CONNECT_D * (0.4 + Math.random() * 0.9)
-        const ox = Math.max(0, Math.min(w, cx + Math.cos(angle) * spread))
-        const oy = Math.max(0, Math.min(h, cy + Math.sin(angle) * spread))
-        // Velocidade inicial pequena em direção ao destino
-        const drift = 0.4 + Math.random() * 0.7
+        const angle = (i / add) * Math.PI * 2 + Math.random() * 0.8
+
+        // Cada nó já nasce ESPALHADO ao redor do clique — não todos no mesmo ponto.
+        // Raio de nascimento: entre 30px e CONNECT_D*0.7 para que já estejam
+        // dentro do alcance de conexão e formem teia imediatamente.
+        const birthR = CONNECT_D * (0.2 + Math.random() * 0.7)
+        const bx = Math.max(4, Math.min(w - 4, cx + Math.cos(angle) * birthR))
+        const by = Math.max(4, Math.min(h - 4, cy + Math.sin(angle) * birthR))
+
+        // Destino (originX/Y): ainda mais afastado — nó continua derivando após nascer
+        const driftR = CONNECT_D * (0.8 + Math.random() * 1.0)
+        const ox = Math.max(4, Math.min(w - 4, cx + Math.cos(angle) * driftR))
+        const oy = Math.max(4, Math.min(h - 4, cy + Math.sin(angle) * driftR))
+
+        // Velocidade aponta para o destino final
+        const dx = ox - bx
+        const dy = oy - by
+        const len = Math.sqrt(dx * dx + dy * dy) || 1
+        const spd = mobile ? 0.5 + Math.random() * 0.5 : 0.6 + Math.random() * 0.8
+
         nodesRef.current.push({
-          x: cx, y: cy,
-          vx: Math.cos(angle) * drift,
-          vy: Math.sin(angle) * drift,
+          x: bx, y: by,
+          vx: (dx / len) * spd,
+          vy: (dy / len) * spd,
           size: 1.6 + Math.random() * 2.0,
           opacity: 0.65 + Math.random() * 0.30,
           originX: ox, originY: oy,
           spawnAlpha: 0,
-          glow: 1.0,   // começa com glow máximo
-          glowDir: -1, // vai diminuindo para nível normal
+          glow: 1.0,
+          glowDir: -1,
         })
       }
     }
@@ -155,10 +168,11 @@ export function AnimatedBackground() {
         if (p.glow <= 0) { p.glow = 0; p.glowDir =  1 }
 
         if (p.spawnAlpha < 1) {
-          // Nó recém-nascido: fade-in + desaceleração gradual
-          p.spawnAlpha = Math.min(p.spawnAlpha + 0.030, 1)
-          p.vx *= 0.965
-          p.vy *= 0.965
+          // Nó recém-nascido: fade-in rápido, mantém velocidade para se espalhar
+          p.spawnAlpha = Math.min(p.spawnAlpha + 0.055, 1)
+          // Fricção menor aqui para o nó percorrer distância antes de parar
+          p.vx *= 0.980
+          p.vy *= 0.980
         } else {
           // Nó estável: repulsão hover + retorno à origem
           if (!mobile) {
