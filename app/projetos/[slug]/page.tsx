@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation"
-import { projects } from "@/lib/projects-data"
+import { getProjectBySlug, getProjects } from "@/app/actions/projects"
 import { ProjectDetailClient } from "./project-detail-client"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const project = projects.find((p) => p.slug === slug)
+  const project = await getProjectBySlug(slug)
   if (!project) return {}
   return {
     title: `${project.title} — Devnix`,
@@ -14,7 +14,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const project = projects.find((p) => p.slug === slug)
+  const [project, allProjects] = await Promise.all([
+    getProjectBySlug(slug),
+    getProjects(),
+  ])
   if (!project) notFound()
-  return <ProjectDetailClient project={project!} />
+  return <ProjectDetailClient project={project} allProjects={allProjects} />
 }

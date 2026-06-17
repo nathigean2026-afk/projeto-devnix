@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import { ArrowLeft, CheckCircle, Clock, ArrowRight, ExternalLink, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { useState } from "react"
-import { projects, type Project } from "@/lib/projects-data"
+import type { ProjectRow } from "@/lib/db/schema"
 import { BeforeAfterSlider } from "@/components/before-after-slider"
 
 const ease = [0.16, 1, 0.3, 1] as const
@@ -113,8 +113,13 @@ function ScreenshotGallery({ screenshots }: { screenshots: { src: string; captio
   )
 }
 
-export function ProjectDetailClient({ project }: { project: Project }) {
-  const others = projects.filter((p) => p.slug !== project.slug).slice(0, 3)
+export function ProjectDetailClient({ project, allProjects = [] }: { project: ProjectRow; allProjects?: ProjectRow[] }) {
+  const others = allProjects.filter((p) => p.slug !== project.slug).slice(0, 3)
+  const screenshots = (project.screenshots as { src: string; caption: string }[]) ?? []
+  const results = (project.results as string[]) ?? []
+  const stack = (project.stack as string[]) ?? []
+  const tech = (project.tech as string[]) ?? []
+  const beforeAfter = project.beforeAfter as { before: string; after: string } | null
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -207,30 +212,13 @@ export function ProjectDetailClient({ project }: { project: Project }) {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.9, delay: 0.15, ease }}
               >
-                {project.beforeAfter ? (
+                {beforeAfter ? (
                   <BeforeAfterSlider
-                    beforeSrc={project.beforeAfter.before}
-                    afterSrc={project.beforeAfter.after}
+                    beforeSrc={beforeAfter.before}
+                    afterSrc={beforeAfter.after}
                     beforeLabel="Antes"
                     afterLabel="Depois"
                   />
-                ) : (project as { image?: string }).image ? (
-                  <div className="relative h-64 lg:h-80 rounded-2xl border border-border overflow-hidden">
-                    <img
-                      src={(project as { image?: string }).image}
-                      alt={`Screenshot do projeto ${project.title}`}
-                      className="absolute inset-0 w-full h-full object-cover object-top"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-1.5">
-                      {project.stack.slice(0, 4).map((s) => (
-                        <span key={s} className="label-sm border border-white/20 px-2 py-0.5 rounded text-white/70 font-mono backdrop-blur-sm"
-                          style={{ fontSize: "9px", background: "rgba(0,0,0,0.4)" }}>
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
                 ) : (
                   <div
                     className="relative h-64 lg:h-80 rounded-2xl border border-border overflow-hidden"
@@ -246,7 +234,7 @@ export function ProjectDetailClient({ project }: { project: Project }) {
                       </span>
                     </div>
                     <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-1.5">
-                      {project.stack.slice(0, 4).map((s) => (
+                      {stack.slice(0, 4).map((s) => (
                         <span key={s} className="label-sm border border-border px-2 py-0.5 rounded text-muted-foreground font-mono backdrop-blur-sm"
                           style={{ fontSize: "9px", background: "var(--background)" }}>
                           {s}

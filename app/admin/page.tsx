@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { authClient } from "@/lib/auth-client"
 import { getLeads, updateLeadStatus, deleteLead } from "@/app/actions/leads"
-import type { Lead } from "@/lib/db/schema"
+import { getProjects } from "@/app/actions/projects"
+import type { Lead, ProjectRow } from "@/lib/db/schema"
+import { ProjectsAdmin } from "@/components/admin-projects"
 import {
   Mail, Phone, MessageSquare, Trash2, CheckCircle2,
   LogOut, Clock, TrendingUp, Inbox, Search, Sun, Moon,
-  ThumbsUp, ArrowUpRight, RefreshCw, Filter, User,
+  ThumbsUp, ArrowUpRight, RefreshCw, Filter, User, Layers,
 } from "lucide-react"
 import { useTheme } from "next-themes"
 
@@ -65,8 +67,11 @@ export default function AdminDashboard() {
   const [mounted, setMounted] = useState(false)
   const [leads, setLeads] = useState<Lead[]>([])
   const [leadsLoaded, setLeadsLoaded] = useState(false)
+  const [projects, setProjects] = useState<ProjectRow[]>([])
+  const [projectsLoaded, setProjectsLoaded] = useState(false)
   const [selected, setSelected] = useState<Lead | null>(null)
   const [activeTab, setActiveTab] = useState("todos")
+  const [activeSection, setActiveSection] = useState<"leads" | "projetos">("leads")
   const [search, setSearch] = useState("")
   const [refreshing, setRefreshing] = useState(false)
   const [, startTransition] = useTransition()
@@ -90,6 +95,7 @@ export default function AdminDashboard() {
       return () => clearTimeout(timer)
     }
     if (!leadsLoaded) loadLeads()
+    if (!projectsLoaded) loadProjects()
   }, [session, sessionLoading]) // eslint-disable-line
 
   async function loadLeads() {
@@ -99,6 +105,16 @@ export default function AdminDashboard() {
       setLeadsLoaded(true)
     } catch {
       router.push("/sign-in")
+    }
+  }
+
+  async function loadProjects() {
+    try {
+      const data = await getProjects()
+      setProjects(data as ProjectRow[])
+      setProjectsLoaded(true)
+    } catch {
+      // silently fail
     }
   }
 
@@ -177,6 +193,22 @@ export default function AdminDashboard() {
         </a>
 
         <div className="flex items-center gap-2 shrink-0">
+          {/* Section toggle */}
+          <div className="hidden sm:flex items-center gap-1 p-1 rounded-lg border border-border bg-secondary/50">
+            <button
+              onClick={() => setActiveSection("leads")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${activeSection === "leads" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <Inbox className="size-3" /> Leads
+            </button>
+            <button
+              onClick={() => setActiveSection("projetos")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${activeSection === "projetos" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <Layers className="size-3" /> Projetos
+            </button>
+          </div>
+
           {/* User badge */}
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border text-xs max-w-[160px] overflow-hidden">
             <User className="size-3 text-muted-foreground shrink-0" />
@@ -246,7 +278,12 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── Main: list + detail ── */}
+      {/* ── Main: conditionally render Leads or Projects ── */}
+      {activeSection === "projetos" ? (
+        <div className="flex-1 overflow-y-auto p-6">
+          <ProjectsAdmin initialProjects={projects} />
+        </div>
+      ) : (
       <div className="flex flex-1 overflow-hidden min-h-0">
 
         {/* ── Left: list panel ── */}
@@ -491,6 +528,7 @@ export default function AdminDashboard() {
           )}
         </div>
       </div>
+      )} {/* end activeSection === "leads" */}
     </div>
   )
 }

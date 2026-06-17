@@ -129,13 +129,33 @@ export function Navbar() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-[60] flex flex-col pt-20 px-8 pb-12 md:hidden"
+            className="fixed inset-0 z-[60] flex flex-col pt-6 px-8 pb-12 md:hidden"
             style={{ background: "var(--background)" }}
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
           >
+            {/* Top bar inside overlay: logo + close button */}
+            <div className="flex items-center justify-between mb-4">
+              <a href="/" aria-label="Devnix">
+                <Image
+                  src="/logo-icon.png"
+                  alt="Devnix"
+                  width={88}
+                  height={88}
+                  className={`object-contain transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
+                  style={{ width: "auto", height: "auto", maxHeight: "36px" }}
+                />
+              </a>
+              <button
+                onClick={() => setOpen(false)}
+                className="size-9 flex items-center justify-center rounded-full border border-border hover:bg-secondary transition-colors"
+                aria-label="Fechar menu"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
             <nav className="flex flex-col mt-8">
               {links.map((l, i) => (
                 <motion.div

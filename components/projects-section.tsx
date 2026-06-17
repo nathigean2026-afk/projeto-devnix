@@ -102,41 +102,16 @@ const COVERS: Record<string, { gradient: string; icon: React.ReactNode }> = {
   },
 }
 
-function ProjectCover({ cover, title, image }: { cover: string; title: string; image?: string }) {
+function ProjectCover({ cover, title }: { cover: string; title: string }) {
   const c = COVERS[cover] ?? COVERS.saas
-
-  // If a real image exists, show it
-  if (image) {
-    return (
-      <div className="h-44 relative overflow-hidden">
-        <img
-          src={image}
-          alt={`Screenshot do projeto ${title}`}
-          className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-        />
-        {/* Subtle dark overlay at bottom for readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-        <span
-          className="absolute bottom-3 right-4 text-[9px] font-bold tracking-[0.2em] uppercase text-white/40 select-none"
-          aria-hidden="true"
-        >
-          {title}
-        </span>
-      </div>
-    )
-  }
 
   return (
     <div className={`h-44 relative overflow-hidden bg-gradient-to-br ${c.gradient} flex items-center justify-center`}>
-      {/* Grid overlay */}
       <div className="absolute inset-0 grid-pattern opacity-30" />
-      {/* Subtle glow */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-      {/* Icon */}
       <div className="relative text-white/70 drop-shadow-lg">
         {c.icon}
       </div>
-      {/* Subtle title watermark */}
       <span
         className="absolute bottom-3 right-4 text-[9px] font-bold tracking-[0.2em] uppercase text-white/25 select-none"
         aria-hidden="true"
@@ -211,7 +186,7 @@ export function ProjectsSection() {
               />
 
               {/* Cover */}
-                <ProjectCover cover={p.cover} title={p.title} image={(p as { image?: string }).image} />
+                <ProjectCover cover={p.cover} title={p.title} />
 
               {/* "Ver projeto" on hover overlay */}
               <div className="absolute top-0 left-0 right-0 h-44 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
