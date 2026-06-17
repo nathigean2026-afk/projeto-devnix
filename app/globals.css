@@ -208,8 +208,8 @@
 /* ─── GRID PATTERN ──────────────────────────────────────── */
 .grid-pattern {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 .light .grid-pattern {
@@ -217,6 +217,26 @@
     linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
   background-size: 64px 64px;
+}
+
+/* ─── MOBILE GLOBAL GRID ────────────────────────────────── */
+/* Em mobile, o canvas de partículas está desativado.
+   Usamos o mesmo grid-pattern como background fixo do body
+   para manter a textura visual nos dois temas. */
+@media (max-width: 767px) {
+  body {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 64px 64px;
+    background-attachment: local;
+  }
+  /* next-themes aplica a classe "light" no <html> */
+  html.light body {
+    background-image:
+      linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  }
 }
 
 /* ─── DOT PATTERN ───────────────────────────────────────── */
