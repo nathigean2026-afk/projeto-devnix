@@ -67,6 +67,7 @@ export function Navbar() {
                 className={`object-contain block sm:hidden transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
                 style={{ width: "auto", height: "auto", maxHeight: "44px" }}
                 priority
+                fetchPriority="high"
               />
               {/* Desktop: full logo */}
               <Image
@@ -77,6 +78,7 @@ export function Navbar() {
                 className={`object-contain hidden sm:block transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
                 style={{ width: "auto", height: "auto", maxHeight: "48px" }}
                 priority
+                fetchPriority="high"
               />
             </a>
 
@@ -146,6 +148,7 @@ export function Navbar() {
                   height={88}
                   className={`object-contain transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
                   style={{ width: "auto", height: "auto", maxHeight: "36px" }}
+                  loading="lazy"
                 />
               </a>
               <button

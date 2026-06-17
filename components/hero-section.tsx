@@ -221,7 +221,7 @@ export function HeroSection() {
           className="flex items-center gap-3 mb-10 pointer-events-auto"
           initial={{ opacity: 0, x: -16 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+          transition={{ duration: 0.5, delay: 0.05, ease: "easeOut" }}
         >
           <span
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border text-muted-foreground"
@@ -239,7 +239,7 @@ export function HeroSection() {
             style={{ fontSize: "clamp(54px,10vw,136px)", lineHeight: 0.9, letterSpacing: "-0.04em" }}
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.9, delay: 0.15, ease: "easeOut" }}
+            transition={{ duration: 0.7, delay: 0.08, ease: "easeOut" }}
           >
             Seu site
           </motion.h1>
@@ -257,7 +257,7 @@ export function HeroSection() {
             }}
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 0.45 }}
-            transition={{ duration: 0.9, delay: 0.22, ease: "easeOut" }}
+            transition={{ duration: 0.7, delay: 0.14, ease: "easeOut" }}
           >
             é sua
           </motion.h1>
@@ -268,7 +268,7 @@ export function HeroSection() {
             style={{ fontSize: "clamp(54px,10vw,136px)", lineHeight: 0.9, letterSpacing: "-0.04em" }}
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.9, delay: 0.29, ease: "easeOut" }}
+            transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
           >
             identidade.
           </motion.h1>
@@ -277,9 +277,9 @@ export function HeroSection() {
         {/* Sub row */}
         <motion.div
           className="flex flex-col md:flex-row md:items-end justify-between gap-8 mt-14 pointer-events-auto"
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.55, ease: "easeOut" }}
+          transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
         >
           <p className="text-base md:text-lg text-muted-foreground max-w-md leading-relaxed">
             Construo sites, software e plataformas que pertencem a você. Código-fonte

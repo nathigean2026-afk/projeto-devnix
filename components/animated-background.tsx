@@ -40,8 +40,13 @@ export function AnimatedBackground() {
       particlesRef.current = createParticles(w, h)
     }
 
+    // Menos partículas em mobile para reduzir carga no thread principal
+    const isMobile = () => window.innerWidth < 768
+    const PARTICLE_COUNT_DESKTOP = 180
+    const PARTICLE_COUNT_MOBILE = 70
+
     const createParticles = (width: number, height: number): Particle[] =>
-      Array.from({ length: 220 }, () => {
+      Array.from({ length: isMobile() ? PARTICLE_COUNT_MOBILE : PARTICLE_COUNT_DESKTOP }, () => {
         const x = Math.random() * width
         const y = Math.random() * height
         return {
@@ -110,16 +115,17 @@ export function AnimatedBackground() {
         ctx.fill()
       })
 
-      // Draw connections between nearby particles
+      // Draw connections between nearby particles — distância menor em mobile
       ctx.globalAlpha = 1
       const pts = particlesRef.current
+      const CONNECT_D2 = isMobile() ? 4000 : 8000
       for (let i = 0; i < pts.length; i++) {
         for (let j = i + 1; j < pts.length; j++) {
           const dx = pts[i].x - pts[j].x
           const dy = pts[i].y - pts[j].y
           const d = dx * dx + dy * dy
-          if (d < 8000) {
-            const alpha = (1 - d / 8000) * (isDark ? 0.07 : 0.05)
+          if (d < CONNECT_D2) {
+            const alpha = (1 - d / CONNECT_D2) * (isDark ? 0.07 : 0.05)
             ctx.beginPath()
             ctx.moveTo(pts[i].x, pts[i].y)
             ctx.lineTo(pts[j].x, pts[j].y)
@@ -149,6 +155,7 @@ export function AnimatedBackground() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 z-0 pointer-events-none"
+      style={{ willChange: "transform" }}
       aria-hidden="true"
     />
   )

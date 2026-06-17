@@ -55,7 +55,7 @@
   --secondary: #1a1a1a;
   --secondary-foreground: #f2f2f2;
   --muted: #1a1a1a;
-  --muted-foreground: #707070;
+  --muted-foreground: #888888;
   --accent: #1a1a1a;
   --accent-foreground: #f2f2f2;
   --destructive: oklch(0.65 0.2 22);
@@ -427,24 +427,23 @@
 }
 
 /* ─── COSMIC TRANSITION ─────────────────────────────────── */
-/* Section reveal with wormhole/black-hole scale effect */
+/* Section reveal com efeito suave — apenas opacity+translateY (compositor-only) */
 .cosmic-section {
   --cosmic-progress: 0;
 }
 @keyframes wormhole-in {
-  0%   { opacity: 0; transform: scale(0.82) translateY(40px); filter: blur(12px); }
-  60%  { opacity: 1; filter: blur(0px); }
+  0%   { opacity: 0; transform: scale(0.95) translateY(24px); }
   100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 @keyframes stellar-in {
-  0%   { opacity: 0; transform: scale(1.08) translateY(-20px); filter: blur(6px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
+  0%   { opacity: 0; transform: translateY(-16px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 .reveal-wormhole {
-  animation: wormhole-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: wormhole-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .reveal-stellar {
-  animation: stellar-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: stellar-in 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* ─── STAR RING ─────────────────────────────────────────── */
