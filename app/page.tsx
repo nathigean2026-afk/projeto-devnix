@@ -13,8 +13,11 @@ import { Footer } from "@/components/footer"
 import { AnimatedBackground } from "@/components/animated-background"
 import { CustomCursor } from "@/components/custom-cursor"
 import { CosmicReveal } from "@/components/cosmic-reveal"
+import { getProjects } from "@/app/actions/projects"
 
-export default function Home() {
+export default async function Home() {
+  const projects = await getProjects()
+
   return (
     <>
       <AnimatedBackground />
@@ -32,7 +35,7 @@ export default function Home() {
           <ProcessSection />
         </CosmicReveal>
         <CosmicReveal delay={0}>
-          <ProjectsSection />
+          <ProjectsSection projects={projects} />
         </CosmicReveal>
         <CosmicReveal delay={0}>
           <GlossaryPreview />

@@ -4,15 +4,14 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, ArrowRight, ExternalLink } from "lucide-react"
 import Link from "next/link"
-import { projects } from "@/lib/projects-data"
+import type { ProjectRow } from "@/lib/db/schema"
 import { ProjectCover } from "@/components/projects-section"
 
-// Unique categories
 const ALL = "Todos"
-const categories = [ALL, ...Array.from(new Set(projects.map((p) => p.category)))]
 
-export function ProjectsGallery() {
+export function ProjectsGallery({ projects }: { projects: ProjectRow[] }) {
   const [active, setActive] = useState(ALL)
+  const categories = [ALL, ...Array.from(new Set(projects.map((p) => p.category)))]
 
   const filtered =
     active === ALL ? projects : projects.filter((p) => p.category === active)
@@ -135,7 +134,7 @@ export function ProjectsGallery() {
 
                   {/* Stack */}
                   <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
-                    {p.tech.map((t) => (
+                    {(p.tech as string[]).map((t) => (
                       <span
                         key={t}
                         className="label-sm border border-border px-2 py-0.5 rounded text-muted-foreground font-mono"

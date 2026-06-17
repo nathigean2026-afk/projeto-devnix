@@ -2,9 +2,9 @@
 
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
-import { ArrowRight, ExternalLink } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import Link from "next/link"
-import { projects } from "@/lib/projects-data"
+import type { ProjectRow } from "@/lib/db/schema"
 
 const containerVariants = {
   hidden: {},
@@ -125,7 +125,7 @@ function ProjectCover({ cover, title }: { cover: string; title: string }) {
 // Show first 4 on homepage
 const PREVIEW_COUNT = 4
 
-export function ProjectsSection() {
+export function ProjectsSection({ projects = [] }: { projects?: ProjectRow[] }) {
   const ref = useRef<HTMLElement>(null)
   const inView = useInView(ref, { once: true, margin: "-80px" })
   const preview = projects.slice(0, PREVIEW_COUNT)
@@ -207,7 +207,7 @@ export function ProjectsSection() {
                 <h3 className="text-sm font-semibold text-foreground">{p.title}</h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
                 <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
-                  {p.tech.map((t) => (
+                  {(p.tech as string[]).map((t) => (
                     <span
                       key={t}
                       className="label-sm border border-border px-2 py-0.5 rounded text-muted-foreground font-mono"

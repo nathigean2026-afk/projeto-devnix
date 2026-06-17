@@ -293,7 +293,7 @@ export function ProjectDetailClient({ project, allProjects = [] }: { project: Pr
                   <span className="label-sm text-muted-foreground uppercase tracking-wider" style={{ fontSize: "9px" }}>Resultados</span>
                 </div>
                 <ul className="flex flex-col gap-3">
-                  {project.results.map((r) => (
+                  {results.map((r) => (
                     <li key={r} className="flex items-start gap-2.5">
                       <CheckCircle className="size-3.5 text-foreground opacity-50 mt-0.5 flex-shrink-0" />
                       <span className="text-sm text-muted-foreground leading-relaxed">{r}</span>
@@ -306,7 +306,7 @@ export function ProjectDetailClient({ project, allProjects = [] }: { project: Pr
         </section>
 
         {/* Screenshots */}
-        {project.screenshots && project.screenshots.length > 0 && (
+        {screenshots.length > 0 && (
           <section className="py-20 border-b border-border">
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
               <motion.div
@@ -324,7 +324,7 @@ export function ProjectDetailClient({ project, allProjects = [] }: { project: Pr
                   O projeto por dentro
                 </h2>
               </motion.div>
-              <ScreenshotGallery screenshots={project.screenshots} />
+              <ScreenshotGallery screenshots={screenshots} />
             </div>
           </section>
         )}
@@ -340,7 +340,7 @@ export function ProjectDetailClient({ project, allProjects = [] }: { project: Pr
             >
               <p className="label-sm text-muted-foreground mb-6">Stack utilizada</p>
               <div className="flex flex-wrap gap-2">
-                {project.stack.map((s) => (
+                {stack.map((s) => (
                   <span key={s}
                     className="px-4 py-2 rounded-xl border border-border text-sm text-foreground font-mono"
                     style={{ background: "var(--secondary)" }}>
