@@ -1,18 +1,22 @@
 "use client"
 
-import { useRef, useEffect, useCallback, useState } from "react"
+import { useRef, useEffect, useCallback } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, ArrowDown } from "lucide-react"
 
 const TAGS = ["Sites", "Software", "E-commerce", "Plataformas", "Landing Pages", "Blogs", "Sistemas", "APIs"]
 
-// FloatingDots — só instanciado em desktop (>=768px)
+// FloatingDots — canvas interativo do hero
+// Desktop: 120 pontos com burst no clique + cursor crosshair
+// Mobile:  40 pontos estáticos, sem burst, inicia em 1500ms (pós-LCP)
 function FloatingDots() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const handleClick = useCallback((e: MouseEvent) => {
     const canvas = canvasRef.current
     if (!canvas) return
+    // Burst só no desktop (mobile não tem cursor)
+    if (window.innerWidth < 768) return
     const rect = canvas.getBoundingClientRect()
     const cx = e.clientX - rect.left
     const cy = e.clientY - rect.top
@@ -24,6 +28,12 @@ function FloatingDots() {
     if (!canvas) return
     const ctx = canvas.getContext("2d")
     if (!ctx) return
+
+    const mobile = window.innerWidth < 768
+    // Desktop: 120 pontos | Mobile: 40 pontos (leve)
+    const DOT_COUNT = mobile ? 40 : 120
+    // Desktop: início em 600ms | Mobile: início em 1500ms (bem pós-LCP)
+    const START_DELAY = mobile ? 1500 : 600
 
     let animId: number
     let W = 0, H = 0
@@ -38,8 +48,8 @@ function FloatingDots() {
     let dots: Dot[] = []
 
     function makeDot(x?: number, y?: number, burst = false): Dot {
-      const speed = burst ? Math.random() * 2.8 + 0.8 : (Math.random() - 0.5) * 0.32
       const angle = Math.random() * Math.PI * 2
+      const speed = burst ? Math.random() * 2.8 + 0.8 : (Math.random() - 0.5) * 0.32
       return {
         x: x ?? Math.random() * W,
         y: y ?? Math.random() * H,
@@ -58,10 +68,10 @@ function FloatingDots() {
       H = canvas!.offsetHeight
       canvas!.width = W
       canvas!.height = H
-      dots = Array.from({ length: 120 }, () => makeDot())
+      dots = Array.from({ length: DOT_COUNT }, () => makeDot())
     }
 
-    const MAX_DOTS = 300
+    const MAX_DOTS = mobile ? 80 : 300
     const burstPool: Dot[] = []
 
     ;(canvas as HTMLCanvasElement & { __inject?: (x: number, y: number) => void }).__inject = (x, y) => {
@@ -89,7 +99,6 @@ function FloatingDots() {
       }
     }
 
-    // Sem linhas de conexão — O(n²) removido, apenas pontos
     function draw() {
       ctx!.clearRect(0, 0, W, H)
       const isDark = document.documentElement.classList.contains("dark") ||
@@ -129,10 +138,7 @@ function FloatingDots() {
     }
 
     resize()
-    // Adiar início da animação para após o LCP — não bloquear o thread no carregamento
-    const startTimer = setTimeout(() => {
-      draw()
-    }, 600)
+    const startTimer = setTimeout(() => draw(), START_DELAY)
 
     const ro = new ResizeObserver(resize)
     ro.observe(canvas)
@@ -162,12 +168,6 @@ export function HeroSection() {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "25%"])
   const fadeOut = useTransform(scrollYProgress, [0, 0.7], [1, 0])
 
-  // Detecta se é desktop para renderizar o canvas de pontos
-  const [isDesktop, setIsDesktop] = useState(false)
-  useEffect(() => {
-    setIsDesktop(window.innerWidth >= 768)
-  }, [])
-
   return (
     <section
       ref={ref}
@@ -177,8 +177,8 @@ export function HeroSection() {
       {/* Grid pattern */}
       <div className="absolute inset-0 grid-pattern pointer-events-none" aria-hidden="true" style={{ zIndex: 0 }} />
 
-      {/* FloatingDots apenas no desktop — em mobile o canvas consome muito CPU */}
-      {isDesktop && <FloatingDots />}
+      {/* FloatingDots — desktop: 120 pontos + burst no clique | mobile: 40 pontos, início adiado */}
+      <FloatingDots />
 
       {/* Corner glows — substituído por versão CSS sem filter:blur */}
       <div
