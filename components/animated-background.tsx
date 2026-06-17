@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react"
 import { useTheme } from "next-themes"
 
+// Em mobile o canvas de partículas consome muito CPU/GPU.
+// Retornamos null abaixo para mobile — o grid-pattern do hero já fornece textura visual.
+
 interface Particle {
   x: number
   y: number
@@ -21,8 +24,12 @@ export function AnimatedBackground() {
   const rafRef = useRef<number>(0)
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
 
-  useEffect(() => setMounted(true), [])
+  useEffect(() => {
+    setMounted(true)
+    setIsDesktop(window.innerWidth >= 768)
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -150,6 +157,8 @@ export function AnimatedBackground() {
   }, [resolvedTheme])
 
   if (!mounted) return null
+  // Em mobile não renderiza o canvas — evita bloquear o thread principal
+  if (!isDesktop) return null
 
   return (
     <canvas

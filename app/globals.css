@@ -170,12 +170,35 @@
   text-transform: uppercase;
 }
 
-/* ─── GLASS ─────────────────────────────────────────────── */
+/* ─── HERO H1 SLIDE — animação CSS pura (não bloqueia LCP) ─ */
+/* Texto começa visível, desliza para cima levemente */
+@keyframes hero-slide-in {
+  from { opacity: 0.2; transform: translateY(24px); }
+  to   { opacity: 1;   transform: translateY(0); }
+}
+.hero-h1-slide {
+  animation: hero-slide-in 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ─── GLASS — sem backdrop-filter em mobile (causa re-composite) */
 .glass {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.07);
+}
+/* Em mobile, backdrop-filter causa re-composite caro em cada scroll */
+@media (max-width: 767px) {
+  .glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(8, 8, 8, 0.92);
+  }
+  .light .glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(250, 250, 250, 0.95);
+  }
 }
 .light .glass {
   background: rgba(255, 255, 255, 0.7);
@@ -367,6 +390,24 @@
 .light .neon-card::after,
 .light .neon-card-secondary::after { background: var(--background); }
 .light .neon-card-secondary::after { background: var(--secondary); }
+
+/* Em mobile, animações de borda conic-gradient consomem GPU — desativar */
+@media (max-width: 767px) {
+  .neon-card::before {
+    animation: none;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .neon-card-featured::before {
+    animation: none;
+    background: rgba(255, 255, 255, 0.25);
+  }
+  .light .neon-card::before {
+    background: rgba(0, 0, 0, 0.1);
+  }
+  .light .neon-card-featured::before {
+    background: rgba(0, 0, 0, 0.18);
+  }
+}
 
 @property --angle {
   syntax: '<angle>';
@@ -562,9 +603,21 @@
 }
 
 /* ─── HERO GLOW ─────────────────────────────────────────── */
+/* Substituído filter:blur(100px) por radial-gradient puro —
+   filter:blur em elementos grandes causa pintura custosa no mobile */
 .hero-glow {
   position: absolute;
   border-radius: 9999px;
-  filter: blur(100px);
   pointer-events: none;
+  /* Sem filter:blur — usa opacidade baixa para suavidade */
+}
+
+/* Versão simplificada sem filter usada no hero mobile */
+.hero-glow-simple {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 40% at 0% 0%, rgba(59, 130, 246, 0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 35% at 100% 100%, rgba(99, 102, 241, 0.03) 0%, transparent 70%);
 }

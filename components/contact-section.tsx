@@ -138,7 +138,7 @@ export function ContactSection() {
             >
               <div className="flex items-center gap-3 mb-8">
                 <div className="h-px w-8 bg-white/25" />
-                <span className="label-sm text-white/60">Contato</span>
+                <span className="label-sm text-white/80">Contato</span>
               </div>
 
               <h2
@@ -161,8 +161,8 @@ export function ContactSection() {
               {/* Channels card */}
               <div className="rounded-2xl border border-white/[0.08] overflow-hidden" style={{ background: "rgba(255,255,255,0.03)" }}>
                 <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-                  <span className="label-sm text-white/60">Canais rápidos</span>
-                  <span className="text-[9px] font-bold tracking-widest uppercase text-white/35">Resposta em &lt; 24h</span>
+                  <span className="label-sm text-white/80">Canais rápidos</span>
+                  <span className="text-[9px] font-bold tracking-widest uppercase text-white/75">Resposta em &lt; 24h</span>
                 </div>
 
                 <div className="divide-y divide-white/[0.05]">
@@ -179,7 +179,7 @@ export function ContactSection() {
                         {ch.icon}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[9px] font-bold tracking-widest uppercase text-white/50 mb-0.5">{ch.label}</div>
+                        <div className="text-[9px] font-bold tracking-widest uppercase text-white/70 mb-0.5">{ch.label}</div>
                         <div className="text-sm font-medium text-white/70 group-hover:text-white transition-colors truncate">{ch.value}</div>
                       </div>
                       <ArrowUpRight className="size-4 text-white/35 group-hover:text-white/60 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0" />
@@ -240,34 +240,34 @@ export function ContactSection() {
                       )}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-xs font-medium text-white/60">Nome *</label>
+                          <label className="text-xs font-medium text-white/80">Nome *</label>
                           <input type="text" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="João Silva" className={inputCls} />
                         </div>
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-xs font-medium text-white/60">E-mail *</label>
+                          <label className="text-xs font-medium text-white/80">E-mail *</label>
                           <input type="email" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="joao@empresa.com" className={inputCls} />
                         </div>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-xs font-medium text-white/60 flex items-center gap-1.5">
+                          <label className="text-xs font-medium text-white/80 flex items-center gap-1.5">
                             <Phone className="size-3" /> Telefone
                           </label>
                           <input type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="(11) 9999-9999" className={inputCls} />
                         </div>
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-xs font-medium text-white/60 flex items-center gap-1.5">
+                          <label className="text-xs font-medium text-white/80 flex items-center gap-1.5">
                             <MessageSquare className="size-3" /> WhatsApp
                           </label>
                           <input type="tel" value={form.whatsapp} onChange={e => setForm({ ...form, whatsapp: e.target.value })} placeholder="(11) 9 9999-9999" className={inputCls} />
                         </div>
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-medium text-white/60">Assunto *</label>
+                        <label className="text-xs font-medium text-white/80">Assunto *</label>
                         <input type="text" required value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} placeholder="Quero um site para minha empresa" className={inputCls} />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-medium text-white/60">Descreva seu projeto *</label>
+                        <label className="text-xs font-medium text-white/80">Descreva seu projeto *</label>
                         <textarea required value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="Quanto mais detalhes, melhor a proposta..." rows={5} className={`${inputCls} resize-none`} />
                       </div>
                       {msgStatus === "error" && (
@@ -303,20 +303,20 @@ export function ContactSection() {
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-xs font-medium text-white/60 flex items-center gap-1.5"><User className="size-3" /> Nome *</label>
+                          <label className="text-xs font-medium text-white/80 flex items-center gap-1.5"><User className="size-3" /> Nome *</label>
                           <input type="text" required value={sched.name} onChange={e => setSched({ ...sched, name: e.target.value })} placeholder="Seu nome" className={inputCls} />
                         </div>
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-xs font-medium text-white/60 flex items-center gap-1.5"><Mail className="size-3" /> E-mail *</label>
+                          <label className="text-xs font-medium text-white/80 flex items-center gap-1.5"><Mail className="size-3" /> E-mail *</label>
                           <input type="email" required value={sched.email} onChange={e => setSched({ ...sched, email: e.target.value })} placeholder="seu@email.com" className={inputCls} />
                         </div>
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-medium text-white/60 flex items-center gap-1.5"><MessageSquare className="size-3" /> WhatsApp (para confirmação)</label>
+                        <label className="text-xs font-medium text-white/80 flex items-center gap-1.5"><MessageSquare className="size-3" /> WhatsApp (para confirmação)</label>
                         <input type="tel" value={sched.whatsapp} onChange={e => setSched({ ...sched, whatsapp: e.target.value })} placeholder="(11) 9 9999-9999" className={inputCls} />
                       </div>
                       <div className="flex flex-col gap-2">
-                        <label className="text-xs font-medium text-white/60 flex items-center gap-1.5"><Calendar className="size-3" /> Escolha um dia *</label>
+                        <label className="text-xs font-medium text-white/80 flex items-center gap-1.5"><Calendar className="size-3" /> Escolha um dia *</label>
                         <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
                           {weekdays.map((d, i) => {
                             const sel = sched.date?.toDateString() === d.toDateString()
@@ -333,7 +333,7 @@ export function ContactSection() {
                         </div>
                       </div>
                       <div className="flex flex-col gap-2">
-                        <label className="text-xs font-medium text-white/60 flex items-center gap-1.5"><Clock className="size-3" /> Escolha um horário *</label>
+                        <label className="text-xs font-medium text-white/80 flex items-center gap-1.5"><Clock className="size-3" /> Escolha um horário *</label>
                         <div className="flex flex-wrap gap-2">
                           {TIMES.map((t) => {
                             const sel = sched.time === t
