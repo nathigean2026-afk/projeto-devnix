@@ -135,16 +135,16 @@ export function Navbar() {
         </div>
       </motion.header>
 
-      {/* Mobile overlay */}
+      {/* Mobile overlay — z-[60] to sit above the fixed header (z-50) */}
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-40 flex flex-col pt-20 px-8 pb-12"
+            className="fixed inset-0 z-[60] flex flex-col pt-20 px-8 pb-12 md:hidden"
             style={{ background: "var(--background)" }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
           >
             <nav className="flex flex-col mt-8">
               {links.map((l, i) =>
