@@ -94,64 +94,46 @@ export function AnimatedBackground() {
       window.addEventListener("mouseleave", onMouseLeave)
     }
 
-    // ── Click: espalha novos nós que crescem a teia ───────────────────
-    const onCanvasClick = (e: MouseEvent) => {
-      const rect  = canvas.getBoundingClientRect()
-      const cx    = e.clientX - rect.left
-      const cy    = e.clientY - rect.top
-      const count = mobile ? 5 : 14
+    // ── Função interna: gera nós que nascem no clique e derivam
+    //    para posições espalhadas — integrando-se à teia existente
+    function spawnWebNodes(cx: number, cy: number, count: number) {
       const slots = MAX_NODES - nodesRef.current.length
-      const add   = Math.min(count, slots)
-
+      const add   = Math.min(count, Math.max(slots, 0))
       for (let i = 0; i < add; i++) {
-        const angle = (i / count) * Math.PI * 2 + Math.random() * 0.6
-        const speed = mobile
-          ? 0.5 + Math.random() * 1.0
-          : 0.8 + Math.random() * 1.8
-
+        const angle = Math.random() * Math.PI * 2
+        // Destino final (originX/Y): espalhado ao redor do clique
+        const spread = CONNECT_D * (0.4 + Math.random() * 0.9)
+        const ox = Math.max(0, Math.min(w, cx + Math.cos(angle) * spread))
+        const oy = Math.max(0, Math.min(h, cy + Math.sin(angle) * spread))
+        // Velocidade inicial pequena em direção ao destino
+        const drift = 0.4 + Math.random() * 0.7
         nodesRef.current.push({
-          x: cx + Math.cos(angle) * 4,
-          y: cy + Math.sin(angle) * 4,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          size: 1.4 + Math.random() * 2.2,
-          opacity: 0.60 + Math.random() * 0.30,
-          originX: cx, originY: cy,
+          x: cx, y: cy,
+          vx: Math.cos(angle) * drift,
+          vy: Math.sin(angle) * drift,
+          size: 1.6 + Math.random() * 2.0,
+          opacity: 0.65 + Math.random() * 0.30,
+          originX: ox, originY: oy,
           spawnAlpha: 0,
-          glow: 0.8,
-          glowDir: 1,
+          glow: 1.0,   // começa com glow máximo
+          glowDir: -1, // vai diminuindo para nível normal
         })
       }
     }
+
+    // ── Click (desktop) ───────────────────────────────────────────────
+    const onCanvasClick = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect()
+      spawnWebNodes(e.clientX - rect.left, e.clientY - rect.top, 14)
+    }
     canvas.addEventListener("click", onCanvasClick)
 
-    // ── Touch: suporte a toque no mobile ─────────────────────────────
+    // ── Touch (mobile) ────────────────────────────────────────────────
     const onTouchEnd = (e: TouchEvent) => {
       if (e.changedTouches.length === 0) return
       const t    = e.changedTouches[0]
       const rect = canvas.getBoundingClientRect()
-      const cx   = t.clientX - rect.left
-      const cy   = t.clientY - rect.top
-      const count = 5
-      const slots = MAX_NODES - nodesRef.current.length
-      const add   = Math.min(count, slots)
-
-      for (let i = 0; i < add; i++) {
-        const angle = (i / count) * Math.PI * 2 + Math.random() * 0.6
-        const speed = 0.5 + Math.random() * 1.0
-        nodesRef.current.push({
-          x: cx + Math.cos(angle) * 4,
-          y: cy + Math.sin(angle) * 4,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          size: 1.4 + Math.random() * 2.0,
-          opacity: 0.60 + Math.random() * 0.30,
-          originX: cx, originY: cy,
-          spawnAlpha: 0,
-          glow: 0.8,
-          glowDir: 1,
-        })
-      }
+      spawnWebNodes(t.clientX - rect.left, t.clientY - rect.top, 6)
     }
     if (mobile) canvas.addEventListener("touchend", onTouchEnd, { passive: true })
 
@@ -238,26 +220,26 @@ export function AnimatedBackground() {
       // ── Nós com glow neon ────────────────────────────────────────────
       for (const p of nodes) {
         const a    = p.opacity * (isDark ? 0.85 : 0.65) * p.spawnAlpha
-        // Glow: intensidade varia com p.glow (pulso) + nós recém-clicados brilham mais
-        const glowIntensity = (0.4 + p.glow * 0.6) * p.spawnAlpha
-        const glowRadius    = p.size * (3 + p.glow * 6)
+        // Intensidade do glow pulsa com cada nó + recém-spawnados brilham no máximo
+        const glowIntensity = (0.55 + p.glow * 0.45) * p.spawnAlpha
+        const glowRadius    = p.size * (5 + p.glow * 9)
 
-        // Halo neon externo
+        // Halo neon externo — difuso e colorido
         ctx.shadowBlur  = glowRadius
-        ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},${(glowIntensity * (isDark ? 0.7 : 0.5)).toFixed(3)})`
+        ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},${(glowIntensity * (isDark ? 0.85 : 0.60)).toFixed(3)})`
 
-        // Núcleo do nó
+        // Anel externo translúcido (dá volume ao nó)
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
         ctx.fillStyle = `rgba(${rgb},${a.toFixed(3)})`
         ctx.fill()
 
-        // Ponto central brilhante (neon puro) — menor e mais intenso
-        ctx.shadowBlur  = p.size * 2
-        ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},${(glowIntensity * (isDark ? 0.9 : 0.7)).toFixed(3)})`
+        // Miolo neon puro — pequeno e ultra-brilhante
+        ctx.shadowBlur  = p.size * 4
+        ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},1)`
         ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size * 0.42, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${neon.r},${neon.g},${neon.b},${(glowIntensity * (isDark ? 0.65 : 0.45)).toFixed(3)})`
+        ctx.arc(p.x, p.y, p.size * 0.38, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(${neon.r},${neon.g},${neon.b},${(glowIntensity * (isDark ? 0.80 : 0.60)).toFixed(3)})`
         ctx.fill()
       }
 
