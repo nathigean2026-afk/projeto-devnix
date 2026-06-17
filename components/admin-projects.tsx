@@ -470,8 +470,66 @@ export function ProjectsAdmin({ initialProjects }: { initialProjects: ProjectRow
         </button>
       </div>
 
-      {/* Table */}
-      <div className="rounded-2xl border border-border overflow-hidden">
+      {/* Lista mobile: cards */}
+      <div className="flex flex-col gap-2 sm:hidden">
+        {projects.length === 0 && (
+          <p className="text-center py-12 text-sm text-muted-foreground">Nenhum projeto cadastrado ainda.</p>
+        )}
+        {projects.map((p) => (
+          <div
+            key={p.id}
+            className="rounded-xl border border-border p-3 flex items-center gap-3"
+          >
+            {/* Dot */}
+            <div
+              className="size-2.5 rounded-full shrink-0"
+              style={{ background: COVER_OPTIONS.find((c) => c.value === p.cover)?.color ?? "#888" }}
+            />
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm text-foreground truncate">{p.title}</p>
+              <p className="text-[11px] text-muted-foreground truncate">{p.category}</p>
+            </div>
+            {/* Status badge */}
+            <span className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+              p.published
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+            }`}>
+              <span className={`size-1.5 rounded-full ${p.published ? "bg-emerald-400" : "bg-zinc-500"}`} />
+              {p.published ? "Pub" : "Rascunho"}
+            </span>
+            {/* Action buttons */}
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => router.push(`/projetos/${p.slug}`)}
+                className="size-8 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
+                title="Visualizar"
+              >
+                <Eye className="size-3.5" />
+              </button>
+              <button
+                onClick={() => setModal({ mode: "edit", project: p })}
+                className="size-8 flex items-center justify-center rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400 hover:text-blue-300 transition-colors"
+                title="Editar"
+              >
+                <Pencil className="size-3.5" />
+              </button>
+              <button
+                onClick={() => handleDelete(p)}
+                disabled={isPending}
+                className="size-8 flex items-center justify-center rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:text-red-300 transition-colors disabled:opacity-40"
+                title="Excluir"
+              >
+                <Trash2 className="size-3.5" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Tabela desktop */}
+      <div className="hidden sm:block rounded-2xl border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
@@ -557,7 +615,7 @@ export function ProjectsAdmin({ initialProjects }: { initialProjects: ProjectRow
             )}
           </tbody>
         </table>
-      </div>
+      </div>{/* end tabela desktop */}
 
       {/* Modal */}
       <AnimatePresence>
