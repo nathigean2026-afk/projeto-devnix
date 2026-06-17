@@ -214,7 +214,7 @@ export function HeroSection() {
 
       <motion.div
         style={{ y, opacity: fadeOut }}
-        className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-20 w-full pointer-events-none"
+        className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-28 w-full pointer-events-none"
       >
         {/* Tag line */}
         <motion.div
@@ -319,31 +319,6 @@ export function HeroSection() {
               </div>
             ))}
           </div>
-        </motion.div>
-
-        {/* Stats strip */}
-        <motion.div
-          className="mt-14 grid grid-cols-3 divide-x divide-border border border-border rounded-2xl overflow-hidden"
-          style={{ background: "var(--card)" }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.05, ease: "easeOut" }}
-        >
-          {[
-            { n: "+50", label: "Projetos entregues" },
-            { n: "100%", label: "Código seu, sempre" },
-            { n: "+5", label: "Anos de experiência" },
-          ].map((s) => (
-            <div key={s.n} className="flex flex-col gap-1 px-6 py-5">
-              <span
-                className="font-black text-foreground"
-                style={{ fontSize: "clamp(26px,3.5vw,42px)", letterSpacing: "-0.04em", lineHeight: 1 }}
-              >
-                {s.n}
-              </span>
-              <span className="label-sm text-muted-foreground">{s.label}</span>
-            </div>
-          ))}
         </motion.div>
       </motion.div>
 
