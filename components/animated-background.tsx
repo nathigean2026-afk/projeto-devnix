@@ -57,7 +57,7 @@ export function AnimatedBackground() {
     const CONNECT_D2      = CONNECT_D * CONNECT_D
     const MAX_FREE        = mobile ? 16  : 30    // limite conservador de nós livres
     const SPAWN_PER_CLICK = mobile ? 5   : 7
-    const LINE_ALPHA_BASE = 0.35                 // alpha base das linhas (era 0.18 — muito escuro)
+    const LINE_ALPHA_BASE = 0.35                 // alpha base das linhas dos nós livres
     const REPEL_R         = 130
     const REPEL_F         = 4.0
     const FRICTION        = 0.88
@@ -253,15 +253,16 @@ export function AnimatedBackground() {
             const sa = Math.min(ni.spawnAlpha, nj.spawnAlpha)
             // Se pelo menos um dos nós é livre (clique), a linha fica mais visível
             const isFreeEdge = ni.free || nj.free
-            const baseAlpha  = isFreeEdge ? LINE_ALPHA_BASE : (isDark ? 0.18 : 0.12)
+            // Dark mode precisa de alpha maior: fundo preto "engole" linhas finas
+            const baseAlpha  = isFreeEdge ? LINE_ALPHA_BASE : (isDark ? 0.38 : 0.14)
             const distMx2    = (ni.x - mx) ** 2 + (ni.y - my) ** 2
-            const hover      = !mobile && distMx2 < (REPEL_R * 1.5) ** 2 ? 0.15 : 0
+            const hover      = !mobile && distMx2 < (REPEL_R * 1.5) ** 2 ? 0.18 : 0
             const alpha      = ratio * baseAlpha * sa + hover * ratio
             ctx.beginPath()
             ctx.moveTo(ni.x, ni.y)
             ctx.lineTo(nj.x, nj.y)
             ctx.strokeStyle = `rgba(${rgb},${alpha.toFixed(3)})`
-            ctx.lineWidth   = ratio * (isFreeEdge ? 0.90 : (isDark ? 0.85 : 0.70))
+            ctx.lineWidth   = ratio * (isFreeEdge ? 1.0 : (isDark ? 0.95 : 0.70))
             ctx.stroke()
           }
         }
@@ -269,27 +270,30 @@ export function AnimatedBackground() {
 
       // ── Nós com glow neon ────────────────────────────────────────────
       for (const p of drawNodes) {
-        const a    = p.opacity * (isDark ? 0.85 : 0.65) * p.spawnAlpha
-        // Intensidade do glow pulsa com cada nó + recém-spawnados brilham no máximo
-        const glowIntensity = (0.55 + p.glow * 0.45) * p.spawnAlpha
-        const glowRadius    = p.size * (5 + p.glow * 9)
+        const sa   = p.spawnAlpha
+        // Pulso do glow: oscila entre 0.4 e 1.0
+        const pulse = 0.40 + p.glow * 0.60
 
-        // Halo neon externo — difuso e colorido
-        ctx.shadowBlur  = glowRadius
-        ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},${(glowIntensity * (isDark ? 0.85 : 0.60)).toFixed(3)})`
+        // ── Camada 1: halo difuso externo (grande, suave)
+        // Simula o box-shadow externo dos neon-cards
+        const haloR    = p.size * (8 + p.glow * 10)                  // 8-18× o raio
+        const haloA    = pulse * sa * (isDark ? 0.55 : 0.35)
+        ctx.shadowBlur  = haloR
+        ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},${haloA.toFixed(3)})`
 
-        // Anel externo translúcido (dá volume ao nó)
+        // Corpo branco/preto do nó — circulo principal
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${rgb},${a.toFixed(3)})`
+        ctx.fillStyle = `rgba(${rgb},${(p.opacity * (isDark ? 0.90 : 0.70) * sa).toFixed(3)})`
         ctx.fill()
 
-        // Miolo neon puro — pequeno e ultra-brilhante
-        ctx.shadowBlur  = p.size * 4
-        ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},1)`
+        // ── Camada 2: miolo neon concentrado (pequeno, ultra-brilhante)
+        // Simula o inner glow dos cards: 0 0 14px rgba(neon, 0.28)
+        ctx.shadowBlur  = p.size * 5
+        ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},${(pulse * sa * (isDark ? 1.0 : 0.75)).toFixed(3)})`
         ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size * 0.38, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${neon.r},${neon.g},${neon.b},${(glowIntensity * (isDark ? 0.80 : 0.60)).toFixed(3)})`
+        ctx.arc(p.x, p.y, p.size * 0.40, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(${neon.r},${neon.g},${neon.b},${(pulse * sa * (isDark ? 0.90 : 0.70)).toFixed(3)})`
         ctx.fill()
       }
 
