@@ -6,9 +6,13 @@ import './globals.css'
 const inter = Inter({
   variable: '--font-inter',
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  // Apenas os pesos realmente usados — reduz payload de fonte
+  weight: ['400', '500', '700', '800', '900'],
   display: 'swap',
   preload: true,
+  // fallback reduz CLS enquanto a fonte carrega
+  fallback: ['system-ui', '-apple-system', 'sans-serif'],
+  adjustFontFallback: true,
 })
 
 const geistMono = Geist_Mono({
@@ -75,6 +79,11 @@ export default function RootLayout({
       className={`${inter.variable} ${geistMono.variable} bg-background`}
       suppressHydrationWarning
     >
+      <head>
+        {/* Preconnect para fontes — elimina round-trip extra no LCP */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body className="font-sans antialiased bg-background text-foreground noise-overlay">
         <Providers>
           {children}
