@@ -3,6 +3,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  experimental: {
+    // Tree-shake apenas os ícones e variants de motion usados — reduz JS ~30%
+    optimizePackageImports: ["lucide-react", "framer-motion"],
+  },
   images: {
     // Habilita otimização de imagens (compressão, WebP, AVIF, lazy-load)
     unoptimized: false,
