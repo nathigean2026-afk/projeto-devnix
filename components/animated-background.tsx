@@ -52,14 +52,15 @@ export function AnimatedBackground() {
     const mobile = window.innerWidth < 768
 
     // ── Configuração por device ───────────────────────────────────────
-    const NODE_COUNT  = mobile ? 45  : 120
-    const CONNECT_D   = mobile ? 90  : 145
-    const CONNECT_D2  = CONNECT_D * CONNECT_D
-    const MAX_NODES   = mobile ? 110 : 280
-    const REPEL_R     = 140            // raio de repulsão do hover
-    const REPEL_F     = 4.5            // força da repulsão
-    const FRICTION    = 0.88
-    const RETURN_SPD  = 0.025          // velocidade de retorno à origem
+    const NODE_COUNT    = mobile ? 35  : 70    // nós base da teia
+    const CONNECT_D     = mobile ? 90  : 130
+    const CONNECT_D2    = CONNECT_D * CONNECT_D
+    const MAX_FREE      = mobile ? 20  : 40    // máx nós livres (clique) simultâneos
+    const SPAWN_PER_CLICK = mobile ? 5 : 8     // nós por clique
+    const REPEL_R       = 130
+    const REPEL_F       = 4.0
+    const FRICTION      = 0.88
+    const RETURN_SPD    = 0.025
 
     let w = 0, h = 0
 
@@ -100,32 +101,36 @@ export function AnimatedBackground() {
     // ── Função interna: gera nós que nascem no clique e derivam
     //    para posições espalhadas — integrando-se à teia existente
     function spawnWebNodes(cx: number, cy: number, count: number) {
-      // Limite baseado apenas nos nós livres vivos — nós base não contam
+      // Conta apenas nós livres com vida restante
       const freeAlive = nodesRef.current.filter((n) => n.free && n.life > 0).length
-      const slots = MAX_NODES - freeAlive
-      const add   = Math.min(count, Math.max(slots, 0))
+      // Se já atingiu o limite, os mais antigos vão sumindo naturalmente —
+      // mas forçamos novos slots acelerando o fade dos mais velhos
+      if (freeAlive >= MAX_FREE) {
+        // Acelera fade-out dos mais velhos (menor vida restante)
+        const freeNodes = nodesRef.current
+          .filter((n) => n.free && n.life > 0)
+          .sort((a, b) => a.life - b.life)
+        // Mata os 'count' mais velhos imediatamente
+        freeNodes.slice(0, count).forEach((n) => { n.life = Math.min(n.life, 60) })
+      }
+      const add = Math.min(count, MAX_FREE - Math.max(0, freeAlive - count))
 
       for (let i = 0; i < add; i++) {
-        // Nasce em ângulo distribuído + ruído, dentro do raio de conexão
-        // → todos dentro de CONNECT_D entre si = linhas visíveis desde o frame 1
-        const angle  = (i / add) * Math.PI * 2 + (Math.random() - 0.5) * 0.8
-        const birthR = CONNECT_D * (0.08 + Math.random() * 0.70)
+        const angle  = (i / Math.max(add, 1)) * Math.PI * 2 + (Math.random() - 0.5) * 0.8
+        const birthR = CONNECT_D * (0.08 + Math.random() * 0.65)
         const bx = Math.max(8, Math.min(w - 8, cx + Math.cos(angle) * birthR))
         const by = Math.max(8, Math.min(h - 8, cy + Math.sin(angle) * birthR))
 
-        // Velocidade: drift para longe do centro do clique — nó se espalha
-        // e depois para (friction 0.97). Velocidade alta o suficiente para
-        // percorrer CONNECT_D*0.5 antes de parar (~60 frames).
-        const spd = mobile ? 0.55 : 0.85
+        const spd = mobile ? 0.55 : 0.80
         const vx  = Math.cos(angle) * spd * (0.5 + Math.random())
         const vy  = Math.sin(angle) * spd * (0.5 + Math.random())
 
-        // vida entre 8s e 20s @ 60fps antes do fade-out
-        const life = 480 + Math.random() * 720
+        // Vida de 4-8s @ 60fps — mais curto e controlado
+        const life = 240 + Math.random() * 240
         nodesRef.current.push({
           x: bx, y: by, vx, vy,
-          size:       1.6 + Math.random() * 2.0,
-          opacity:    0.60 + Math.random() * 0.35,
+          size:       1.4 + Math.random() * 1.8,
+          opacity:    0.55 + Math.random() * 0.30,
           originX:    -1,
           originY:    -1,
           spawnAlpha: 0.6,
@@ -147,7 +152,7 @@ export function AnimatedBackground() {
     const onWindowClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       if (target.closest("a, button, input, textarea, select, [role=button]")) return
-      spawnWebNodes(e.clientX, e.clientY, 14)
+      spawnWebNodes(e.clientX, e.clientY, SPAWN_PER_CLICK)
     }
     window.addEventListener("click", onWindowClick)
 
@@ -157,7 +162,7 @@ export function AnimatedBackground() {
       const target = e.target as HTMLElement
       if (target.closest("a, button, input, textarea, select, [role=button]")) return
       const t = e.changedTouches[0]
-      spawnWebNodes(t.clientX, t.clientY, 6)
+      spawnWebNodes(t.clientX, t.clientY, SPAWN_PER_CLICK)
     }
     if (mobile) window.addEventListener("touchend", onTouchEnd, { passive: true })
 
@@ -197,9 +202,12 @@ export function AnimatedBackground() {
         }
 
         if (p.free) {
-          // Decrementa vida e aplica fade-out nos últimos 120 frames
+          // Decrementa vida; fade-out nos últimos 30% da vida total
           p.life -= 1
-          if (p.life < 120) p.spawnAlpha = Math.max(0, p.life / 120)
+          const fadeThresh = (240 + 240) * 0.30  // ~144 frames
+          if (p.life < fadeThresh) {
+            p.spawnAlpha = Math.max(0, p.life / fadeThresh)
+          }
           // Fricção suave — nó flutua livre sem retorno à origem
           p.vx *= 0.97
           p.vy *= 0.97
@@ -231,8 +239,8 @@ export function AnimatedBackground() {
 
       for (let i = 0; i < drawNodes.length; i++) {
         for (let j = i + 1; j < drawNodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x
-          const dy = nodes[i].y - nodes[j].y
+          const dx = drawNodes[i].x - drawNodes[j].x
+          const dy = drawNodes[i].y - drawNodes[j].y
           const d2 = dx * dx + dy * dy
           if (d2 < CONNECT_D2) {
             const ratio = 1 - d2 / CONNECT_D2
