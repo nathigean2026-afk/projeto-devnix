@@ -219,23 +219,25 @@
   background-size: 64px 64px;
 }
 
-/* ─── MOBILE GLOBAL GRID ────────────────────────────────── */
-/* Em mobile, o canvas de partículas está desativado.
-   Usamos o mesmo grid-pattern como background fixo do body
-   para manter a textura visual nos dois temas. */
+/* ─── MOBILE BACKGROUND ─────────────────────────────────── */
+/* Canvas desativado em mobile — background CSS puro (zero JS/GPU).
+   Dark: grid com linhas brancas levemente visíveis.
+   Light: apenas quadrados muito sutis (igual à imagem de referência). */
 @media (max-width: 767px) {
+  /* Dark (default): linhas brancas no grid — contraste suficiente no fundo escuro */
   body {
     background-image:
-      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
     background-size: 64px 64px;
     background-attachment: local;
   }
-  /* next-themes aplica a classe "light" no <html> */
+  /* Light: linhas mais finas e suaves — quadrados discretos como na referência */
   html.light body {
     background-image:
-      linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+      linear-gradient(rgba(0, 0, 0, 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.055) 1px, transparent 1px);
+    background-size: 64px 64px;
   }
 }
 
@@ -507,7 +509,7 @@
   animation: stellar-in 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* ─── STAR RING ─────────────────────────────────────────── */
+/* ─── STAR RING ────────────────────────────────────��────── */
 @keyframes star-ring {
   0%   { transform: rotate(0deg) scale(0.5); opacity: 0; }
   20%  { opacity: 1; }
