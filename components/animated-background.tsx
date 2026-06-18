@@ -24,6 +24,8 @@ interface Node {
   // brilho neon individual (0→1), pulsa levemente
   glow: number
   glowDir: number
+  // se é um nó spawnado pelo clique (física diferente)
+  free?: boolean
 }
 
 // Cores neon: dark = azul, light = verde (mesmas dos neon-cards)
@@ -101,28 +103,28 @@ export function AnimatedBackground() {
       const add   = Math.min(count, Math.max(slots, 0))
 
       for (let i = 0; i < add; i++) {
-        // Nasce espalhado ao redor do clique dentro do raio de conexão
-        const angle  = (i / add) * Math.PI * 2 + (Math.random() - 0.5) * 1.2
-        const birthR = CONNECT_D * (0.1 + Math.random() * 0.8)
-        const bx     = Math.max(8, Math.min(w - 8, cx + Math.cos(angle) * birthR))
-        const by     = Math.max(8, Math.min(h - 8, cy + Math.sin(angle) * birthR))
+        // Nasce em ângulo distribuído + ruído, dentro do raio de conexão
+        // → todos dentro de CONNECT_D entre si = linhas visíveis desde o frame 1
+        const angle  = (i / add) * Math.PI * 2 + (Math.random() - 0.5) * 0.8
+        const birthR = CONNECT_D * (0.08 + Math.random() * 0.70)
+        const bx = Math.max(8, Math.min(w - 8, cx + Math.cos(angle) * birthR))
+        const by = Math.max(8, Math.min(h - 8, cy + Math.sin(angle) * birthR))
 
-        // Velocidade igual aos nós base — flutuação lenta e livre
-        const spd = mobile ? 0.18 : 0.26
+        // Velocidade: leve drift aleatório para se espalhar suavemente
+        const spd = mobile ? 0.15 : 0.22
         const vx  = (Math.random() - 0.5) * spd * 2
         const vy  = (Math.random() - 0.5) * spd * 2
 
-        // originX/Y fora da tela → RETURN_SPD nunca puxa de volta
-        // O nó flutua completamente livre, como qualquer nó estável da teia
         nodesRef.current.push({
           x: bx, y: by, vx, vy,
-          size:       1.4 + Math.random() * 2.2,
-          opacity:    0.50 + Math.random() * 0.40,
-          originX:    -9999,
-          originY:    -9999,
-          spawnAlpha: 0,
+          size:       1.6 + Math.random() * 2.0,
+          opacity:    0.55 + Math.random() * 0.35,
+          originX:    -1,   // -1 = nó livre, sem RETURN_SPD
+          originY:    -1,
+          spawnAlpha: 0.4,  // começa visível — linha aparece no frame 1
           glow:       1.0,
           glowDir:    -1,
+          free:       true,
         })
       }
     }
@@ -161,12 +163,17 @@ export function AnimatedBackground() {
         if (p.glow <= 0) { p.glow = 0; p.glowDir =  1 }
 
         if (p.spawnAlpha < 1) {
-          // Fade-in: 0→1 em ~25 frames. Nó flutua livre durante o fade.
+          // Fade-in rápido: 0.4→1 em ~15 frames
           p.spawnAlpha = Math.min(p.spawnAlpha + 0.04, 1)
-          p.vx *= FRICTION
-          p.vy *= FRICTION
+        }
+
+        if (p.free) {
+          // Nó spawnado pelo clique: flutua completamente livre
+          // Fricção suave para se espalhar por mais tempo antes de parar
+          p.vx *= 0.97
+          p.vy *= 0.97
         } else {
-          // Nó estável: repulsão hover + retorno à origem (só se tiver originX válido)
+          // Nó base: repulsão hover + retorno à origem
           if (!mobile) {
             const dx = p.x - mx
             const dy = p.y - my
@@ -178,12 +185,8 @@ export function AnimatedBackground() {
               p.vy += (dy / d) * force
             }
           }
-          // Só aplica RETURN_SPD se tiver originX/Y válido (nós base)
-          // Nós spawnados têm originX = -9999 e flutuam completamente livres
-          if (p.originX > 0 && p.originY > 0) {
-            p.vx += (p.originX - p.x) * RETURN_SPD
-            p.vy += (p.originY - p.y) * RETURN_SPD
-          }
+          p.vx += (p.originX - p.x) * RETURN_SPD
+          p.vy += (p.originY - p.y) * RETURN_SPD
           p.vx *= FRICTION
           p.vy *= FRICTION
         }
@@ -210,7 +213,8 @@ export function AnimatedBackground() {
           const d2 = dx * dx + dy * dy
           if (d2 < CONNECT_D2) {
             const ratio = 1 - d2 / CONNECT_D2
-            const sa    = nodes[i].spawnAlpha * nodes[j].spawnAlpha
+            // Usa min() em vez de produto: linha aparece assim que UM dos nós existe
+            const sa    = Math.min(nodes[i].spawnAlpha, nodes[j].spawnAlpha)
             // Linhas mais próximas do cursor ficam levemente mais brilhantes
             const distMx2 = (nodes[i].x - mx) ** 2 + (nodes[i].y - my) ** 2
             const hover   = !mobile && distMx2 < (REPEL_R * 1.5) ** 2
