@@ -131,21 +131,29 @@ export function AnimatedBackground() {
       }
     }
 
-    // ── Click (desktop) ───────────────────────────────────────────────
-    const onCanvasClick = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect()
-      spawnWebNodes(e.clientX - rect.left, e.clientY - rect.top, 14)
-    }
-    canvas.addEventListener("click", onCanvasClick)
+    // Expõe spawn globalmente — facilita testes e integração futura
+    ;(window as typeof window & { __spawnWeb?: (x: number, y: number, n: number) => void }).__spawnWeb = spawnWebNodes
 
-    // ── Touch (mobile) ────────────────────────────────────────────────
+    // ── Click no WINDOW (não no canvas) ──────────────────────────────
+    // O canvas fica em z-0, elementos HTML ficam na frente.
+    // Escutando window garante que qualquer click na página dispara.
+    // Ignora clicks em inputs, botões e links para não interferir com UI.
+    const onWindowClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (target.closest("a, button, input, textarea, select, [role=button]")) return
+      spawnWebNodes(e.clientX, e.clientY, 14)
+    }
+    window.addEventListener("click", onWindowClick)
+
+    // ── Touch no WINDOW (mobile) ──────────────────────────────────────
     const onTouchEnd = (e: TouchEvent) => {
       if (e.changedTouches.length === 0) return
-      const t    = e.changedTouches[0]
-      const rect = canvas.getBoundingClientRect()
-      spawnWebNodes(t.clientX - rect.left, t.clientY - rect.top, 6)
+      const target = e.target as HTMLElement
+      if (target.closest("a, button, input, textarea, select, [role=button]")) return
+      const t = e.changedTouches[0]
+      spawnWebNodes(t.clientX, t.clientY, 6)
     }
-    if (mobile) canvas.addEventListener("touchend", onTouchEnd, { passive: true })
+    if (mobile) window.addEventListener("touchend", onTouchEnd, { passive: true })
 
     // ── Loop principal ────────────────────────────────────────────────
     const draw = () => {
@@ -266,20 +274,20 @@ export function AnimatedBackground() {
       rafRef.current = requestAnimationFrame(draw)
     }
 
-    // Adiamento pós-LCP: desktop 400ms | mobile 1800ms
-    const delay = mobile ? 1800 : 400
-    const timer = setTimeout(() => { rafRef.current = requestAnimationFrame(draw) }, delay)
+    // Inicia imediatamente — delay remvido pois causava canvas branco
+    rafRef.current = requestAnimationFrame(draw)
+    const timer = 0
 
     return () => {
-      clearTimeout(timer)
+      // timer = 0, nada a limpar
       cancelAnimationFrame(rafRef.current)
       window.removeEventListener("resize", resize)
       if (!mobile) {
         window.removeEventListener("mousemove",  onMouseMove)
         window.removeEventListener("mouseleave", onMouseLeave)
       }
-      canvas.removeEventListener("click",    onCanvasClick)
-      if (mobile) canvas.removeEventListener("touchend", onTouchEnd)
+      window.removeEventListener("click",    onWindowClick)
+      if (mobile) window.removeEventListener("touchend", onTouchEnd)
     }
   }, [mounted, resolvedTheme])
 
