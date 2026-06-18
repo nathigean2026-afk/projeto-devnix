@@ -9,10 +9,11 @@ interface CosmicRevealProps {
   delay?: number
 }
 
-// Em mobile (pointer:coarse) usa CSS animation puro — zero framer-motion, zero listeners JS.
-// Em desktop usa framer-motion com IntersectionObserver.
+// Mobile-first: começa como true (CSS puro) e só troca para false no desktop.
+// CosmicReveal é usado abaixo do fold — mobile-first garante zero framer-motion
+// no primeiro render em dispositivos touch (sem TBT extra no load).
 function useMobile() {
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(true)
   useEffect(() => {
     setIsMobile(window.matchMedia("(pointer: coarse)").matches)
   }, [])
