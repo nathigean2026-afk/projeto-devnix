@@ -3,7 +3,7 @@
 import { db } from "@/lib/db"
 import { projects_db, type NewProject } from "@/lib/db/schema"
 import { auth } from "@/lib/auth"
-import { eq, desc } from "drizzle-orm"
+import { eq, desc, asc } from "drizzle-orm"
 import { headers } from "next/headers"
 import { revalidatePath } from "next/cache"
 
@@ -14,7 +14,18 @@ async function requireAdmin() {
 }
 
 export async function getProjects() {
-  return db.select().from(projects_db).orderBy(desc(projects_db.createdAt))
+  return db.select().from(projects_db).orderBy(asc(projects_db.sortOrder), desc(projects_db.createdAt))
+}
+
+export async function reorderProjects(items: { id: number; sortOrder: number }[]) {
+  await requireAdmin()
+  await Promise.all(
+    items.map(({ id, sortOrder }) =>
+      db.update(projects_db).set({ sortOrder }).where(eq(projects_db.id, id))
+    )
+  )
+  revalidatePath("/projetos")
+  revalidatePath("/admin")
 }
 
 export async function getProjectBySlug(slug: string) {

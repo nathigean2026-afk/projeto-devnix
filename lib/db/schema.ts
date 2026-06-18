@@ -104,6 +104,7 @@ export const projects_db = pgTable("projects", {
   // layout hint for homepage grid
   col: text("col").default(""),
   published: boolean("published").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 })
