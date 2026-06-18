@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from "react"
 import { useTheme } from "next-themes"
 
-// ─── Efeito de teia/grafo interativo (desktop-only) ─────────────────────────
-// Mobile usa background CSS puro (ver globals.css .mobile-bg)
+// ─── Efeito de teia/grafo interativo (desktop-only) — v4 ────────────────────
+// Mobile: canvas NUNCA renderiza — background CSS puro no globals.css
+// isMobile começa como TRUE → componente retorna null antes de qualquer canvas
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface Node {
