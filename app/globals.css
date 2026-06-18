@@ -240,14 +240,14 @@
 }
 
 /* ─── METEOROS MOBILE ────────────────────────────────────── */
-/* Cometas CSS puros — zero canvas, zero JS canvas, zero RAF.
-   Cada meteoro é um <span> absoluto animado por @keyframes compositor-only
-   (transform + opacity = GPU layer sem repaint). */
+/* Lixo espacial: fragmentos pequenos e sutis caindo em diagonal.
+   Cor: laranja #f97316 — mesma dos ícones dos cards de serviço.
+   CSS puro: transform+opacity compositor-only, zero repaint. */
 @keyframes meteor-fall {
-  0%   { transform: translateX(0) translateY(-60px) rotate(-35deg); opacity: 0; }
-  8%   { opacity: 1; }
-  90%  { opacity: 0.7; }
-  100% { transform: translateX(280px) translateY(700px) rotate(-35deg); opacity: 0; }
+  0%   { transform: translateX(0) translateY(-10px) rotate(-40deg); opacity: 0; }
+  7%   { opacity: 0.6; }
+  86%  { opacity: 0.3; }
+  100% { transform: translateX(200px) translateY(600px) rotate(-40deg); opacity: 0; }
 }
 
 .meteor-container {
@@ -258,90 +258,74 @@
   overflow: hidden;
 }
 
-/* Meteoro base: linha com glow neon */
+/* Fragmento base: fino, curto — lixo espacial, não cometa dramático */
 .meteor {
   position: absolute;
-  top: 0;
-  width: 1.5px;
+  top: -10px;
+  width: 1px;
   border-radius: 9999px;
   transform-origin: top left;
   will-change: transform, opacity;
   opacity: 0;
   animation: meteor-fall linear infinite;
-}
-
-/* Cauda: gradient da cor neon → transparente */
-/* Dark: azul neon */
-.meteor::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-}
-
-/* Variações: posição horizontal, altura, velocidade e fase inicial.
-   Delays negativos = meteor já está no meio da animação ao carregar
-   → sempre há 2-3 meteoros visíveis em qualquer momento */
-.meteor:nth-child(1)  { left:  8%;  height: 90px;  animation-duration: 5.2s; animation-delay: -1.2s; }
-.meteor:nth-child(2)  { left: 22%;  height: 70px;  animation-duration: 6.8s; animation-delay: -3.4s; }
-.meteor:nth-child(3)  { left: 38%;  height: 110px; animation-duration: 4.9s; animation-delay: -0.9s; }
-.meteor:nth-child(4)  { left: 55%;  height: 65px;  animation-duration: 7.4s; animation-delay: -5.1s; }
-.meteor:nth-child(5)  { left: 68%;  height: 95px;  animation-duration: 5.7s; animation-delay: -2.2s; }
-.meteor:nth-child(6)  { left: 80%;  height: 80px;  animation-duration: 8.1s; animation-delay: -0.5s; }
-.meteor:nth-child(7)  { left: 14%;  height: 55px;  animation-duration: 6.3s; animation-delay: -4.7s; }
-.meteor:nth-child(8)  { left: 45%;  height: 100px; animation-duration: 5.5s; animation-delay: -1.8s; }
-.meteor:nth-child(9)  { left: 72%;  height: 75px;  animation-duration: 7.9s; animation-delay: -6.3s; }
-
-/* ── Dark mode (default): azul neon */
-.meteor {
+  /* laranja neon — mesmo tom do ícone dos cards */
   background: linear-gradient(
     to bottom,
-    rgba(59, 130, 246, 0.0),
-    rgba(59, 130, 246, 0.95) 25%,
-    #3b82f6 55%,
-    rgba(147, 197, 253, 0.8) 80%,
-    rgba(255, 255, 255, 0.9)
+    transparent 0%,
+    rgba(249, 115, 22, 0.12) 18%,
+    rgba(249, 115, 22, 0.65) 52%,
+    rgba(253, 186, 116, 0.85) 78%,
+    rgba(255, 237, 213, 0.5) 100%
   );
   box-shadow:
-    0 0 4px 1px rgba(59, 130, 246, 0.6),
-    0 0 12px 2px rgba(59, 130, 246, 0.25);
+    0 0 1.5px 0.5px rgba(249, 115, 22, 0.4),
+    0 0 5px   1px   rgba(249, 115, 22, 0.12);
 }
 
-/* ── Light mode: verde neon */
+/* Ponto brilhante na cabeça — minúsculo */
+.meteor-head {
+  position: absolute;
+  top: -1.5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(255, 237, 213, 0.9);
+  box-shadow:
+    0 0 3px 1px rgba(249, 115, 22, 0.75),
+    0 0 7px 2px rgba(249, 115, 22, 0.25);
+}
+
+/* Fragmentos: pequenos (28–48px), fases negativas → sempre visíveis ao carregar */
+.meteor:nth-child(1)  { left:  6%;  height: 36px; animation-duration: 6.8s;  animation-delay: -2.1s; }
+.meteor:nth-child(2)  { left: 19%;  height: 28px; animation-duration: 9.2s;  animation-delay: -5.8s; }
+.meteor:nth-child(3)  { left: 33%;  height: 44px; animation-duration: 5.9s;  animation-delay: -1.3s; }
+.meteor:nth-child(4)  { left: 48%;  height: 30px; animation-duration: 8.5s;  animation-delay: -7.4s; }
+.meteor:nth-child(5)  { left: 61%;  height: 48px; animation-duration: 7.1s;  animation-delay: -0.6s; }
+.meteor:nth-child(6)  { left: 75%;  height: 32px; animation-duration: 10.4s; animation-delay: -4.9s; }
+.meteor:nth-child(7)  { left: 87%;  height: 40px; animation-duration: 6.4s;  animation-delay: -3.5s; }
+.meteor:nth-child(8)  { left: 11%;  height: 26px; animation-duration: 11.0s; animation-delay: -9.1s; }
+.meteor:nth-child(9)  { left: 55%;  height: 42px; animation-duration: 7.8s;  animation-delay: -6.3s; }
+
+/* Light mode: opacidade ligeiramente menor — fundo claro já é mais brilhante */
 html.light .meteor {
   background: linear-gradient(
     to bottom,
-    rgba(22, 163, 74, 0.0),
-    rgba(22, 163, 74, 0.95) 25%,
-    #16a34a 55%,
-    rgba(74, 222, 128, 0.8) 80%,
-    rgba(255, 255, 255, 0.9)
+    transparent 0%,
+    rgba(249, 115, 22, 0.08) 18%,
+    rgba(249, 115, 22, 0.5)  52%,
+    rgba(253, 186, 116, 0.7) 78%,
+    rgba(255, 237, 213, 0.4) 100%
   );
   box-shadow:
-    0 0 4px 1px rgba(22, 163, 74, 0.6),
-    0 0 12px 2px rgba(22, 163, 74, 0.25);
+    0 0 1.5px 0.5px rgba(249, 115, 22, 0.3),
+    0 0 4px   1px   rgba(249, 115, 22, 0.09);
 }
-
-/* Ponto brilhante no topo do meteoro (cabeça) */
-.meteor-head {
-  position: absolute;
-  top: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: #fff;
-}
-/* Dark: glow azul na cabeça */
-.meteor-head {
-  box-shadow: 0 0 6px 2px rgba(59, 130, 246, 0.9), 0 0 14px 4px rgba(59, 130, 246, 0.4);
-}
-/* Light: glow verde na cabeça */
 html.light .meteor-head {
-  box-shadow: 0 0 6px 2px rgba(22, 163, 74, 0.9), 0 0 14px 4px rgba(22, 163, 74, 0.4);
+  box-shadow:
+    0 0 3px 1px rgba(249, 115, 22, 0.6),
+    0 0 6px 2px rgba(249, 115, 22, 0.2);
 }
 
 /* ─── DOT PATTERN ───────────────────────────────────────── */
