@@ -52,15 +52,16 @@ export function AnimatedBackground() {
     const mobile = window.innerWidth < 768
 
     // ── Configuração por device ───────────────────────────────────────
-    const NODE_COUNT    = mobile ? 35  : 70    // nós base da teia
-    const CONNECT_D     = mobile ? 90  : 130
-    const CONNECT_D2    = CONNECT_D * CONNECT_D
-    const MAX_FREE      = mobile ? 20  : 40    // máx nós livres (clique) simultâneos
-    const SPAWN_PER_CLICK = mobile ? 5 : 8     // nós por clique
-    const REPEL_R       = 130
-    const REPEL_F       = 4.0
-    const FRICTION      = 0.88
-    const RETURN_SPD    = 0.025
+    const NODE_COUNT      = mobile ? 35  : 65
+    const CONNECT_D       = mobile ? 110 : 160   // raio de conexão maior → mais linhas visíveis
+    const CONNECT_D2      = CONNECT_D * CONNECT_D
+    const MAX_FREE        = mobile ? 16  : 30    // limite conservador de nós livres
+    const SPAWN_PER_CLICK = mobile ? 5   : 7
+    const LINE_ALPHA_BASE = 0.35                 // alpha base das linhas dos nós livres
+    const REPEL_R         = 130
+    const REPEL_F         = 4.0
+    const FRICTION        = 0.88
+    const RETURN_SPD      = 0.025
 
     let w = 0, h = 0
 
@@ -116,24 +117,28 @@ export function AnimatedBackground() {
       const add = Math.min(count, MAX_FREE - Math.max(0, freeAlive - count))
 
       for (let i = 0; i < add; i++) {
-        const angle  = (i / Math.max(add, 1)) * Math.PI * 2 + (Math.random() - 0.5) * 0.8
-        const birthR = CONNECT_D * (0.08 + Math.random() * 0.65)
+        const angle = (i / Math.max(add, 1)) * Math.PI * 2 + (Math.random() - 0.5) * 0.5
+
+        // Nasce PERTO do clique — dentro de 35% do raio de conexão
+        // Assim os nós já estão conectados entre si no frame 1
+        const birthR = CONNECT_D * (0.05 + Math.random() * 0.30)
         const bx = Math.max(8, Math.min(w - 8, cx + Math.cos(angle) * birthR))
         const by = Math.max(8, Math.min(h - 8, cy + Math.sin(angle) * birthR))
 
-        const spd = mobile ? 0.55 : 0.80
-        const vx  = Math.cos(angle) * spd * (0.5 + Math.random())
-        const vy  = Math.sin(angle) * spd * (0.5 + Math.random())
+        // Velocidade baixa: nós se espalham lentamente para não sair do CONNECT_D
+        const spd = mobile ? 0.30 : 0.40
+        const vx  = Math.cos(angle) * spd * (0.4 + Math.random() * 0.6)
+        const vy  = Math.sin(angle) * spd * (0.4 + Math.random() * 0.6)
 
-        // Vida de 4-8s @ 60fps — mais curto e controlado
-        const life = 240 + Math.random() * 240
+        // Vida de 5-10s @ 60fps
+        const life = 300 + Math.random() * 300
         nodesRef.current.push({
           x: bx, y: by, vx, vy,
-          size:       1.4 + Math.random() * 1.8,
-          opacity:    0.55 + Math.random() * 0.30,
+          size:       1.5 + Math.random() * 1.8,
+          opacity:    0.65 + Math.random() * 0.25,
           originX:    -1,
           originY:    -1,
-          spawnAlpha: 0.6,
+          spawnAlpha: 1.0,  // começa totalmente visível — sem fade-in
           glow:       1.0,
           glowDir:    -1,
           free:       true,
@@ -183,8 +188,8 @@ export function AnimatedBackground() {
         if (p.glow >= 1) { p.glow = 1; p.glowDir = -1 }
         if (p.glow <= 0) { p.glow = 0; p.glowDir =  1 }
 
-        if (p.spawnAlpha < 1) {
-          // Fade-in rápido: 0.4→1 em ~15 frames
+        // Fade-in apenas para nós base (spawned=true inicia em 0)
+        if (!p.free && p.spawnAlpha < 1) {
           p.spawnAlpha = Math.min(p.spawnAlpha + 0.04, 1)
         }
 
@@ -244,15 +249,20 @@ export function AnimatedBackground() {
           const d2 = dx * dx + dy * dy
           if (d2 < CONNECT_D2) {
             const ratio = 1 - d2 / CONNECT_D2
-            const sa    = Math.min(drawNodes[i].spawnAlpha, drawNodes[j].spawnAlpha)
-            const distMx2 = (drawNodes[i].x - mx) ** 2 + (drawNodes[i].y - my) ** 2
-            const hover   = !mobile && distMx2 < (REPEL_R * 1.5) ** 2 ? 0.18 : 0
-            const alpha = ratio * (isDark ? 0.18 : 0.12) * sa + hover * ratio
+            const ni = drawNodes[i], nj = drawNodes[j]
+            const sa = Math.min(ni.spawnAlpha, nj.spawnAlpha)
+            // Se pelo menos um dos nós é livre (clique), a linha fica mais visível
+            const isFreeEdge = ni.free || nj.free
+            // Dark mode precisa de alpha maior: fundo preto "engole" linhas finas
+            const baseAlpha  = isFreeEdge ? LINE_ALPHA_BASE : (isDark ? 0.38 : 0.14)
+            const distMx2    = (ni.x - mx) ** 2 + (ni.y - my) ** 2
+            const hover      = !mobile && distMx2 < (REPEL_R * 1.5) ** 2 ? 0.18 : 0
+            const alpha      = ratio * baseAlpha * sa + hover * ratio
             ctx.beginPath()
-            ctx.moveTo(drawNodes[i].x, drawNodes[i].y)
-            ctx.lineTo(drawNodes[j].x, drawNodes[j].y)
+            ctx.moveTo(ni.x, ni.y)
+            ctx.lineTo(nj.x, nj.y)
             ctx.strokeStyle = `rgba(${rgb},${alpha.toFixed(3)})`
-            ctx.lineWidth   = ratio * (isDark ? 0.85 : 0.70)
+            ctx.lineWidth   = ratio * (isFreeEdge ? 1.0 : (isDark ? 0.95 : 0.70))
             ctx.stroke()
           }
         }
@@ -260,27 +270,30 @@ export function AnimatedBackground() {
 
       // ── Nós com glow neon ────────────────────────────────────────────
       for (const p of drawNodes) {
-        const a    = p.opacity * (isDark ? 0.85 : 0.65) * p.spawnAlpha
-        // Intensidade do glow pulsa com cada nó + recém-spawnados brilham no máximo
-        const glowIntensity = (0.55 + p.glow * 0.45) * p.spawnAlpha
-        const glowRadius    = p.size * (5 + p.glow * 9)
+        const sa   = p.spawnAlpha
+        // Pulso do glow: oscila entre 0.4 e 1.0
+        const pulse = 0.40 + p.glow * 0.60
 
-        // Halo neon externo — difuso e colorido
-        ctx.shadowBlur  = glowRadius
-        ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},${(glowIntensity * (isDark ? 0.85 : 0.60)).toFixed(3)})`
+        // ── Camada 1: halo difuso externo (grande, suave)
+        // Simula o box-shadow externo dos neon-cards
+        const haloR    = p.size * (8 + p.glow * 10)                  // 8-18× o raio
+        const haloA    = pulse * sa * (isDark ? 0.55 : 0.35)
+        ctx.shadowBlur  = haloR
+        ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},${haloA.toFixed(3)})`
 
-        // Anel externo translúcido (dá volume ao nó)
+        // Corpo branco/preto do nó — circulo principal
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${rgb},${a.toFixed(3)})`
+        ctx.fillStyle = `rgba(${rgb},${(p.opacity * (isDark ? 0.90 : 0.70) * sa).toFixed(3)})`
         ctx.fill()
 
-        // Miolo neon puro — pequeno e ultra-brilhante
-        ctx.shadowBlur  = p.size * 4
-        ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},1)`
+        // ── Camada 2: miolo neon concentrado (pequeno, ultra-brilhante)
+        // Simula o inner glow dos cards: 0 0 14px rgba(neon, 0.28)
+        ctx.shadowBlur  = p.size * 5
+        ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},${(pulse * sa * (isDark ? 1.0 : 0.75)).toFixed(3)})`
         ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size * 0.38, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${neon.r},${neon.g},${neon.b},${(glowIntensity * (isDark ? 0.80 : 0.60)).toFixed(3)})`
+        ctx.arc(p.x, p.y, p.size * 0.40, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(${neon.r},${neon.g},${neon.b},${(pulse * sa * (isDark ? 0.90 : 0.70)).toFixed(3)})`
         ctx.fill()
       }
 
