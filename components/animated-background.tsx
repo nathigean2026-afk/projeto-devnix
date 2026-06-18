@@ -110,18 +110,20 @@ export function AnimatedBackground() {
         const bx = Math.max(8, Math.min(w - 8, cx + Math.cos(angle) * birthR))
         const by = Math.max(8, Math.min(h - 8, cy + Math.sin(angle) * birthR))
 
-        // Velocidade: leve drift aleatório para se espalhar suavemente
-        const spd = mobile ? 0.15 : 0.22
-        const vx  = (Math.random() - 0.5) * spd * 2
-        const vy  = (Math.random() - 0.5) * spd * 2
+        // Velocidade: drift para longe do centro do clique — nó se espalha
+        // e depois para (friction 0.97). Velocidade alta o suficiente para
+        // percorrer CONNECT_D*0.5 antes de parar (~60 frames).
+        const spd = mobile ? 0.55 : 0.85
+        const vx  = Math.cos(angle) * spd * (0.5 + Math.random())
+        const vy  = Math.sin(angle) * spd * (0.5 + Math.random())
 
         nodesRef.current.push({
           x: bx, y: by, vx, vy,
           size:       1.6 + Math.random() * 2.0,
-          opacity:    0.55 + Math.random() * 0.35,
+          opacity:    0.60 + Math.random() * 0.35,
           originX:    -1,   // -1 = nó livre, sem RETURN_SPD
           originY:    -1,
-          spawnAlpha: 0.4,  // começa visível — linha aparece no frame 1
+          spawnAlpha: 0.6,  // bem visível desde o frame 1
           glow:       1.0,
           glowDir:    -1,
           free:       true,
