@@ -24,6 +24,8 @@ interface Node {
   // brilho neon individual (0→1), pulsa levemente
   glow: number
   glowDir: number
+  // se é um nó spawnado pelo clique (física diferente)
+  free?: boolean
 }
 
 // Cores neon: dark = azul, light = verde (mesmas dos neon-cards)
@@ -101,47 +103,57 @@ export function AnimatedBackground() {
       const add   = Math.min(count, Math.max(slots, 0))
 
       for (let i = 0; i < add; i++) {
-        // Nasce espalhado ao redor do clique dentro do raio de conexão
-        const angle  = (i / add) * Math.PI * 2 + (Math.random() - 0.5) * 1.2
-        const birthR = CONNECT_D * (0.1 + Math.random() * 0.8)
-        const bx     = Math.max(8, Math.min(w - 8, cx + Math.cos(angle) * birthR))
-        const by     = Math.max(8, Math.min(h - 8, cy + Math.sin(angle) * birthR))
+        // Nasce em ângulo distribuído + ruído, dentro do raio de conexão
+        // → todos dentro de CONNECT_D entre si = linhas visíveis desde o frame 1
+        const angle  = (i / add) * Math.PI * 2 + (Math.random() - 0.5) * 0.8
+        const birthR = CONNECT_D * (0.08 + Math.random() * 0.70)
+        const bx = Math.max(8, Math.min(w - 8, cx + Math.cos(angle) * birthR))
+        const by = Math.max(8, Math.min(h - 8, cy + Math.sin(angle) * birthR))
 
-        // Velocidade igual aos nós base — flutuação lenta e livre
-        const spd = mobile ? 0.18 : 0.26
-        const vx  = (Math.random() - 0.5) * spd * 2
-        const vy  = (Math.random() - 0.5) * spd * 2
+        // Velocidade: drift para longe do centro do clique — nó se espalha
+        // e depois para (friction 0.97). Velocidade alta o suficiente para
+        // percorrer CONNECT_D*0.5 antes de parar (~60 frames).
+        const spd = mobile ? 0.55 : 0.85
+        const vx  = Math.cos(angle) * spd * (0.5 + Math.random())
+        const vy  = Math.sin(angle) * spd * (0.5 + Math.random())
 
-        // originX/Y fora da tela → RETURN_SPD nunca puxa de volta
-        // O nó flutua completamente livre, como qualquer nó estável da teia
         nodesRef.current.push({
           x: bx, y: by, vx, vy,
-          size:       1.4 + Math.random() * 2.2,
-          opacity:    0.50 + Math.random() * 0.40,
-          originX:    -9999,
-          originY:    -9999,
-          spawnAlpha: 0,
+          size:       1.6 + Math.random() * 2.0,
+          opacity:    0.60 + Math.random() * 0.35,
+          originX:    -1,   // -1 = nó livre, sem RETURN_SPD
+          originY:    -1,
+          spawnAlpha: 0.6,  // bem visível desde o frame 1
           glow:       1.0,
           glowDir:    -1,
+          free:       true,
         })
       }
     }
 
-    // ── Click (desktop) ───────────────────────────────────────────────
-    const onCanvasClick = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect()
-      spawnWebNodes(e.clientX - rect.left, e.clientY - rect.top, 14)
-    }
-    canvas.addEventListener("click", onCanvasClick)
+    // Expõe spawn globalmente — facilita testes e integração futura
+    ;(window as typeof window & { __spawnWeb?: (x: number, y: number, n: number) => void }).__spawnWeb = spawnWebNodes
 
-    // ── Touch (mobile) ────────────────────────────────────────────────
+    // ── Click no WINDOW (não no canvas) ──────────────────────────────
+    // O canvas fica em z-0, elementos HTML ficam na frente.
+    // Escutando window garante que qualquer click na página dispara.
+    // Ignora clicks em inputs, botões e links para não interferir com UI.
+    const onWindowClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (target.closest("a, button, input, textarea, select, [role=button]")) return
+      spawnWebNodes(e.clientX, e.clientY, 14)
+    }
+    window.addEventListener("click", onWindowClick)
+
+    // ── Touch no WINDOW (mobile) ──────────────────────────────────────
     const onTouchEnd = (e: TouchEvent) => {
       if (e.changedTouches.length === 0) return
-      const t    = e.changedTouches[0]
-      const rect = canvas.getBoundingClientRect()
-      spawnWebNodes(t.clientX - rect.left, t.clientY - rect.top, 6)
+      const target = e.target as HTMLElement
+      if (target.closest("a, button, input, textarea, select, [role=button]")) return
+      const t = e.changedTouches[0]
+      spawnWebNodes(t.clientX, t.clientY, 6)
     }
-    if (mobile) canvas.addEventListener("touchend", onTouchEnd, { passive: true })
+    if (mobile) window.addEventListener("touchend", onTouchEnd, { passive: true })
 
     // ── Loop principal ────────────────────────────────────────────────
     const draw = () => {
@@ -161,12 +173,17 @@ export function AnimatedBackground() {
         if (p.glow <= 0) { p.glow = 0; p.glowDir =  1 }
 
         if (p.spawnAlpha < 1) {
-          // Fade-in: 0→1 em ~25 frames. Nó flutua livre durante o fade.
+          // Fade-in rápido: 0.4→1 em ~15 frames
           p.spawnAlpha = Math.min(p.spawnAlpha + 0.04, 1)
-          p.vx *= FRICTION
-          p.vy *= FRICTION
+        }
+
+        if (p.free) {
+          // Nó spawnado pelo clique: flutua completamente livre
+          // Fricção suave para se espalhar por mais tempo antes de parar
+          p.vx *= 0.97
+          p.vy *= 0.97
         } else {
-          // Nó estável: repulsão hover + retorno à origem (só se tiver originX válido)
+          // Nó base: repulsão hover + retorno à origem
           if (!mobile) {
             const dx = p.x - mx
             const dy = p.y - my
@@ -178,12 +195,8 @@ export function AnimatedBackground() {
               p.vy += (dy / d) * force
             }
           }
-          // Só aplica RETURN_SPD se tiver originX/Y válido (nós base)
-          // Nós spawnados têm originX = -9999 e flutuam completamente livres
-          if (p.originX > 0 && p.originY > 0) {
-            p.vx += (p.originX - p.x) * RETURN_SPD
-            p.vy += (p.originY - p.y) * RETURN_SPD
-          }
+          p.vx += (p.originX - p.x) * RETURN_SPD
+          p.vy += (p.originY - p.y) * RETURN_SPD
           p.vx *= FRICTION
           p.vy *= FRICTION
         }
@@ -210,7 +223,8 @@ export function AnimatedBackground() {
           const d2 = dx * dx + dy * dy
           if (d2 < CONNECT_D2) {
             const ratio = 1 - d2 / CONNECT_D2
-            const sa    = nodes[i].spawnAlpha * nodes[j].spawnAlpha
+            // Usa min() em vez de produto: linha aparece assim que UM dos nós existe
+            const sa    = Math.min(nodes[i].spawnAlpha, nodes[j].spawnAlpha)
             // Linhas mais próximas do cursor ficam levemente mais brilhantes
             const distMx2 = (nodes[i].x - mx) ** 2 + (nodes[i].y - my) ** 2
             const hover   = !mobile && distMx2 < (REPEL_R * 1.5) ** 2
@@ -260,20 +274,20 @@ export function AnimatedBackground() {
       rafRef.current = requestAnimationFrame(draw)
     }
 
-    // Adiamento pós-LCP: desktop 400ms | mobile 1800ms
-    const delay = mobile ? 1800 : 400
-    const timer = setTimeout(() => { rafRef.current = requestAnimationFrame(draw) }, delay)
+    // Inicia imediatamente — delay remvido pois causava canvas branco
+    rafRef.current = requestAnimationFrame(draw)
+    const timer = 0
 
     return () => {
-      clearTimeout(timer)
+      // timer = 0, nada a limpar
       cancelAnimationFrame(rafRef.current)
       window.removeEventListener("resize", resize)
       if (!mobile) {
         window.removeEventListener("mousemove",  onMouseMove)
         window.removeEventListener("mouseleave", onMouseLeave)
       }
-      canvas.removeEventListener("click",    onCanvasClick)
-      if (mobile) canvas.removeEventListener("touchend", onTouchEnd)
+      window.removeEventListener("click",    onWindowClick)
+      if (mobile) window.removeEventListener("touchend", onTouchEnd)
     }
   }, [mounted, resolvedTheme])
 

@@ -1,166 +1,10 @@
 "use client"
 
-import { useRef, useEffect, useCallback } from "react"
+import { useRef } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, ArrowDown } from "lucide-react"
 
 const TAGS = ["Sites", "Software", "E-commerce", "Plataformas", "Landing Pages", "Blogs", "Sistemas", "APIs"]
-
-// FloatingDots — canvas interativo do hero
-// Desktop: 120 pontos com burst no clique + cursor crosshair
-// Mobile:  40 pontos estáticos, sem burst, inicia em 1500ms (pós-LCP)
-function FloatingDots() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  const handleClick = useCallback((e: MouseEvent) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    // Burst só no desktop (mobile não tem cursor)
-    if (window.innerWidth < 768) return
-    const rect = canvas.getBoundingClientRect()
-    const cx = e.clientX - rect.left
-    const cy = e.clientY - rect.top
-    ;(canvas as HTMLCanvasElement & { __inject?: (x: number, y: number) => void }).__inject?.(cx, cy)
-  }, [])
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    const mobile = window.innerWidth < 768
-    // Desktop: 120 pontos | Mobile: 40 pontos (leve)
-    const DOT_COUNT = mobile ? 40 : 120
-    // Desktop: início em 600ms | Mobile: início em 1500ms (bem pós-LCP)
-    const START_DELAY = mobile ? 1500 : 600
-
-    let animId: number
-    let W = 0, H = 0
-
-    type Dot = {
-      x: number; y: number; r: number
-      vx: number; vy: number
-      alpha: number; targetAlpha: number; alphaSpeed: number
-      burst?: boolean
-    }
-
-    let dots: Dot[] = []
-
-    function makeDot(x?: number, y?: number, burst = false): Dot {
-      const angle = Math.random() * Math.PI * 2
-      const speed = burst ? Math.random() * 2.8 + 0.8 : (Math.random() - 0.5) * 0.32
-      return {
-        x: x ?? Math.random() * W,
-        y: y ?? Math.random() * H,
-        r: burst ? Math.random() * 1.8 + 0.4 : Math.random() * 1.5 + 0.3,
-        vx: burst ? Math.cos(angle) * speed : (Math.random() - 0.5) * 0.32,
-        vy: burst ? Math.sin(angle) * speed : (Math.random() - 0.5) * 0.32,
-        alpha: burst ? 0.8 : Math.random() * 0.55 + 0.12,
-        targetAlpha: Math.random() * 0.55 + 0.12,
-        alphaSpeed: Math.random() * 0.005 + 0.001,
-        burst,
-      }
-    }
-
-    function resize() {
-      W = canvas!.offsetWidth
-      H = canvas!.offsetHeight
-      canvas!.width = W
-      canvas!.height = H
-      dots = Array.from({ length: DOT_COUNT }, () => makeDot())
-    }
-
-    const MAX_DOTS = mobile ? 80 : 300
-    const burstPool: Dot[] = []
-
-    ;(canvas as HTMLCanvasElement & { __inject?: (x: number, y: number) => void }).__inject = (x, y) => {
-      const count = Math.floor(Math.random() * 16 + 10)
-      for (let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2
-        const speed = Math.random() * 2.8 + 0.8
-        const d: Dot = {
-          x, y,
-          r: Math.random() * 1.8 + 0.4,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          alpha: Math.random() * 0.5 + 0.5,
-          targetAlpha: Math.random() * 0.55 + 0.12,
-          alphaSpeed: Math.random() * 0.005 + 0.001,
-          burst: true,
-        }
-        burstPool.push(d)
-        dots.push(d)
-      }
-      while (dots.length > MAX_DOTS && burstPool.length > 0) {
-        const evict = burstPool.shift()!
-        const idx = dots.indexOf(evict)
-        if (idx !== -1) dots.splice(idx, 1)
-      }
-    }
-
-    function draw() {
-      ctx!.clearRect(0, 0, W, H)
-      const isDark = document.documentElement.classList.contains("dark") ||
-        !document.documentElement.classList.contains("light")
-      const color = isDark ? "255,255,255" : "0,0,0"
-      const alphaMultiplier = isDark ? 1 : 2.8
-
-      for (const d of dots) {
-        if (d.burst) {
-          d.vx *= 0.97
-          d.vy *= 0.97
-          const speed = Math.sqrt(d.vx * d.vx + d.vy * d.vy)
-          if (speed < 0.35) d.burst = false
-        }
-
-        d.x += d.vx
-        d.y += d.vy
-
-        if (d.x < -4) d.x = W + 4
-        if (d.x > W + 4) d.x = -4
-        if (d.y < -4) d.y = H + 4
-        if (d.y > H + 4) d.y = -4
-
-        if (Math.abs(d.alpha - d.targetAlpha) < d.alphaSpeed) {
-          d.targetAlpha = Math.random() * 0.55 + 0.12
-        }
-        d.alpha += (d.targetAlpha - d.alpha) * d.alphaSpeed * 40
-
-        const a = Math.min(d.alpha * alphaMultiplier, 1)
-        ctx!.beginPath()
-        ctx!.arc(d.x, d.y, d.r, 0, Math.PI * 2)
-        ctx!.fillStyle = `rgba(${color},${a.toFixed(3)})`
-        ctx!.fill()
-      }
-
-      animId = requestAnimationFrame(draw)
-    }
-
-    resize()
-    const startTimer = setTimeout(() => draw(), START_DELAY)
-
-    const ro = new ResizeObserver(resize)
-    ro.observe(canvas)
-    canvas.addEventListener("click", handleClick as EventListener)
-
-    return () => {
-      clearTimeout(startTimer)
-      cancelAnimationFrame(animId)
-      ro.disconnect()
-      canvas.removeEventListener("click", handleClick as EventListener)
-    }
-  }, [handleClick])
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full cursor-crosshair"
-      style={{ zIndex: 1 }}
-      aria-hidden="true"
-    />
-  )
-}
 
 export function HeroSection() {
   const ref = useRef<HTMLElement>(null)
@@ -176,9 +20,6 @@ export function HeroSection() {
     >
       {/* Grid pattern */}
       <div className="absolute inset-0 grid-pattern pointer-events-none" aria-hidden="true" style={{ zIndex: 0 }} />
-
-      {/* FloatingDots — desktop: 120 pontos + burst no clique | mobile: 40 pontos, início adiado */}
-      <FloatingDots />
 
       {/* Corner glows — substituído por versão CSS sem filter:blur */}
       <div
