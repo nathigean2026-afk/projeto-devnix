@@ -5,9 +5,18 @@ import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Plus, Pencil, Trash2, Eye, Save, X,
-  ImagePlus, ExternalLink,
+  ImagePlus, ExternalLink, GripVertical,
 } from "lucide-react"
-import { createProject, updateProject, deleteProject, getProjects } from "@/app/actions/projects"
+import {
+  DndContext, closestCenter, PointerSensor, KeyboardSensor,
+  useSensor, useSensors, type DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  SortableContext, sortableKeyboardCoordinates, useSortable,
+  verticalListSortingStrategy, arrayMove,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import { createProject, updateProject, deleteProject, getProjects, reorderProjects } from "@/app/actions/projects"
 import type { ProjectRow } from "@/lib/db/schema"
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -433,12 +442,96 @@ function ProjectFormModal({
   )
 }
 
+// ── Linha drag-and-drop ───────────────────────────────────────────────────────
+function SortableRow({
+  p, onEdit, onDelete, onPreview, isPending,
+}: {
+  p: ProjectRow
+  onEdit: () => void
+  onDelete: () => void
+  onPreview: () => void
+  isPending: boolean
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: p.id })
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.45 : 1 }
+  const dot = COVER_OPTIONS.find((c) => c.value === p.cover)?.color ?? "#888"
+
+  const badge = (
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 ${
+      p.published ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+    }`}>
+      <span className={`size-1.5 rounded-full ${p.published ? "bg-emerald-400" : "bg-zinc-500"}`} />
+      {p.published ? "Pub" : "Rascunho"}
+    </span>
+  )
+
+  const actions = (
+    <div className="flex items-center gap-1 shrink-0">
+      {p.liveUrl && (
+        <a href={p.liveUrl} target="_blank" rel="noopener noreferrer"
+          className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors" title="Ver ao vivo">
+          <ExternalLink className="size-3" />
+        </a>
+      )}
+      <button onClick={onPreview} className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors" title="Visualizar">
+        <Eye className="size-3" />
+      </button>
+      <button onClick={onEdit} className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-blue-400 transition-colors" title="Editar">
+        <Pencil className="size-3" />
+      </button>
+      <button onClick={onDelete} disabled={isPending} className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-red-400 transition-colors disabled:opacity-40" title="Excluir">
+        <Trash2 className="size-3" />
+      </button>
+    </div>
+  )
+
+  const grip = (
+    <button {...attributes} {...listeners}
+      className="touch-none p-1 text-muted-foreground/30 hover:text-muted-foreground/70 cursor-grab active:cursor-grabbing shrink-0 transition-colors"
+      title="Arrastar para reordenar">
+      <GripVertical className="size-4" />
+    </button>
+  )
+
+  return (
+    <div ref={setNodeRef} style={style} className="rounded-xl border border-border bg-background">
+      {/* Mobile */}
+      <div className="flex sm:hidden items-center gap-2 p-3">
+        {grip}
+        <div className="size-2.5 rounded-full shrink-0" style={{ background: dot }} />
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm text-foreground truncate">{p.title}</p>
+          <p className="text-[11px] text-muted-foreground truncate">{p.category}</p>
+        </div>
+        {badge}
+        {actions}
+      </div>
+      {/* Desktop */}
+      <div className="hidden sm:flex items-center gap-1 px-2 py-2.5">
+        {grip}
+        <div className="size-2 rounded-full shrink-0" style={{ background: dot }} />
+        <span className="flex-1 font-medium text-sm text-foreground px-2 truncate">{p.title}</span>
+        <span className="w-40 text-xs text-muted-foreground truncate hidden md:block">{p.category}</span>
+        <span className="w-36 font-mono text-xs text-muted-foreground truncate hidden lg:block">{p.slug}</span>
+        <div className="w-24 flex justify-center">{badge}</div>
+        {actions}
+      </div>
+    </div>
+  )
+}
+
 // ── Main ProjectsAdmin component ─────────────────────────────────────────────
 export function ProjectsAdmin({ initialProjects }: { initialProjects: ProjectRow[] }) {
   const router = useRouter()
   const [projects, setProjects] = useState<ProjectRow[]>(initialProjects)
   const [modal, setModal] = useState<{ mode: "create" | "edit"; project?: ProjectRow } | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [savingOrder, setSavingOrder] = useState(false)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
 
   const reload = async () => {
     const fresh = await getProjects()
@@ -453,13 +546,31 @@ export function ProjectsAdmin({ initialProjects }: { initialProjects: ProjectRow
     })
   }
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    setProjects((items) => {
+      const from = items.findIndex((p) => p.id === active.id)
+      const to   = items.findIndex((p) => p.id === over.id)
+      const next = arrayMove(items, from, to)
+      setSavingOrder(true)
+      reorderProjects(next.map((p, i) => ({ id: p.id, sortOrder: i })))
+        .finally(() => setSavingOrder(false))
+      return next
+    })
+  }
+
   return (
     <div className="p-4 sm:p-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between mb-5">
         <div>
           <h2 className="text-lg font-bold text-foreground">Projetos</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">{projects.length} projetos — clique em um para editar</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {projects.length} projeto{projects.length !== 1 ? "s" : ""} —{" "}
+            <span className="opacity-70">arraste</span> para reordenar
+            {savingOrder && <span className="ml-2 text-blue-400">salvando...</span>}
+          </p>
         </div>
         <button
           onClick={() => setModal({ mode: "create" })}
@@ -470,152 +581,38 @@ export function ProjectsAdmin({ initialProjects }: { initialProjects: ProjectRow
         </button>
       </div>
 
-      {/* Lista mobile: cards */}
-      <div className="flex flex-col gap-2 sm:hidden">
-        {projects.length === 0 && (
-          <p className="text-center py-12 text-sm text-muted-foreground">Nenhum projeto cadastrado ainda.</p>
-        )}
-        {projects.map((p) => (
-          <div
-            key={p.id}
-            className="rounded-xl border border-border p-3 flex items-center gap-3"
-          >
-            {/* Dot */}
-            <div
-              className="size-2.5 rounded-full shrink-0"
-              style={{ background: COVER_OPTIONS.find((c) => c.value === p.cover)?.color ?? "#888" }}
-            />
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm text-foreground truncate">{p.title}</p>
-              <p className="text-[11px] text-muted-foreground truncate">{p.category}</p>
-            </div>
-            {/* Status badge */}
-            <span className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-              p.published
-                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
-            }`}>
-              <span className={`size-1.5 rounded-full ${p.published ? "bg-emerald-400" : "bg-zinc-500"}`} />
-              {p.published ? "Pub" : "Rascunho"}
-            </span>
-            {/* Action buttons */}
-            <div className="flex items-center gap-1 shrink-0">
-              <button
-                onClick={() => router.push(`/projetos/${p.slug}`)}
-                className="size-8 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
-                title="Visualizar"
-              >
-                <Eye className="size-3.5" />
-              </button>
-              <button
-                onClick={() => setModal({ mode: "edit", project: p })}
-                className="size-8 flex items-center justify-center rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400 hover:text-blue-300 transition-colors"
-                title="Editar"
-              >
-                <Pencil className="size-3.5" />
-              </button>
-              <button
-                onClick={() => handleDelete(p)}
-                disabled={isPending}
-                className="size-8 flex items-center justify-center rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:text-red-300 transition-colors disabled:opacity-40"
-                title="Excluir"
-              >
-                <Trash2 className="size-3.5" />
-              </button>
-            </div>
-          </div>
-        ))}
+      {/* Cabeçalho desktop */}
+      <div className="hidden sm:flex items-center gap-1 px-3 py-1.5 mb-1 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+        <div className="w-6" />
+        <div className="w-3" />
+        <div className="flex-1 px-2">Projeto</div>
+        <div className="w-40 hidden md:block">Categoria</div>
+        <div className="w-36 hidden lg:block">Slug</div>
+        <div className="w-24 text-center">Status</div>
+        <div className="w-32 text-right">Ações</div>
       </div>
 
-      {/* Tabela desktop */}
-      <div className="hidden sm:block rounded-2xl border border-border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border">
-              <th className="text-left px-4 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Projeto</th>
-              <th className="text-left px-4 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold hidden sm:table-cell">Categoria</th>
-              <th className="text-left px-4 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold hidden md:table-cell">Slug</th>
-              <th className="text-center px-4 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Status</th>
-              <th className="text-right px-4 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {projects.map((p, i) => (
-              <tr key={p.id} className={`border-b border-border last:border-0 hover:bg-secondary/40 transition-colors ${i % 2 === 0 ? "" : "bg-secondary/10"}`}>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    {/* Color dot */}
-                    <div className="size-2 rounded-full shrink-0" style={{
-                      background: COVER_OPTIONS.find((c) => c.value === p.cover)?.color ?? "#888",
-                    }} />
-                    <span className="font-medium text-foreground">{p.title}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">{p.category}</td>
-                <td className="px-4 py-3 hidden md:table-cell">
-                  <span className="font-mono text-xs text-muted-foreground">{p.slug}</span>
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                    p.published
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                      : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
-                  }`}>
-                    <span className={`size-1.5 rounded-full ${p.published ? "bg-emerald-400" : "bg-zinc-500"}`} />
-                    {p.published ? "Publicado" : "Rascunho"}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center justify-end gap-1">
-                    {p.liveUrl && (
-                      <a
-                        href={p.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
-                        title="Ver site ao vivo"
-                      >
-                        <ExternalLink className="size-3" />
-                      </a>
-                    )}
-                    {/* Preview: navigate within the same frame to avoid proxy unauthorized */}
-                    <button
-                      onClick={() => router.push(`/projetos/${p.slug}`)}
-                      className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
-                      title="Visualizar página do projeto"
-                    >
-                      <Eye className="size-3" />
-                    </button>
-                    <button
-                      onClick={() => setModal({ mode: "edit", project: p })}
-                      className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-blue-400 transition-colors"
-                      title="Editar projeto"
-                    >
-                      <Pencil className="size-3" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(p)}
-                      disabled={isPending}
-                      className="size-7 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-red-400 transition-colors disabled:opacity-40"
-                      title="Excluir projeto"
-                    >
-                      <Trash2 className="size-3" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {projects.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">
-                  Nenhum projeto cadastrado ainda.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>{/* end tabela desktop */}
+      {/* Lista sortable */}
+      {projects.length === 0 ? (
+        <p className="text-center py-12 text-sm text-muted-foreground">Nenhum projeto cadastrado ainda.</p>
+      ) : (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={projects.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+            <div className="flex flex-col gap-1.5">
+              {projects.map((p) => (
+                <SortableRow
+                  key={p.id}
+                  p={p}
+                  isPending={isPending}
+                  onEdit={() => setModal({ mode: "edit", project: p })}
+                  onDelete={() => handleDelete(p)}
+                  onPreview={() => router.push(`/projetos/${p.slug}`)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      )}
 
       {/* Modal */}
       <AnimatePresence>
