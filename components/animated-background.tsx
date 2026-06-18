@@ -3,24 +3,9 @@
 import { useEffect, useRef, useState } from "react"
 import { useTheme } from "next-themes"
 
-// ─── Efeito de teia/grafo interativo (desktop) + meteoros CSS (mobile) ───────
-// Desktop: canvas interativo com nós e linhas + glow neon
-// Mobile:  meteoros CSS puros — zero canvas, zero RAF, zero JS de animação
-//          apenas @keyframes transform+opacity (compositor-only, sem repaint)
+// ─── Efeito de teia/grafo interativo (desktop-only) ─────────────────────────
+// Mobile: apenas background CSS grid — zero canvas, zero JS
 // ─────────────────────────────────────────────────────────────────────────────
-
-// 9 meteoros com parâmetros fixos — sem JS, apenas CSS @keyframes
-function MeteorBackground() {
-  return (
-    <div className="meteor-container" aria-hidden="true">
-      {Array.from({ length: 9 }).map((_, i) => (
-        <span key={i} className="meteor">
-          <span className="meteor-head" />
-        </span>
-      ))}
-    </div>
-  )
-}
 
 interface Node {
   x: number; y: number
@@ -265,10 +250,7 @@ export function AnimatedBackground() {
     }
   }, [mounted, isMobile])
 
-  if (!mounted) return null
-
-  // Mobile: meteoros CSS puros (sem canvas, sem RAF)
-  if (isMobile) return <MeteorBackground />
+  if (!mounted || isMobile) return null
 
   return (
     <canvas
