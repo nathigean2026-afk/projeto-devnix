@@ -13,6 +13,7 @@ const links = [
   { label: "Projetos", href: "/#projetos" },
   { label: "Preços", href: "/#precos" },
   { label: "Glossário", href: "/glossario" },
+  { label: "CRM Plus", href: "/crm-plus" },
   { label: "Contato", href: "/#contato" },
 ]
 
