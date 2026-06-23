@@ -114,13 +114,13 @@ export default function CrmPlusPage() {
                 style={{ background: "var(--foreground)", color: "var(--background)" }}>
                 Comecar agora <ArrowRight className="size-3.5" />
               </a>
-              <button onClick={() => setVideoOpen(true)}
+              <a href="https://v0-crm-devnix.vercel.app/demo"
                 className="flex items-center gap-3 px-7 py-4 rounded-full text-[11px] font-bold tracking-widest uppercase border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-all duration-300">
                 <span className="size-6 rounded-full border border-border flex items-center justify-center">
                   <Play className="size-2.5 fill-current ml-0.5" />
                 </span>
                 Ver demonstracao
-              </button>
+              </a>
             </motion.div>
             <motion.div
               className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 pt-16 border-t border-border"
