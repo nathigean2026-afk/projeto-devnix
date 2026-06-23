@@ -442,5 +442,3 @@ export default function CrmPlusPage() {
     </>
   )
 }
-ENDOFFILE
-echo "DONE"
