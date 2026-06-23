@@ -11,7 +11,7 @@ import Image from "next/image"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 
-const CRM_URL = "https://v0-crm-devnix.vercel.app"
+const CRM_URL = "https://v0-crm-devnix.vercel.app/demo"
 
 const screenshots = [
   { id: "dashboard", label: "Dashboard", src: "/crm-screenshot-dashboard.png", desc: "Visao geral do negocio em tempo real" },
