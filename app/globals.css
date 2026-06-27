@@ -107,8 +107,9 @@
 /* ─── BASE ─────────────────────────────────────────────── */
 @layer base {
   * { @apply border-border outline-ring/50; }
+  html, body { border: none !important; outline: none !important; }
   img, svg, video { border: none !important; outline: none !important; }
-  header, nav, footer, main, section, article, aside { outline: none !important; }
+  header, nav, footer, main, section, article, aside { border: none !important; outline: none !important; }
   body {
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
