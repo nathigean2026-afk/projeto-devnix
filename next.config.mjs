@@ -13,6 +13,11 @@ const nextConfig = {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    // Permite query strings em imagens locais (ex: ?v=3 para cache busting)
+    localPatterns: [
+      { pathname: "/**", search: "" },
+      { pathname: "/**", search: "**" },
+    ],
   },
   // Remover console.log em produção para reduzir bundle
   compiler: {
