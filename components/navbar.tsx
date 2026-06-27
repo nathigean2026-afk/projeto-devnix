@@ -64,12 +64,17 @@ export function Navbar() {
             fetchPriority="high"
           />
           <Image
-            src={mounted ? (isDark ? "/logo-full-light.png" : "/logo-full-dark.png") : "/logo-full-dark.png"}
+            src="/logo-full-light.png"
             alt="Elevanthe — Tecnologia que Eleva Negócios"
             width={320}
             height={92}
             className="object-contain hidden sm:block transition-all duration-300"
-            style={{ width: "auto", height: "auto", maxHeight: "64px" }}
+            style={{
+              width: "auto",
+              height: "auto",
+              maxHeight: "64px",
+              filter: mounted && !isDark ? "invert(1)" : "none",
+            }}
             priority
             fetchPriority="high"
           />
@@ -155,12 +160,17 @@ export function Navbar() {
             <div className="flex items-center justify-between mb-4">
               <a href="/" aria-label="Elevanthe">
                 <Image
-                  src={mounted ? (isDark ? "/logo-icon-light.png" : "/logo-icon-dark.png") : "/logo-icon-dark.png"}
+                  src="/logo-icon-light.png"
                   alt="Elevanthe"
                   width={88}
                   height={88}
                   className="object-contain transition-all duration-300"
-                  style={{ width: "auto", height: "auto", maxHeight: "36px" }}
+                  style={{
+                    width: "auto",
+                    height: "auto",
+                    maxHeight: "36px",
+                    filter: mounted && !isDark ? "invert(1)" : "none",
+                  }}
                   loading="lazy"
                 />
               </a>
