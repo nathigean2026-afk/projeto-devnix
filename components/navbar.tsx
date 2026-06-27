@@ -51,23 +51,23 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
         {/* Logo */}
-        <a href="#" className="flex items-center gap-2.5 group" aria-label="Devnix — Soluções Web Inteligentes">
+        <a href="#" className="flex items-center gap-2.5 group" aria-label="Elevanthe — Tecnologia que Eleva Negócios">
           <Image
-            src="/logo-icon.png"
-            alt="Devnix"
+            src={mounted ? (isDark ? "/logo-icon-light.png" : "/logo-icon-dark.png") : "/logo-icon-dark.png"}
+            alt="Elevanthe"
             width={88}
             height={88}
-            className={`object-contain block sm:hidden transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
+            className="object-contain block sm:hidden transition-all duration-300"
             style={{ width: "auto", height: "auto", maxHeight: "44px" }}
             priority
             fetchPriority="high"
           />
           <Image
-            src="/logo-full.png"
-            alt="Devnix — Soluções Web Inteligentes"
+            src={mounted ? (isDark ? "/logo-full-light.png" : "/logo-full-dark.png") : "/logo-full-dark.png"}
+            alt="Elevanthe — Tecnologia que Eleva Negócios"
             width={260}
             height={75}
-            className={`object-contain hidden sm:block transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
+            className="object-contain hidden sm:block transition-all duration-300"
             style={{ width: "auto", height: "auto", maxHeight: "48px" }}
             priority
             fetchPriority="high"
@@ -152,13 +152,13 @@ export function Navbar() {
             transition={{ duration: 0.2 }}
           >
             <div className="flex items-center justify-between mb-4">
-              <a href="/" aria-label="Devnix">
+              <a href="/" aria-label="Elevanthe">
                 <Image
-                  src="/logo-icon.png"
-                  alt="Devnix"
+                  src={mounted ? (isDark ? "/logo-icon-light.png" : "/logo-icon-dark.png") : "/logo-icon-dark.png"}
+                  alt="Elevanthe"
                   width={88}
                   height={88}
-                  className={`object-contain transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
+                  className="object-contain transition-all duration-300"
                   style={{ width: "auto", height: "auto", maxHeight: "36px" }}
                   loading="lazy"
                 />

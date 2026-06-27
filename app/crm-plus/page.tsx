@@ -88,7 +88,7 @@ export default function CrmPlusPage() {
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
             >
               <span className="size-1.5 rounded-full bg-green-400 animate-pulse" />
-              Produto Devnix — CRM Plus
+              Produto Elevanthe — CRM Plus
             </motion.div>
             <motion.h1
               className="text-display text-[clamp(52px,10vw,120px)] text-foreground mb-6 text-balance"
@@ -165,7 +165,7 @@ export default function CrmPlusPage() {
               <div className="relative aspect-video w-full">
                 <Image
                   src="/crm-screenshot-dashboard.png"
-                  alt="Video demonstracao Devnix CRM Plus"
+                  alt="Video demonstracao Elevanthe CRM Plus"
                   fill
                   className="object-cover opacity-40 group-hover:opacity-30 transition-opacity duration-300"
                 />
@@ -400,7 +400,7 @@ export default function CrmPlusPage() {
               <blockquote className="text-editorial text-[clamp(22px,4vw,40px)] text-foreground leading-tight mb-6 text-balance">
                 &ldquo;Organizei toda a minha assistencia tecnica em menos de um dia. Vale cada centavo.&rdquo;
               </blockquote>
-              <p className="text-xs text-muted-foreground mb-8">Cliente Devnix CRM Plus</p>
+              <p className="text-xs text-muted-foreground mb-8">Cliente Elevanthe CRM Plus</p>
               <a href={`${CRM_URL}/planos`} target="_blank" rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-7 py-4 rounded-full text-[11px] font-bold tracking-widest uppercase transition-all duration-300 hover:opacity-80"
                 style={{ background: "var(--foreground)", color: "var(--background)" }}>

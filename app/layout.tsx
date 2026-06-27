@@ -22,28 +22,28 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Devnix | Soluções Web Inteligentes',
+  title: 'Elevanthe | Tecnologia que Eleva Negócios',
   description:
-    'Devnix — Soluções Web Inteligentes. Desenvolvimento de sites, software personalizado, plataformas analíticas, landing pages e e-commerce sob medida para o seu negócio.',
-  keywords: ['desenvolvimento web', 'software personalizado', 'devnix', 'sites profissionais', 'soluções web', 'freelancer web', 'next.js'],
-  authors: [{ name: 'Devnix' }],
-  creator: 'Devnix',
-  metadataBase: new URL('https://v0-devnix.vercel.app'),
+    'Elevanthe — Tecnologia que Eleva Negócios. Desenvolvimento de sites, software personalizado, plataformas analíticas, landing pages e e-commerce sob medida para o seu negócio.',
+  keywords: ['desenvolvimento web', 'software personalizado', 'elevanthe', 'sites profissionais', 'soluções web', 'tecnologia', 'next.js'],
+  authors: [{ name: 'Elevanthe' }],
+  creator: 'Elevanthe',
+  metadataBase: new URL('https://elevanthe.com'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
-    url: 'https://v0-devnix.vercel.app',
-    title: 'Devnix | Soluções Web Inteligentes',
+    url: 'https://elevanthe.com',
+    title: 'Elevanthe | Tecnologia que Eleva Negócios',
     description:
       'Desenvolvimento de sites, software personalizado, plataformas analíticas e e-commerce sob medida para o seu negócio.',
-    siteName: 'Devnix',
+    siteName: 'Elevanthe',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Devnix | Soluções Web Inteligentes',
+    title: 'Elevanthe | Tecnologia que Eleva Negócios',
     description:
       'Desenvolvimento de sites, software personalizado e plataformas sob medida para o seu negócio.',
   },

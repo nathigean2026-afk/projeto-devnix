@@ -128,7 +128,7 @@ export function ProjectDetailClient({ project, allProjects = [] }: { project: Pr
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="size-4" />
-            Devnix
+            Elevanthe
           </Link>
           <Link href="/#projetos" className="label-sm text-muted-foreground hover:text-foreground transition-colors">
             Todos os projetos

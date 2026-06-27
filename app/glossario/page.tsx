@@ -4,7 +4,7 @@ import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
-  title: "Glossário de Negócios | Devnix",
+  title: "Glossário de Negócios | Elevanthe",
   description:
     "Os termos que todo dono de negócio deveria conhecer. Marketing, Finanças, Gestão, Operações e Produto explicados de forma direta.",
 }

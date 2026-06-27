@@ -33,12 +33,12 @@ export async function submitLead(data: {
       const resend = new Resend(process.env.RESEND_API_KEY)
       const wa = data.whatsapp?.replace(/\D/g, "") ?? ""
       await resend.emails.send({
-        from: "Devnix <onboarding@resend.dev>",
+        from: "Elevanthe <onboarding@resend.dev>",
         to: process.env.ADMIN_EMAIL,
         subject: `Novo lead: ${data.name} — ${data.subject ?? "Sem assunto"}`,
         html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#fff;border-radius:12px;overflow:hidden;">
           <div style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);padding:32px 24px;text-align:center;">
-            <h1 style="margin:0;font-size:22px;font-weight:800;color:#fff;">Novo Lead Devnix</h1>
+            <h1 style="margin:0;font-size:22px;font-weight:800;color:#fff;">Novo Lead Elevanthe</h1>
             <p style="margin:6px 0 0;color:rgba(255,255,255,0.7);font-size:13px;">Um novo cliente entrou em contato pelo site</p>
           </div>
           <div style="padding:28px 24px;">
@@ -55,11 +55,11 @@ export async function submitLead(data: {
               ${wa ? `<a href="https://wa.me/${wa}" style="display:inline-block;padding:11px 22px;background:#25d366;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;">Abrir WhatsApp</a>` : ""}
             </div>
           </div>
-          <div style="padding:14px 24px;border-top:1px solid #1a1a1a;text-align:center;color:#444;font-size:11px;">Devnix — Soluções Web Inteligentes</div>
+          <div style="padding:14px 24px;border-top:1px solid #1a1a1a;text-align:center;color:#444;font-size:11px;">Elevanthe — Tecnologia que Eleva Negócios</div>
         </div>`,
       })
     } catch (err) {
-      console.error("[Devnix] Erro ao enviar email de notificação:", err)
+      console.error("[Elevanthe] Erro ao enviar email de notificação:", err)
     }
   }
 

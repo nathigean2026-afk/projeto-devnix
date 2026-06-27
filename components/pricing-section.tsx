@@ -68,7 +68,7 @@ export function PricingSection() {
   const handlePlanClick = (planName: string) => {
     // Dispatch custom event picked up by ContactSection
     window.dispatchEvent(
-      new CustomEvent("devnix:plan-selected", {
+      new CustomEvent("elevanthe:plan-selected", {
         detail: { plan: planName, subject: `Interesse no plano ${planName}` },
       })
     )

@@ -182,8 +182,8 @@ export default function AdminDashboard() {
         {/* Logo */}
         <a href="/" className="flex items-center gap-2 shrink-0 group min-w-0">
           <Image
-            src="/logo-full.png"
-            alt="Devnix"
+            src="/logo-full-dark.png"
+            alt="Elevanthe"
             width={90}
             height={28}
             className={`object-contain shrink-0 transition-all${mounted && !isDark ? " brightness-0" : ""}`}
@@ -494,7 +494,7 @@ function LeadDetail({
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => {
-                const url = `mailto:${lead.email}?subject=Re: ${encodeURIComponent(lead.subject ?? "Sua solicitação — Devnix")}`
+                const url = `mailto:${lead.email}?subject=Re: ${encodeURIComponent(lead.subject ?? "Sua solicitação — Elevanthe")}`
                 try { (window.top ?? window).open(url, "_blank") } catch { window.open(url, "_blank") }
               }}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80 active:scale-95"
@@ -507,7 +507,7 @@ function LeadDetail({
             {lead.whatsapp && (
               <button
                 onClick={() => {
-                  const url = `https://wa.me/${lead.whatsapp!.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${lead.name}! Tudo bem? Vi sua mensagem na Devnix e gostaria de conversar sobre o seu projeto.`)}`
+                  const url = `https://wa.me/${lead.whatsapp!.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${lead.name}! Tudo bem? Vi sua mensagem na Elevanthe e gostaria de conversar sobre o seu projeto.`)}`
                   try { (window.top ?? window).open(url, "_blank") } catch { window.open(url, "_blank") }
                 }}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-[#25d366]/30 text-[#25d366] bg-[#25d366]/10 hover:bg-[#25d366]/20 transition-all active:scale-95"

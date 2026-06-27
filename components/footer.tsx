@@ -21,7 +21,7 @@ const socials = [
   { Icon: GitBranch, href: "https://github.com", label: "GitHub" },
   { Icon: Link2, href: "https://linkedin.com", label: "LinkedIn" },
   { Icon: AtSign, href: "https://instagram.com", label: "Instagram" },
-  { Icon: Mail, href: "mailto:contato@devnix.com.br", label: "E-mail" },
+  { Icon: Mail, href: "mailto:contato@elevanthe.com", label: "E-mail" },
 ]
 
 export function Footer() {
@@ -44,7 +44,7 @@ export function Footer() {
           className="text-[clamp(80px,18vw,220px)] font-black text-foreground tracking-tight leading-none whitespace-nowrap"
           style={{ opacity: 0.025, letterSpacing: "-0.04em" }}
         >
-          Devnix
+          Elevanthe
         </span>
       </div>
 
@@ -73,13 +73,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Brand col */}
           <div className="lg:col-span-2">
-            <a href="#" className="flex items-center gap-2 mb-5 w-fit group" aria-label="Devnix">
+            <a href="#" className="flex items-center gap-2 mb-5 w-fit group" aria-label="Elevanthe">
               <Image
-                src="/logo-full.png"
-                alt="Devnix — Soluções Web Inteligentes"
+                src={mounted ? (isDark ? "/logo-full-light.png" : "/logo-full-dark.png") : "/logo-full-dark.png"}
+                alt="Elevanthe — Tecnologia que Eleva Negócios"
                 width={160}
                 height={46}
-                className={`object-contain transition-all duration-300${mounted && !isDark ? " brightness-0" : ""}`}
+                className="object-contain transition-all duration-300"
                 style={{ width: "auto", height: "auto", maxHeight: "38px" }}
               />
             </a>
@@ -124,10 +124,10 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-8 border-t border-border">
           <p className="text-xs text-muted-foreground opacity-50">
-            &copy; {new Date().getFullYear()} Devnix. Todos os direitos reservados.
+            &copy; {new Date().getFullYear()} Elevanthe. Todos os direitos reservados.
           </p>
           <p className="text-xs text-muted-foreground opacity-50">
-            Feito com <span className="opacity-80">&#9829;</span> por Devnix
+            Feito com <span className="opacity-80">&#9829;</span> por Elevanthe
           </p>
         </div>
       </div>
