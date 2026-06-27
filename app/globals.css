@@ -107,6 +107,7 @@
 /* ─── BASE ─────────────────────────────────────────────── */
 @layer base {
   * { @apply border-border outline-ring/50; }
+  img, svg, video { border: none !important; }
   body {
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
@@ -508,7 +509,7 @@
   animation: stellar-in 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* ─── STAR RING ────────────────────────────────────��────── */
+/* ─── STAR RING ───────────────────────────────��────��────── */
 @keyframes star-ring {
   0%   { transform: rotate(0deg) scale(0.5); opacity: 0; }
   20%  { opacity: 1; }
