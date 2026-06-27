@@ -59,17 +59,17 @@ export function Navbar() {
             width={88}
             height={88}
             className="object-contain block sm:hidden transition-all duration-300"
-            style={{ width: "auto", height: "auto", maxHeight: "44px" }}
+            style={{ width: "auto", height: "auto", maxHeight: "56px" }}
             priority
             fetchPriority="high"
           />
           <Image
             src={mounted ? (isDark ? "/logo-full-light.png" : "/logo-full-dark.png") : "/logo-full-dark.png"}
             alt="Elevanthe — Tecnologia que Eleva Negócios"
-            width={260}
-            height={75}
+            width={320}
+            height={92}
             className="object-contain hidden sm:block transition-all duration-300"
-            style={{ width: "auto", height: "auto", maxHeight: "48px" }}
+            style={{ width: "auto", height: "auto", maxHeight: "64px" }}
             priority
             fetchPriority="high"
           />

@@ -1,7 +1,8 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 import { motion, useInView } from "framer-motion"
+import { useTheme } from "next-themes"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -122,6 +123,11 @@ function FadeIn({
 }
 
 export function QuemSomosContent() {
+  const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  const isDark = resolvedTheme === "dark"
+
   return (
     <main className="relative overflow-hidden">
 
@@ -213,11 +219,11 @@ export function QuemSomosContent() {
                   style={{ background: "var(--background)" }}
                 >
                   <Image
-                    src="/logo-icon-color.png"
+                    src={mounted ? (isDark ? "/logo-icon-light.png" : "/logo-icon-dark.png") : "/logo-icon-dark.png"}
                     alt="Mascote Elevanthe — elefante tecnológico"
                     width={160}
                     height={160}
-                    className="object-contain"
+                    className="object-contain transition-all duration-300"
                     style={{ maxWidth: "80%", maxHeight: "80%" }}
                   />
                 </div>
