@@ -198,9 +198,9 @@ export function AnimatedBackground() {
             const ni = drawNodes[i], nj = drawNodes[j]
             const sa = Math.min(ni.spawnAlpha, nj.spawnAlpha)
             const isFreeEdge = ni.free || nj.free
-            const baseAlpha  = isFreeEdge ? LINE_ALPHA_BASE : (isDark ? 0.38 : 0.14)
+            const baseAlpha  = isFreeEdge ? (isDark ? LINE_ALPHA_BASE : LINE_ALPHA_BASE * 0.35) : (isDark ? 0.38 : 0.06)
             const distMx2    = (ni.x - mx) ** 2 + (ni.y - my) ** 2
-            const hover      = distMx2 < (REPEL_R * 1.5) ** 2 ? 0.18 : 0
+            const hover      = distMx2 < (REPEL_R * 1.5) ** 2 ? (isDark ? 0.18 : 0.07) : 0
             const alpha      = ratio * baseAlpha * sa + hover * ratio
             ctx.beginPath()
             ctx.moveTo(ni.x, ni.y)
@@ -217,20 +217,20 @@ export function AnimatedBackground() {
         const sa    = p.spawnAlpha
         const pulse = 0.40 + p.glow * 0.60
         const haloR = p.size * (8 + p.glow * 10)
-        const haloA = pulse * sa * (isDark ? 0.55 : 0.35)
+        const haloA = pulse * sa * (isDark ? 0.55 : 0.10)
 
-        ctx.shadowBlur  = haloR
+        ctx.shadowBlur  = isDark ? haloR : haloR * 0.3
         ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},${haloA.toFixed(3)})`
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${rgb},${(p.opacity * (isDark ? 0.90 : 0.70) * sa).toFixed(3)})`
+        ctx.fillStyle = `rgba(${rgb},${(p.opacity * (isDark ? 0.90 : 0.30) * sa).toFixed(3)})`
         ctx.fill()
 
-        ctx.shadowBlur  = p.size * 5
-        ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},${(pulse * sa * (isDark ? 1.0 : 0.75)).toFixed(3)})`
+        ctx.shadowBlur  = p.size * (isDark ? 5 : 2)
+        ctx.shadowColor = `rgba(${neon.r},${neon.g},${neon.b},${(pulse * sa * (isDark ? 1.0 : 0.20)).toFixed(3)})`
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size * 0.40, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${neon.r},${neon.g},${neon.b},${(pulse * sa * (isDark ? 0.90 : 0.70)).toFixed(3)})`
+        ctx.fillStyle = `rgba(${neon.r},${neon.g},${neon.b},${(pulse * sa * (isDark ? 0.90 : 0.25)).toFixed(3)})`
         ctx.fill()
       }
 
