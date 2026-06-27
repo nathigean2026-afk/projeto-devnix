@@ -69,7 +69,7 @@ export default function SignUpPage() {
             width={140}
             height={40}
             className="object-contain transition-all duration-300"
-            style={{ width: "auto", maxHeight: "40px", mixBlendMode: "multiply" }}
+            style={{ width: "auto", maxHeight: "40px" }}
             loading="eager"
             priority
           />

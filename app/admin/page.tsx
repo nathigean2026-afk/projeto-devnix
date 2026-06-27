@@ -187,11 +187,7 @@ export default function AdminDashboard() {
             width={90}
             height={28}
             className="object-contain shrink-0 transition-all"
-            style={{
-              width: "auto",
-              maxHeight: "28px",
-              mixBlendMode: mounted && isDark ? "screen" : "multiply",
-            }}
+            style={{ width: "auto", maxHeight: "28px" }}
           />
         </a>
 
