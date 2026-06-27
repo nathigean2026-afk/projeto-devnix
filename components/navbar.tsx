@@ -8,6 +8,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 const links = [
+  { label: "Quem Somos", href: "/quem-somos" },
   { label: "Serviços", href: "/#servicos" },
   { label: "Processo", href: "/#processo" },
   { label: "Projetos", href: "/#projetos" },
@@ -45,7 +46,7 @@ export function Navbar() {
           : "transparent",
         backdropFilter: scrolled ? "blur(24px)" : "none",
         WebkitBackdropFilter: scrolled ? "blur(24px)" : "none",
-        border: scrolled ? "1px solid var(--border)" : "1px solid transparent",
+        border: scrolled ? "1px solid var(--border)" : (!isDark && mounted ? "1px solid var(--border)" : "none"),
         boxShadow: scrolled ? "0 4px 32px rgba(0,0,0,0.18)" : "none",
       }}
     >
@@ -58,17 +59,17 @@ export function Navbar() {
             width={88}
             height={88}
             className="object-contain block sm:hidden transition-all duration-300"
-            style={{ width: "auto", height: "auto", maxHeight: "44px" }}
+            style={{ width: "auto", height: "auto", maxHeight: "56px" }}
             priority
             fetchPriority="high"
           />
           <Image
             src={mounted ? (isDark ? "/logo-full-light.png" : "/logo-full-dark.png") : "/logo-full-dark.png"}
             alt="Elevanthe — Tecnologia que Eleva Negócios"
-            width={260}
-            height={75}
+            width={320}
+            height={92}
             className="object-contain hidden sm:block transition-all duration-300"
-            style={{ width: "auto", height: "auto", maxHeight: "48px" }}
+            style={{ width: "auto", height: "auto", maxHeight: "64px" }}
             priority
             fetchPriority="high"
           />

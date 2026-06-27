@@ -11,47 +11,47 @@ import Image from "next/image"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 
-const CRM_URL = "https://v0-crm-devnix.vercel.app/demo"
+const CRM_URL = "https://crm.elevanthe.com/demo"
 
 const screenshots = [
-  { id: "dashboard", label: "Dashboard", src: "/crm-screenshot-dashboard.png", desc: "Visao geral do negocio em tempo real" },
-  { id: "clientes", label: "Clientes", src: "/crm-screenshot-clientes.png", desc: "Gestao completa da sua base de clientes" },
-  { id: "os", label: "Ordens de Servico", src: "/crm-screenshot-os.png", desc: "Acompanhamento de todas as OS em aberto" },
+  { id: "dashboard", label: "Dashboard", src: "/crm-screenshot-dashboard.png", desc: "Visão geral do negócio em tempo real" },
+  { id: "clientes", label: "Clientes", src: "/crm-screenshot-clientes.png", desc: "Gestão completa da sua base de clientes" },
+  { id: "os", label: "Ordens de Serviço", src: "/crm-screenshot-os.png", desc: "Acompanhamento de todas as OS em aberto" },
   { id: "financeiro", label: "Financeiro", src: "/crm-screenshot-financeiro.png", desc: "Controle de receitas, despesas e saldo" },
 ]
 
 const features = [
-  { icon: Users, title: "Gestao de Clientes", desc: "Cadastre e organize todos os seus clientes com historico completo, contatos e status de relacionamento." },
-  { icon: Wrench, title: "Ordens de Servico", desc: "Crie, acompanhe e finalize ordens de servico com controle de status em tempo real." },
-  { icon: FileText, title: "Orcamentos Profissionais", desc: "Gere orcamentos detalhados com itens, valores e envie diretamente para seus clientes." },
-  { icon: DollarSign, title: "Controle Financeiro", desc: "Acompanhe receitas, despesas e lucro do seu negocio com visao clara do fluxo de caixa." },
-  { icon: BarChart3, title: "Relatorios e Metricas", desc: "Dashboards com graficos e indicadores para voce tomar decisoes baseadas em dados reais." },
-  { icon: Shield, title: "Dados Seguros", desc: "Banco de dados seguro com acesso protegido por autenticacao. Seus dados sempre disponiveis." },
+  { icon: Users, title: "Gestão de Clientes", desc: "Cadastre e organize todos os seus clientes com histórico completo, contatos e status de relacionamento." },
+  { icon: Wrench, title: "Ordens de Serviço", desc: "Crie, acompanhe e finalize ordens de serviço com controle de status em tempo real." },
+  { icon: FileText, title: "Orçamentos Profissionais", desc: "Gere orçamentos detalhados com itens, valores e envie diretamente para seus clientes." },
+  { icon: DollarSign, title: "Controle Financeiro", desc: "Acompanhe receitas, despesas e lucro do seu negócio com visão clara do fluxo de caixa." },
+  { icon: BarChart3, title: "Relatórios e Métricas", desc: "Dashboards com gráficos e indicadores para você tomar decisões baseadas em dados reais." },
+  { icon: Shield, title: "Dados Seguros", desc: "Banco de dados seguro com acesso protegido por autenticação. Seus dados sempre disponíveis." },
 ]
 
 const plans = [
   {
     id: "start", icon: Zap, label: "Start", duration: "7 dias", price: "R$ 7", priceDetail: "por 7 dias",
     desc: "Ideal para conhecer a plataforma sem compromisso.", featured: false,
-    features: ["Acesso completo por 7 dias", "Clientes ilimitados", "Ordens de servico ilimitadas", "Orcamentos e financeiro", "Suporte por email"],
+    features: ["Acesso completo por 7 dias", "Clientes ilimitados", "Ordens de serviço ilimitadas", "Orçamentos e financeiro", "Suporte por e-mail"],
   },
   {
     id: "business", icon: CalendarDays, label: "Business", duration: "30 dias", price: "R$ 24", priceDetail: "por mes",
     desc: "Para profissionais que precisam de controle mensal.", featured: true,
-    features: ["Acesso completo por 30 dias", "Clientes ilimitados", "Ordens de servico ilimitadas", "Orcamentos e financeiro", "Relatorios completos", "Suporte prioritario"],
+    features: ["Acesso completo por 30 dias", "Clientes ilimitados", "Ordens de serviço ilimitadas", "Orçamentos e financeiro", "Relatórios completos", "Suporte prioritário"],
   },
   {
     id: "enterprise", icon: CalendarRange, label: "Enterprise", duration: "1 ano", price: "R$ 260", priceDetail: "por ano",
-    desc: "Melhor custo-beneficio para uso continuo.", featured: false,
-    features: ["Acesso completo por 12 meses", "Clientes ilimitados", "Ordens de servico ilimitadas", "Orcamentos e financeiro", "Relatorios completos", "Suporte VIP"],
+    desc: "Melhor custo-benefício para uso contínuo.", featured: false,
+    features: ["Acesso completo por 12 meses", "Clientes ilimitados", "Ordens de serviço ilimitadas", "Orçamentos e financeiro", "Relatórios completos", "Suporte VIP"],
   },
 ]
 
 const stats = [
   { value: "100%", label: "Online" },
-  { value: "3", label: "Planos acessiveis" },
-  { value: "24h", label: "Acesso instantaneo" },
-  { value: "R$ 7", label: "Para comecar" },
+  { value: "3", label: "Planos acessíveis" },
+  { value: "24h", label: "Acesso instantâneo" },
+  { value: "R$ 7", label: "Para começar" },
 ]
 
 export default function CrmPlusPage() {
@@ -96,14 +96,14 @@ export default function CrmPlusPage() {
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
-              Seu negocio,<br /><span className="text-muted-foreground">organizado.</span>
+              Seu negócio,<br /><span className="text-muted-foreground">organizado.</span>
             </motion.h1>
             <motion.p
               className="text-base text-muted-foreground max-w-xl mx-auto leading-relaxed mb-10"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
             >
-              CRM completo para prestadores de servico. Gerencie clientes, ordens de servico,
-              orcamentos e financeiro em um so lugar, acessivel de qualquer dispositivo.
+              CRM completo para prestadores de serviço. Gerencie clientes, ordens de serviço,
+              orçamentos e financeiro em um só lugar, acessível de qualquer dispositivo.
             </motion.p>
             <motion.div
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
@@ -112,14 +112,14 @@ export default function CrmPlusPage() {
               <a href={`${CRM_URL}/planos`} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2 px-7 py-4 rounded-full text-[11px] font-bold tracking-widest uppercase transition-all duration-300 hover:opacity-80 hover:scale-95"
                 style={{ background: "var(--foreground)", color: "var(--background)" }}>
-                Comecar agora <ArrowRight className="size-3.5" />
+                Começar agora <ArrowRight className="size-3.5" />
               </a>
-              <a href="https://v0-crm-devnix.vercel.app/demo"
+              <a href="https://crm.elevanthe.com/demo"
                 className="flex items-center gap-3 px-7 py-4 rounded-full text-[11px] font-bold tracking-widest uppercase border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-all duration-300">
                 <span className="size-6 rounded-full border border-border flex items-center justify-center">
                   <Play className="size-2.5 fill-current ml-0.5" />
                 </span>
-                Ver demonstracao
+                Ver demonstração
               </a>
             </motion.div>
             <motion.div
@@ -143,7 +143,7 @@ export default function CrmPlusPage() {
             <motion.div className="flex items-center gap-3 mb-6"
               initial={{ opacity: 0, x: -16 }} animate={videoInView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.6 }}>
               <div className="h-px w-8 bg-foreground opacity-30" />
-              <span className="label-sm text-muted-foreground">Demonstracao</span>
+              <span className="label-sm text-muted-foreground">Demonstração</span>
             </motion.div>
             <motion.h2
               className="text-editorial text-[clamp(32px,5vw,60px)] text-foreground leading-none mb-12"
@@ -151,7 +151,7 @@ export default function CrmPlusPage() {
               animate={videoInView ? { opacity: 1, scale: 1, filter: "blur(0px)" } : {}}
               transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
-              Veja como funciona<br /><span className="text-muted-foreground">na pratica.</span>
+              Veja como funciona<br /><span className="text-muted-foreground">na prática.</span>
             </motion.h2>
             <motion.div
               className="relative rounded-2xl overflow-hidden border border-border cursor-pointer group"
@@ -165,7 +165,7 @@ export default function CrmPlusPage() {
               <div className="relative aspect-video w-full">
                 <Image
                   src="/crm-screenshot-dashboard.png"
-                  alt="Video demonstracao Elevanthe CRM Plus"
+                  alt="Vídeo de demonstração do Elevanthe CRM Plus"
                   fill
                   className="object-cover opacity-40 group-hover:opacity-30 transition-opacity duration-300"
                 />
@@ -180,7 +180,7 @@ export default function CrmPlusPage() {
                 {/* Badge */}
                 <div className="absolute bottom-6 left-6 flex items-center gap-3">
                   <div className="px-4 py-2 rounded-full border border-white/10 backdrop-blur-sm bg-black/40 text-xs text-white font-semibold tracking-wider">
-                    Assistir demonstracao — 2 min
+                    Assistir demonstração — 2 min
                   </div>
                 </div>
               </div>
@@ -208,7 +208,7 @@ export default function CrmPlusPage() {
               </motion.h2>
               <motion.p className="text-sm text-muted-foreground max-w-xs leading-relaxed"
                 initial={{ opacity: 0, y: 16 }} animate={screenshotInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.25 }}>
-                Cada tela foi pensada para ser intuitiva. Zero treinamento necessario para comecar.
+                Cada tela foi pensada para ser intuitiva. Zero treinamento necessário para começar.
               </motion.p>
             </div>
 
@@ -239,7 +239,7 @@ export default function CrmPlusPage() {
                   </div>
                   <div className="flex-1 mx-4">
                     <div className="h-6 max-w-xs mx-auto rounded-md flex items-center justify-center px-3 border border-border" style={{ background: "var(--muted)" }}>
-                      <span className="text-[10px] text-muted-foreground font-mono">v0-crm-devnix.vercel.app</span>
+                      <span className="text-[10px] text-muted-foreground font-mono">crm.elevanthe.com</span>
                     </div>
                   </div>
                 </div>
@@ -283,11 +283,11 @@ export default function CrmPlusPage() {
                 initial={{ opacity: 0, scale: 0.95, filter: "blur(8px)" }}
                 animate={featInView ? { opacity: 1, scale: 1, filter: "blur(0px)" } : {}}
                 transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}>
-                Tudo que voce<br /><span className="text-muted-foreground">precisa.</span>
+                Tudo que você<br /><span className="text-muted-foreground">precisa.</span>
               </motion.h2>
               <motion.p className="text-sm text-muted-foreground max-w-xs leading-relaxed"
                 initial={{ opacity: 0, y: 16 }} animate={featInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.25 }}>
-                Uma plataforma completa pensada para quem presta servicos e precisa de controle real do negocio.
+                Uma plataforma completa pensada para quem presta serviços e precisa de controle real do negócio.
               </motion.p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -326,11 +326,11 @@ export default function CrmPlusPage() {
                 initial={{ opacity: 0, scale: 0.95, filter: "blur(8px)" }}
                 animate={pricingInView ? { opacity: 1, scale: 1, filter: "blur(0px)" } : {}}
                 transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}>
-                Precos que<br /><span className="text-muted-foreground">cabem no bolso.</span>
+                Preços que<br /><span className="text-muted-foreground">cabem no bolso.</span>
               </motion.h2>
               <motion.p className="text-sm text-muted-foreground max-w-xs leading-relaxed"
                 initial={{ opacity: 0, y: 16 }} animate={pricingInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.25 }}>
-                Pagamento unico via Cartao ou Pix. Ativacao automatica apos confirmacao.
+                Pagamento único via Cartão ou Pix. Ativação automática após confirmação.
               </motion.p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -381,7 +381,7 @@ export default function CrmPlusPage() {
               initial={{ opacity: 0 }} animate={pricingInView ? { opacity: 1 } : {}} transition={{ delay: 0.8 }}>
               <div className="flex items-center gap-2"><Shield className="size-3.5" />Pagamento seguro via Stripe e Mercado Pago</div>
               <span className="hidden sm:block opacity-30">·</span>
-              <div className="flex items-center gap-2"><Zap className="size-3.5" />Ativacao automatica apos pagamento</div>
+              <div className="flex items-center gap-2"><Zap className="size-3.5" />Ativação automática após pagamento</div>
             </motion.div>
           </div>
         </section>
@@ -398,7 +398,7 @@ export default function CrmPlusPage() {
                 {[...Array(5)].map((_, i) => (<Star key={i} className="size-4 text-foreground opacity-60 fill-current" />))}
               </div>
               <blockquote className="text-editorial text-[clamp(22px,4vw,40px)] text-foreground leading-tight mb-6 text-balance">
-                &ldquo;Organizei toda a minha assistencia tecnica em menos de um dia. Vale cada centavo.&rdquo;
+                &ldquo;Organizei toda a minha assistência técnica em menos de um dia. Vale cada centavo.&rdquo;
               </blockquote>
               <p className="text-xs text-muted-foreground mb-8">Cliente Elevanthe CRM Plus</p>
               <a href={`${CRM_URL}/planos`} target="_blank" rel="noopener noreferrer"
@@ -432,8 +432,8 @@ export default function CrmPlusPage() {
             </button>
             <div className="relative aspect-video w-full bg-black flex items-center justify-center">
               <p className="text-sm text-white/40 text-center px-8">
-                Adicione aqui o link do seu video de demonstracao.<br />
-                <span className="text-xs opacity-60">Substitua este placeholder pelo componente de video (YouTube, Vimeo ou &lt;video&gt; nativo).</span>
+                Adicione aqui o link do seu vídeo de demonstração.<br />
+                <span className="text-xs opacity-60">Substitua este placeholder pelo componente de vídeo (YouTube, Vimeo ou &lt;video&gt; nativo).</span>
               </p>
             </div>
           </motion.div>

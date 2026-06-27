@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
 import { authClient } from "@/lib/auth-client"
 import Image from "next/image"
-import { Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff } from "lucide-react"
+import { Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff, Sun, Moon } from "lucide-react"
 
 export default function SignInPage() {
   const router = useRouter()
+  const { resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -16,6 +18,8 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
+
+  const isDark = resolvedTheme === "dark"
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -33,9 +37,23 @@ export default function SignInPage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden dot-pattern"
+      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden grid-pattern"
       style={{ background: "var(--background)" }}
     >
+      {/* Toggle de tema — canto superior direito */}
+      {mounted && (
+        <button
+          onClick={() => setTheme(isDark ? "light" : "dark")}
+          className="absolute top-5 right-5 size-9 rounded-full flex items-center justify-center border border-border hover:bg-secondary transition-all duration-200 z-20"
+          aria-label="Alternar tema"
+          style={{ background: "var(--background)" }}
+        >
+          {isDark
+            ? <Sun className="size-4 text-muted-foreground" />
+            : <Moon className="size-4 text-muted-foreground" />}
+        </button>
+      )}
+
       {/* Radial vignette — mesma do hero */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -63,7 +81,7 @@ export default function SignInPage() {
         {mounted && (
           <div className="animate-fade-in">
             <Image
-              src="/logo-full-dark.png"
+              src={isDark ? "/logo-full-light.png" : "/logo-full-dark.png"}
               alt="Elevanthe"
               width={160}
               height={44}
