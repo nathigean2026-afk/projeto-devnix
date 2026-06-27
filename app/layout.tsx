@@ -22,6 +22,11 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
   title: 'Elevanthe | Tecnologia que Eleva Negócios',
   description:
     'Elevanthe — Tecnologia que Eleva Negócios. Desenvolvimento de sites, software personalizado, plataformas analíticas, landing pages e e-commerce sob medida para o seu negócio.',
