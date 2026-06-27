@@ -81,13 +81,14 @@ export default function SignInPage() {
         {mounted && (
           <div className="animate-fade-in">
             <Image
-              src="/logo-full-light.png?v=3"
+              src="/logo-full-light.png"
               alt="Elevanthe"
               width={160}
               height={44}
               className="object-contain"
               style={{ width: "auto", maxHeight: "40px", filter: !isDark ? "invert(1)" : "none" }}
               priority
+              unoptimized
             />
           </div>
         )}
