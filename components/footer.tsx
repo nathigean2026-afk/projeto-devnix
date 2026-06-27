@@ -75,12 +75,17 @@ export function Footer() {
           <div className="lg:col-span-2">
             <a href="#" className="flex items-center gap-2 mb-5 w-fit group" aria-label="Elevanthe">
               <Image
-                src={mounted ? (isDark ? "/logo-full-light.png" : "/logo-full-dark.png") : "/logo-full-dark.png"}
+                src="/logo-full-light.png"
                 alt="Elevanthe — Tecnologia que Eleva Negócios"
                 width={160}
                 height={46}
                 className="object-contain transition-all duration-300"
-                style={{ width: "auto", height: "auto", maxHeight: "38px" }}
+                style={{
+                  width: "auto",
+                  height: "auto",
+                  maxHeight: "38px",
+                  filter: mounted && !isDark ? "invert(1)" : "none",
+                }}
               />
             </a>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-xs mb-6">
