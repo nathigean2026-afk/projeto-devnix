@@ -75,7 +75,7 @@ export function Footer() {
           <div className="lg:col-span-2">
             <a href="#" className="flex items-center gap-2 mb-5 w-fit group" aria-label="Elevanthe">
               <Image
-                src="/logo-full-light.png"
+                src="/logo-full-light.png?v=3"
                 alt="Elevanthe — Tecnologia que Eleva Negócios"
                 width={160}
                 height={46}

@@ -54,7 +54,7 @@ export function Navbar() {
         {/* Logo */}
         <a href="#" className="flex items-center gap-2.5 group" aria-label="Elevanthe — Tecnologia que Eleva Negócios">
           <Image
-            src="/logo-icon-light.png"
+            src="/logo-icon-light.png?v=3"
             alt="Elevanthe"
             width={88}
             height={88}
@@ -64,7 +64,7 @@ export function Navbar() {
             fetchPriority="high"
           />
           <Image
-            src="/logo-full-light.png"
+            src="/logo-full-light.png?v=3"
             alt="Elevanthe — Tecnologia que Eleva Negócios"
             width={320}
             height={92}
@@ -160,7 +160,7 @@ export function Navbar() {
             <div className="flex items-center justify-between mb-4">
               <a href="/" aria-label="Elevanthe">
                 <Image
-                  src="/logo-icon-light.png"
+                  src="/logo-icon-light.png?v=3"
                   alt="Elevanthe"
                   width={88}
                   height={88}

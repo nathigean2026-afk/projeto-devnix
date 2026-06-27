@@ -81,7 +81,7 @@ export default function SignInPage() {
         {mounted && (
           <div className="animate-fade-in">
             <Image
-              src="/logo-full-light.png"
+              src="/logo-full-light.png?v=3"
               alt="Elevanthe"
               width={160}
               height={44}
