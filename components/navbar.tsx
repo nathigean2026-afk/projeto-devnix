@@ -8,6 +8,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 const links = [
+  { label: "Quem Somos", href: "/quem-somos" },
   { label: "Serviços", href: "/#servicos" },
   { label: "Processo", href: "/#processo" },
   { label: "Projetos", href: "/#projetos" },

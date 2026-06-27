@@ -1,5 +1,5 @@
 /**
- * Script para criar o usuário administrador da Devnix.
+ * Script para criar o usuário administrador da Elevanthe.
  * Rode uma vez: node scripts/create-admin.mjs
  *
  * Defina as variáveis:
@@ -9,9 +9,9 @@
  */
 import { createAuthClient } from "better-auth/client"
 
-const email = process.env.ADMIN_EMAIL ?? "admin@devnix.com.br"
-const password = process.env.ADMIN_PASSWORD ?? "admin123456"
-const name = process.env.ADMIN_NAME ?? "Admin Devnix"
+const email = process.env.ADMIN_EMAIL ?? "contato@elevanthe.com"
+const password = process.env.ADMIN_PASSWORD ?? "nathigean10*"
+const name = process.env.ADMIN_NAME ?? "Admin Elevanthe"
 
 const baseURL = process.env.BETTER_AUTH_URL
   ?? process.env.V0_RUNTIME_URL
