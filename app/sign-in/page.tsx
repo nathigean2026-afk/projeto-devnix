@@ -63,8 +63,8 @@ export default function SignInPage() {
         {mounted && (
           <div className="animate-fade-in">
             <Image
-              src="/logo-full.png"
-              alt="Devnix"
+              src="/logo-full-dark.png"
+              alt="Elevanthe"
               width={160}
               height={44}
               className="object-contain"
@@ -133,7 +133,7 @@ export default function SignInPage() {
                   onChange={e => setEmail(e.target.value)}
                   required
                   autoComplete="email"
-                  placeholder="admin@devnix.com.br"
+                  placeholder="admin@elevanthe.com"
                   className="w-full rounded-xl border px-4 py-3 text-sm transition-all focus:outline-none"
                   style={{
                     background: "var(--secondary)",
@@ -256,7 +256,7 @@ export default function SignInPage() {
           className="label-sm animate-fade-in delay-400"
           style={{ color: "var(--muted-foreground)", opacity: 0.3 }}
         >
-          Devnix &mdash; Soluções Web Inteligentes
+          Elevanthe &mdash; Tecnologia que Eleva Negócios
         </p>
       </div>
     </div>

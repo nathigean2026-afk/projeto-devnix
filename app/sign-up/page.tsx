@@ -64,11 +64,11 @@ export default function SignUpPage() {
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-10">
           <Image
-            src="/logo-full.png"
-            alt="Devnix"
+            src="/logo-full-dark.png"
+            alt="Elevanthe"
             width={140}
             height={40}
-            className={`object-contain transition-all duration-300${mounted && resolvedTheme !== "dark" ? " brightness-0" : ""}`}
+            className="object-contain transition-all duration-300"
             style={{ width: "auto", maxHeight: "40px" }}
             loading="eager"
             priority
@@ -77,7 +77,7 @@ export default function SignUpPage() {
 
         <div className="rounded-2xl border border-border bg-card p-8 shadow-2xl">
           <h1 className="text-2xl font-bold text-foreground mb-1">Criar conta admin</h1>
-          <p className="text-muted-foreground text-sm mb-8">Configure o primeiro acesso administrativo da Devnix.</p>
+          <p className="text-muted-foreground text-sm mb-8">Configure o primeiro acesso administrativo da Elevanthe.</p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
@@ -90,7 +90,7 @@ export default function SignUpPage() {
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">E-mail</label>
               <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required
                 className="w-full rounded-xl border border-border bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/20 transition"
-                placeholder="admin@devnix.com.br" />
+                placeholder="admin@elevanthe.com" />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Senha</label>
@@ -116,7 +116,7 @@ export default function SignUpPage() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          Devnix — Soluções Web Inteligentes
+          Elevanthe — Tecnologia que Eleva Negócios
         </p>
       </div>
     </div>

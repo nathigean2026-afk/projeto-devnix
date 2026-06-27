@@ -25,7 +25,7 @@ export function ProjectsGallery({ projects }: { projects: ProjectRow[] }) {
             href="/"
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
           >
-            <ArrowLeft className="size-4" /> Devnix
+            <ArrowLeft className="size-4" /> Elevanthe
           </Link>
           <span className="label-sm text-muted-foreground hidden sm:block">
             {filtered.length} projeto{filtered.length !== 1 ? "s" : ""}
