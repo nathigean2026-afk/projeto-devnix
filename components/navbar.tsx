@@ -54,12 +54,12 @@ export function Navbar() {
         {/* Logo */}
         <a href="#" className="flex items-center gap-2.5 group" aria-label="Elevanthe — Tecnologia que Eleva Negócios">
           <Image
-            src={mounted ? (isDark ? "/logo-icon-light.png" : "/logo-icon-dark.png") : "/logo-icon-dark.png"}
+            src="/logo-icon-light.png"
             alt="Elevanthe"
             width={88}
             height={88}
             className="object-contain block sm:hidden transition-all duration-300"
-            style={{ width: "auto", height: "auto", maxHeight: "56px" }}
+            style={{ width: "auto", height: "auto", maxHeight: "56px", filter: mounted && !isDark ? "invert(1)" : "none" }}
             priority
             fetchPriority="high"
           />

@@ -219,12 +219,12 @@ export function QuemSomosContent() {
                   style={{ background: "var(--background)" }}
                 >
                   <Image
-                    src={mounted ? (isDark ? "/logo-icon-light.png" : "/logo-icon-dark.png") : "/logo-icon-dark.png"}
+                    src="/logo-icon-light.png"
                     alt="Mascote Elevanthe — elefante tecnológico"
                     width={160}
                     height={160}
                     className="object-contain transition-all duration-300"
-                    style={{ maxWidth: "80%", maxHeight: "80%" }}
+                    style={{ maxWidth: "80%", maxHeight: "80%", filter: mounted && !isDark ? "invert(1)" : "none" }}
                   />
                 </div>
               </div>
