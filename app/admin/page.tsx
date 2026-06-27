@@ -182,12 +182,12 @@ export default function AdminDashboard() {
         {/* Logo */}
         <a href="/" className="flex items-center gap-2 shrink-0 group min-w-0">
           <Image
-            src={mounted ? (isDark ? "/logo-full-light.png" : "/logo-full-dark.png") : "/logo-full-dark.png"}
+            src="/logo-full-light.png"
             alt="Elevanthe"
             width={90}
             height={28}
             className="object-contain shrink-0 transition-all"
-            style={{ width: "auto", maxHeight: "28px" }}
+            style={{ width: "auto", maxHeight: "28px", filter: mounted && !isDark ? "invert(1)" : "none" }}
           />
         </a>
 

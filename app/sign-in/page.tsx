@@ -81,12 +81,12 @@ export default function SignInPage() {
         {mounted && (
           <div className="animate-fade-in">
             <Image
-              src={isDark ? "/logo-full-light.png" : "/logo-full-dark.png"}
+              src="/logo-full-light.png"
               alt="Elevanthe"
               width={160}
               height={44}
               className="object-contain"
-              style={{ width: "auto", maxHeight: "40px" }}
+              style={{ width: "auto", maxHeight: "40px", filter: !isDark ? "invert(1)" : "none" }}
               priority
             />
           </div>
@@ -151,7 +151,7 @@ export default function SignInPage() {
                   onChange={e => setEmail(e.target.value)}
                   required
                   autoComplete="email"
-                  placeholder="admin@elevanthe.com"
+                  placeholder=""
                   className="w-full rounded-xl border px-4 py-3 text-sm transition-all focus:outline-none"
                   style={{
                     background: "var(--secondary)",
@@ -187,7 +187,7 @@ export default function SignInPage() {
                     onChange={e => setPassword(e.target.value)}
                     required
                     autoComplete="current-password"
-                    placeholder="••••••••"
+                    placeholder=""
                     className="w-full rounded-xl border px-4 py-3 pr-11 text-sm transition-all focus:outline-none"
                     style={{
                       background: "var(--secondary)",
