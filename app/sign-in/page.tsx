@@ -68,7 +68,7 @@ export default function SignInPage() {
               width={160}
               height={44}
               className="object-contain"
-              style={{ width: "auto", maxHeight: "40px" }}
+              style={{ width: "auto", maxHeight: "40px", mixBlendMode: "multiply" }}
               priority
             />
           </div>

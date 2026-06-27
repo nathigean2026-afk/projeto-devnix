@@ -68,8 +68,8 @@ export default function SignUpPage() {
             alt="Elevanthe"
             width={140}
             height={40}
-            className={`object-contain transition-all duration-300${mounted && resolvedTheme !== "dark" ? " brightness-0" : ""}`}
-            style={{ width: "auto", maxHeight: "40px" }}
+            className="object-contain transition-all duration-300"
+            style={{ width: "auto", maxHeight: "40px", mixBlendMode: "multiply" }}
             loading="eager"
             priority
           />

@@ -58,7 +58,12 @@ export function Navbar() {
             width={88}
             height={88}
             className="object-contain block sm:hidden transition-all duration-300"
-            style={{ width: "auto", height: "auto", maxHeight: "44px" }}
+            style={{
+              width: "auto",
+              height: "auto",
+              maxHeight: "44px",
+              mixBlendMode: mounted && isDark ? "screen" : "multiply",
+            }}
             priority
             fetchPriority="high"
           />
@@ -68,7 +73,12 @@ export function Navbar() {
             width={260}
             height={75}
             className="object-contain hidden sm:block transition-all duration-300"
-            style={{ width: "auto", height: "auto", maxHeight: "48px" }}
+            style={{
+              width: "auto",
+              height: "auto",
+              maxHeight: "48px",
+              mixBlendMode: mounted && isDark ? "screen" : "multiply",
+            }}
             priority
             fetchPriority="high"
           />
@@ -159,7 +169,12 @@ export function Navbar() {
                   width={88}
                   height={88}
                   className="object-contain transition-all duration-300"
-                  style={{ width: "auto", height: "auto", maxHeight: "36px" }}
+                  style={{
+                    width: "auto",
+                    height: "auto",
+                    maxHeight: "36px",
+                    mixBlendMode: mounted && isDark ? "screen" : "multiply",
+                  }}
                   loading="lazy"
                 />
               </a>
