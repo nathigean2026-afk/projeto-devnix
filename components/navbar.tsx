@@ -46,7 +46,7 @@ export function Navbar() {
           : "transparent",
         backdropFilter: scrolled ? "blur(24px)" : "none",
         WebkitBackdropFilter: scrolled ? "blur(24px)" : "none",
-        border: scrolled ? "1px solid var(--border)" : "1px solid transparent",
+        border: scrolled ? "1px solid var(--border)" : "none",
         boxShadow: scrolled ? "0 4px 32px rgba(0,0,0,0.18)" : "none",
       }}
     >
