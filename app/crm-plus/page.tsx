@@ -1,23 +1,71 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { motion, useInView } from "framer-motion"
 import {
   Check, Users, FileText, BarChart3, Wrench, DollarSign,
   Shield, Zap, CalendarDays, CalendarRange, ArrowRight,
-  Star, ChevronRight, Play, X,
+  Star, ChevronRight, Play, X, Quote,
 } from "lucide-react"
 import Image from "next/image"
+import { useTheme } from "next-themes"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 
 const CRM_URL = "https://crm.elevanthe.com/demo"
 
 const screenshots = [
-  { id: "dashboard", label: "Dashboard", src: "/crm-screenshot-dashboard.png", desc: "Visão geral do negócio em tempo real" },
-  { id: "clientes", label: "Clientes", src: "/crm-screenshot-clientes.png", desc: "Gestão completa da sua base de clientes" },
-  { id: "os", label: "Ordens de Serviço", src: "/crm-screenshot-os.png", desc: "Acompanhamento de todas as OS em aberto" },
-  { id: "financeiro", label: "Financeiro", src: "/crm-screenshot-financeiro.png", desc: "Controle de receitas, despesas e saldo" },
+  {
+    id: "dashboard", label: "Dashboard",
+    dark: "/crm-dark-dashboard.png", light: "/crm-screenshot-dashboard.png",
+    desc: "Visão geral do negócio em tempo real",
+  },
+  {
+    id: "clientes", label: "Clientes",
+    dark: "/crm-dark-clientes.png", light: "/crm-screenshot-clientes.png",
+    desc: "Gestão completa da sua base de clientes",
+  },
+  {
+    id: "servicos", label: "Serviços",
+    dark: "/crm-dark-servicos.png", light: "/crm-dark-servicos.png",
+    desc: "Cadastre serviços com preço, categoria e status",
+  },
+  {
+    id: "orcamentos", label: "Orçamentos",
+    dark: "/crm-dark-orcamentos.png", light: "/crm-screenshot-clientes.png",
+    desc: "Orçamentos profissionais com notificação de aprovação",
+  },
+  {
+    id: "os", label: "Ordens de Serviço",
+    dark: "/crm-dark-os.png", light: "/crm-screenshot-os.png",
+    desc: "Acompanhamento de todas as OS em aberto",
+  },
+  {
+    id: "financeiro", label: "Financeiro",
+    dark: "/crm-dark-financeiro.png", light: "/crm-screenshot-financeiro.png",
+    desc: "Controle de receitas, despesas e saldo",
+  },
+  {
+    id: "relatorios", label: "Relatórios",
+    dark: "/crm-dark-relatorios.png", light: "/crm-screenshot-dashboard.png",
+    desc: "Relatórios consolidados com gráficos e exportação",
+  },
+  {
+    id: "configuracoes", label: "Configurações",
+    dark: "/crm-dark-configuracoes.png", light: "/crm-dark-configuracoes.png",
+    desc: "Personalize empresa, tema, Pix e notificações",
+  },
+]
+
+const testimonials = [
+  { quote: "Organizei toda a minha assistência técnica em menos de um dia. Vale cada centavo.", author: "Rafael M.", role: "Técnico em Eletrônica, SP" },
+  { quote: "Antes eu perdia orçamento no WhatsApp. Agora envio PDF profissional em 2 minutos.", author: "Carla S.", role: "Prestadora de Serviços, RJ" },
+  { quote: "O financeiro integrado foi o que me fez fechar. Receita automática quando concluo a OS.", author: "Thiago A.", role: "Eletricista Autônomo, MG" },
+  { quote: "Meus clientes ficam impressionados com o orçamento. Parece empresa grande.", author: "Fernanda L.", role: "Designer de Interiores, PR" },
+  { quote: "Uso no celular em campo. Super rápido pra criar ordem de serviço na hora.", author: "Diego R.", role: "Técnico de Refrigeração, BA" },
+  { quote: "Relatório de receita e despesa me deu clareza que nunca tive no meu negócio.", author: "Ana P.", role: "Costureira, RS" },
+  { quote: "O plano anual paga menos de R$ 22 por mês. Absurdo o custo-benefício.", author: "Lucas F.", role: "Encanador, CE" },
+  { quote: "Finalmente um CRM que não precisa de treinamento. Já estava usando no mesmo dia.", author: "Marina T.", role: "Personal Trainer, GO" },
 ]
 
 const features = [
@@ -57,6 +105,8 @@ const stats = [
 export default function CrmPlusPage() {
   const [activeShot, setActiveShot] = useState(0)
   const [videoOpen, setVideoOpen] = useState(false)
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === "dark"
 
   const videoRef = useRef<HTMLElement>(null)
   const screenshotRef = useRef<HTMLElement>(null)
@@ -249,7 +299,7 @@ export default function CrmPlusPage() {
                       initial={false}
                       animate={{ opacity: activeShot === i ? 1 : 0 }}
                       transition={{ duration: 0.35 }}>
-                      <Image src={s.src} alt={s.label} fill className="object-cover object-top" />
+                      <Image src={isDark ? s.dark : s.light} alt={s.label} fill className="object-cover object-top" unoptimized />
                     </motion.div>
                   ))}
                 </div>
@@ -383,6 +433,66 @@ export default function CrmPlusPage() {
               <span className="hidden sm:block opacity-30">·</span>
               <div className="flex items-center gap-2"><Zap className="size-3.5" />Ativação automática após pagamento</div>
             </motion.div>
+          </div>
+        </section>
+
+        {/* ─── TESTIMONIALS MARQUEE ─── */}
+        <section className="relative py-24 overflow-hidden">
+          <div className="absolute inset-0 dot-pattern opacity-20 pointer-events-none" />
+          <div className="relative z-10 max-w-7xl mx-auto px-6 mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-px w-8 bg-foreground opacity-30" />
+              <span className="label-sm text-muted-foreground">Depoimentos</span>
+            </div>
+            <h2 className="text-editorial text-[clamp(32px,5vw,60px)] text-foreground leading-none">
+              Quem usa,<br /><span className="text-muted-foreground">recomenda.</span>
+            </h2>
+          </div>
+
+          {/* Primeira linha — direção normal */}
+          <div className="relative mb-4">
+            <div className="absolute left-0 top-0 bottom-0 w-32 z-10 pointer-events-none" style={{ background: "linear-gradient(to right, var(--background), transparent)" }} />
+            <div className="absolute right-0 top-0 bottom-0 w-32 z-10 pointer-events-none" style={{ background: "linear-gradient(to left, var(--background), transparent)" }} />
+            <div className="flex gap-4 marquee-track">
+              {[...testimonials, ...testimonials].map((t, i) => (
+                <div key={i} className="flex-shrink-0 w-80 rounded-2xl border border-border p-6" style={{ background: "var(--card)" }}>
+                  <div className="flex items-center gap-1 mb-3">
+                    {[...Array(5)].map((_, j) => (
+                      <Star key={j} className="size-3 text-foreground opacity-50 fill-current" />
+                    ))}
+                  </div>
+                  <Quote className="size-4 text-muted-foreground opacity-40 mb-3" />
+                  <p className="text-sm text-foreground leading-relaxed mb-4">&ldquo;{t.quote}&rdquo;</p>
+                  <div>
+                    <p className="text-xs font-bold text-foreground">{t.author}</p>
+                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Segunda linha — direção reversa */}
+          <div className="relative">
+            <div className="absolute left-0 top-0 bottom-0 w-32 z-10 pointer-events-none" style={{ background: "linear-gradient(to right, var(--background), transparent)" }} />
+            <div className="absolute right-0 top-0 bottom-0 w-32 z-10 pointer-events-none" style={{ background: "linear-gradient(to left, var(--background), transparent)" }} />
+            <div className="flex gap-4 marquee-track-reverse">
+              {[...testimonials.slice(4), ...testimonials.slice(4)].map((t, i) => (
+                <div key={i} className="flex-shrink-0 w-80 rounded-2xl border border-border p-6" style={{ background: "var(--card)" }}>
+                  <div className="flex items-center gap-1 mb-3">
+                    {[...Array(5)].map((_, j) => (
+                      <Star key={j} className="size-3 text-foreground opacity-50 fill-current" />
+                    ))}
+                  </div>
+                  <Quote className="size-4 text-muted-foreground opacity-40 mb-3" />
+                  <p className="text-sm text-foreground leading-relaxed mb-4">&ldquo;{t.quote}&rdquo;</p>
+                  <div>
+                    <p className="text-xs font-bold text-foreground">{t.author}</p>
+                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 

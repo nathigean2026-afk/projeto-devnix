@@ -526,8 +526,15 @@
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
-.marquee-track { animation: marquee 28s linear infinite; }
+.marquee-track { animation: marquee 32s linear infinite; }
 .marquee-track:hover { animation-play-state: paused; }
+
+@keyframes marquee-reverse {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+.marquee-track-reverse { animation: marquee-reverse 36s linear infinite; }
+.marquee-track-reverse:hover { animation-play-state: paused; }
 
 /* ─── KEYFRAMES ─────────────────────────────────────────── */
 @keyframes float-slow {
