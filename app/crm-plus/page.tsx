@@ -12,7 +12,8 @@ import { useTheme } from "next-themes"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 
-const CRM_URL = "https://crm.elevanthe.com/demo"
+const CRM_URL = "https://crm.elevanthe.com"
+const CRM_PLANS_URL = "https://crm.elevanthe.com/planos/publico"
 
 const screenshots = [
   {
@@ -164,12 +165,12 @@ export default function CrmPlusPage() {
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.45 }}
             >
-              <a href={`${CRM_URL}/planos`} target="_blank" rel="noopener noreferrer"
+              <a href={CRM_PLANS_URL} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2 px-7 py-4 rounded-full text-[11px] font-bold tracking-widest uppercase transition-all duration-300 hover:opacity-80 hover:scale-95"
                 style={{ background: "var(--foreground)", color: "var(--background)" }}>
                 Começar agora <ArrowRight className="size-3.5" />
               </a>
-              <a href="https://crm.elevanthe.com/demo"
+              <a href={`${CRM_URL}/demo`}
                 className="flex items-center gap-3 px-7 py-4 rounded-full text-[11px] font-bold tracking-widest uppercase border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-all duration-300">
                 <span className="size-6 rounded-full border border-border flex items-center justify-center">
                   <Play className="size-2.5 fill-current ml-0.5" />
@@ -430,7 +431,7 @@ export default function CrmPlusPage() {
                         </li>
                       ))}
                     </ul>
-                    <a href={`${CRM_URL}/planos`} target="_blank" rel="noopener noreferrer"
+                    <a href={CRM_PLANS_URL} target="_blank" rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-[11px] font-bold tracking-widest uppercase transition-all duration-300 hover:opacity-75"
                       style={plan.featured
                         ? { background: "var(--foreground)", color: "var(--background)" }
@@ -525,7 +526,7 @@ export default function CrmPlusPage() {
                 &ldquo;Organizei toda a minha assistência técnica em menos de um dia. Vale cada centavo.&rdquo;
               </blockquote>
               <p className="text-xs text-muted-foreground mb-8">Cliente Elevanthe CRM Plus</p>
-              <a href={`${CRM_URL}/planos`} target="_blank" rel="noopener noreferrer"
+              <a href={CRM_PLANS_URL} target="_blank" rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-7 py-4 rounded-full text-[11px] font-bold tracking-widest uppercase transition-all duration-300 hover:opacity-80"
                 style={{ background: "var(--foreground)", color: "var(--background)" }}>
                 Comece agora por R$ 7 <ArrowRight className="size-3.5" />

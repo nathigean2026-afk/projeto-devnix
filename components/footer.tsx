@@ -61,7 +61,7 @@ export function Footer() {
             </p>
           </div>
           <a
-            href="#contato"
+            href="/#contato"
             className="flex items-center gap-2 px-7 py-4 rounded-full text-[11px] font-bold tracking-widest uppercase whitespace-nowrap transition-all duration-300 hover:opacity-75"
             style={{ background: "var(--foreground)", color: "var(--background)" }}
           >
