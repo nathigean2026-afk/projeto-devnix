@@ -64,7 +64,7 @@ const testimonials = [
   { quote: "Meus clientes ficam impressionados com o orçamento. Parece empresa grande.", author: "Fernanda L.", role: "Designer de Interiores, PR" },
   { quote: "Uso no celular em campo. Super rápido pra criar ordem de serviço na hora.", author: "Diego R.", role: "Técnico de Refrigeração, BA" },
   { quote: "Relatório de receita e despesa me deu clareza que nunca tive no meu negócio.", author: "Ana P.", role: "Costureira, RS" },
-  { quote: "O plano anual paga menos de R$ 22 por mês. Absurdo o custo-benefício.", author: "Lucas F.", role: "Encanador, CE" },
+  { quote: "O Enterprise sai R$ 23,33 por mês. Menos que um almoço e tenho tudo organizado.", author: "Lucas F.", role: "Encanador, CE" },
   { quote: "Finalmente um CRM que não precisa de treinamento. Já estava usando no mesmo dia.", author: "Marina T.", role: "Personal Trainer, GO" },
 ]
 
@@ -79,19 +79,24 @@ const features = [
 
 const plans = [
   {
-    id: "start", icon: Zap, label: "Start", duration: "7 dias", price: "R$ 7", priceDetail: "por 7 dias",
-    desc: "Ideal para conhecer a plataforma sem compromisso.", featured: false,
+    id: "start", icon: Zap, label: "Start", duration: "7 dias", price: "R$ 7", priceDetail: "pagamento único",
+    desc: "Experimente a plataforma completa. Ideal para avaliar antes de assinar.", featured: false,
+    badge: null, savings: null,
     features: ["Acesso completo por 7 dias", "Clientes ilimitados", "Ordens de serviço ilimitadas", "Orçamentos e financeiro", "Suporte por e-mail"],
   },
   {
-    id: "business", icon: CalendarDays, label: "Business", duration: "30 dias", price: "R$ 24", priceDetail: "por mes",
-    desc: "Para profissionais que precisam de controle mensal.", featured: true,
-    features: ["Acesso completo por 30 dias", "Clientes ilimitados", "Ordens de serviço ilimitadas", "Orçamentos e financeiro", "Relatórios completos", "Suporte prioritário"],
+    id: "business", icon: CalendarDays, label: "Business", duration: "30 dias", price: "R$ 30", priceDetail: "por mês",
+    desc: "Para profissionais que precisam de marca própria e notificações de orçamento.", featured: true,
+    badge: "Mais popular",
+    savings: null,
+    features: ["Acesso completo por 30 dias", "Clientes ilimitados", "Ordens de serviço ilimitadas", "Orçamentos e financeiro", "Relatórios completos", "Marca própria nos documentos", "Suporte prioritário"],
   },
   {
-    id: "enterprise", icon: CalendarRange, label: "Enterprise", duration: "1 ano", price: "R$ 260", priceDetail: "por ano",
-    desc: "Melhor custo-benefício para uso contínuo.", featured: false,
-    features: ["Acesso completo por 12 meses", "Clientes ilimitados", "Ordens de serviço ilimitadas", "Orçamentos e financeiro", "Relatórios completos", "Suporte VIP"],
+    id: "enterprise", icon: CalendarRange, label: "Enterprise", duration: "360 dias", price: "R$ 280", priceDetail: "por ano",
+    desc: "Melhor custo-benefício com funcionário auxiliar incluso por 360 dias.", featured: false,
+    badge: "Melhor valor",
+    savings: "Equivale a R$ 23,33/mês · Economia de R$ 80",
+    features: ["Acesso completo por 360 dias", "Clientes ilimitados", "Ordens de serviço ilimitadas", "Orçamentos e financeiro", "Relatórios completos", "Marca própria nos documentos", "1 funcionário auxiliar incluso", "Suporte VIP"],
   },
 ]
 
@@ -392,10 +397,16 @@ export default function CrmPlusPage() {
                     initial={{ opacity: 0, y: 40, scale: 0.92, filter: "blur(8px)" }}
                     animate={pricingInView ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" } : {}}
                     transition={{ duration: 0.85, delay: 0.15 + i * 0.14, ease: [0.16, 1, 0.3, 1] }}>
-                    {plan.featured && (
+                    {plan.badge === "Mais popular" && (
                       <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 text-[10px] font-bold rounded-full whitespace-nowrap label-sm"
                         style={{ background: "var(--foreground)", color: "var(--background)" }}>
-                        Mais Popular
+                        Mais popular
+                      </div>
+                    )}
+                    {plan.badge === "Melhor valor" && (
+                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 text-[10px] font-bold rounded-full whitespace-nowrap label-sm"
+                        style={{ background: "#f59e0b", color: "#fff" }}>
+                        Melhor valor
                       </div>
                     )}
                     <div className="size-11 rounded-xl border border-border flex items-center justify-center mb-5" style={{ background: "var(--muted)" }}>
@@ -407,6 +418,9 @@ export default function CrmPlusPage() {
                       <span className="text-xs text-muted-foreground opacity-60">{plan.priceDetail}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mb-1">{plan.duration} de acesso</p>
+                    {plan.savings && (
+                      <p className="text-xs font-semibold mb-1" style={{ color: "#22c55e" }}>{plan.savings}</p>
+                    )}
                     <p className="text-xs text-muted-foreground leading-relaxed mb-6">{plan.desc}</p>
                     <ul className="flex flex-col gap-2.5 mb-8 flex-1">
                       {plan.features.map((feat) => (
