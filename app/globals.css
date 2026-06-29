@@ -491,7 +491,7 @@
   to { --neon-angle-2: 360deg; }
 }
 
-/* ─── COSMIC TRANSITION ─────────────────────────────────── */
+/* ─── COSMIC TRANSITION ───────────────────────────���─────── */
 /* Section reveal com efeito suave — apenas opacity+translateY (compositor-only) */
 .cosmic-section {
   --cosmic-progress: 0;
@@ -535,6 +535,12 @@
 }
 .marquee-track-reverse { animation: marquee-reverse 36s linear infinite; }
 .marquee-track-reverse:hover { animation-play-state: paused; }
+
+/* ─── BURACO NEGRO ──────────────────────────────────────── */
+@keyframes bh-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
 
 /* ─── KEYFRAMES ─────────────────────────────────────────── */
 @keyframes float-slow {

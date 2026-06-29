@@ -125,6 +125,35 @@ function FadeIn({
 export function QuemSomosContent() {
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const [elephantClicks, setElephantClicks] = useState(0)
+  const [blackHoleActive, setBlackHoleActive] = useState(false)
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  function handleElephantClick() {
+    const next = elephantClicks + 1
+    setElephantClicks(next)
+
+    // toca o barrado do elefante em cada clique
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0
+      audioRef.current.play()
+    }
+
+    // no 5º clique abre o buraco negro
+    if (next >= 5) {
+      setBlackHoleActive(true)
+      setElephantClicks(0)
+    }
+  }
+
+  function closeBlackHole() {
+    setBlackHoleActive(false)
+    if (videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0
+    }
+  }
   useEffect(() => { setMounted(true) }, [])
   const isDark = resolvedTheme === "dark"
 
@@ -215,19 +244,38 @@ export function QuemSomosContent() {
               {/* Mascote */}
               <div className="flex-shrink-0">
                 <div
-                  className="size-40 md:size-52 rounded-2xl flex items-center justify-center border border-border"
-                  style={{ background: "var(--background)" }}
+                  className="size-40 md:size-52 rounded-2xl flex items-center justify-center border border-border relative select-none"
+                  style={{ background: "var(--background)", cursor: "pointer" }}
+                  onClick={handleElephantClick}
+                  role="button"
+                  aria-label="Clique no elefante"
+                  title={elephantClicks > 0 ? `${5 - elephantClicks} clique${5 - elephantClicks !== 1 ? "s" : ""} para o segredo…` : "Clique no elefante"}
                 >
                   <Image
                     src="/logo-icon-light.png"
                     alt="Mascote Elevanthe — elefante tecnológico"
                     width={160}
                     height={160}
-                    className="object-contain transition-all duration-300"
-                    style={{ maxWidth: "80%", maxHeight: "80%", filter: mounted && !isDark ? "invert(1)" : "none" }}
+                    className="object-contain transition-all duration-300 pointer-events-none"
+                    style={{
+                      maxWidth: "80%", maxHeight: "80%",
+                      filter: mounted && !isDark ? "invert(1)" : "none",
+                      transform: elephantClicks > 0 ? `scale(${1 + elephantClicks * 0.04})` : "scale(1)",
+                      transition: "transform 0.15s ease",
+                    }}
+                    unoptimized
                   />
+                  {elephantClicks > 0 && (
+                    <span className="absolute top-2 right-2 text-[10px] font-bold rounded-full px-1.5 py-0.5 tabular-nums"
+                      style={{ background: "var(--foreground)", color: "var(--background)", lineHeight: 1.4 }}>
+                      {elephantClicks}/5
+                    </span>
+                  )}
                 </div>
               </div>
+
+              {/* Áudio oculto */}
+              <audio ref={audioRef} src="/elephant-trumpeting.mp3" preload="auto" className="hidden" />
 
               {/* Texto */}
               <div>
@@ -256,6 +304,43 @@ export function QuemSomosContent() {
           </FadeIn>
         </div>
       </section>
+
+      {/* ── EASTER EGG: BURACO NEGRO ──────────────────────────── */}
+      {blackHoleActive && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.96)" }}
+          onClick={closeBlackHole}
+        >
+          {/* Efeito de distorção / buraco negro ao redor do vídeo */}
+          <div className="relative flex items-center justify-center" style={{ width: "min(90vw,700px)", aspectRatio: "16/9" }}>
+            {/* Anéis orbitais animados */}
+            <div className="absolute inset-0 rounded-full" style={{
+              background: "radial-gradient(circle, transparent 28%, rgba(59,130,246,0.08) 40%, rgba(139,92,246,0.12) 55%, rgba(0,0,0,0.9) 70%)",
+              animation: "bh-spin 8s linear infinite",
+            }} />
+            <div className="absolute inset-0 rounded-full" style={{
+              background: "radial-gradient(circle, transparent 30%, rgba(99,102,241,0.06) 45%, transparent 60%)",
+              animation: "bh-spin 5s linear infinite reverse",
+              transform: "scale(1.3)",
+            }} />
+            {/* Vídeo central */}
+            <video
+              ref={videoRef}
+              src="/black-hole.mp4"
+              autoPlay
+              loop
+              playsInline
+              className="relative z-10 rounded-xl w-full h-full object-cover"
+              style={{ boxShadow: "0 0 80px 20px rgba(99,102,241,0.3), 0 0 160px 60px rgba(0,0,0,0.8)" }}
+            />
+          </div>
+          {/* Instrução para fechar */}
+          <p className="absolute bottom-8 text-xs text-white/40 select-none pointer-events-none">
+            Clique em qualquer lugar para fechar
+          </p>
+        </div>
+      )}
 
       {/* ── STATS ─────────────────────────────────────────────── */}
       <section className="py-16 px-6">
