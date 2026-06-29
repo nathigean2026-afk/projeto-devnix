@@ -17,42 +17,42 @@ const CRM_URL = "https://crm.elevanthe.com/demo"
 const screenshots = [
   {
     id: "dashboard", label: "Dashboard",
-    dark: "/crm-dark-dashboard.png", light: "/crm-screenshot-dashboard.png",
+    dark: "/crm-dark-dashboard.png", light: "/crm-light-dashboard.png",
     desc: "Visão geral do negócio em tempo real",
   },
   {
     id: "clientes", label: "Clientes",
-    dark: "/crm-dark-clientes.png", light: "/crm-screenshot-clientes.png",
+    dark: "/crm-dark-clientes.png", light: "/crm-light-clientes.png",
     desc: "Gestão completa da sua base de clientes",
   },
   {
     id: "servicos", label: "Serviços",
-    dark: "/crm-dark-servicos.png", light: "/crm-dark-servicos.png",
+    dark: "/crm-dark-servicos.png", light: "/crm-light-servicos.png",
     desc: "Cadastre serviços com preço, categoria e status",
   },
   {
     id: "orcamentos", label: "Orçamentos",
-    dark: "/crm-dark-orcamentos.png", light: "/crm-screenshot-clientes.png",
+    dark: "/crm-dark-orcamentos.png", light: "/crm-light-orcamentos.png",
     desc: "Orçamentos profissionais com notificação de aprovação",
   },
   {
     id: "os", label: "Ordens de Serviço",
-    dark: "/crm-dark-os.png", light: "/crm-screenshot-os.png",
+    dark: "/crm-dark-os.png", light: "/crm-light-os.png",
     desc: "Acompanhamento de todas as OS em aberto",
   },
   {
     id: "financeiro", label: "Financeiro",
-    dark: "/crm-dark-financeiro.png", light: "/crm-screenshot-financeiro.png",
+    dark: "/crm-dark-financeiro.png", light: "/crm-light-financeiro.png",
     desc: "Controle de receitas, despesas e saldo",
   },
   {
     id: "relatorios", label: "Relatórios",
-    dark: "/crm-dark-relatorios.png", light: "/crm-screenshot-dashboard.png",
+    dark: "/crm-dark-relatorios.png", light: "/crm-light-relatorios.png",
     desc: "Relatórios consolidados com gráficos e exportação",
   },
   {
     id: "configuracoes", label: "Configurações",
-    dark: "/crm-dark-configuracoes.png", light: "/crm-dark-configuracoes.png",
+    dark: "/crm-dark-configuracoes.png", light: "/crm-light-configuracoes.png",
     desc: "Personalize empresa, tema, Pix e notificações",
   },
 ]
