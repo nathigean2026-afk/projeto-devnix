@@ -52,7 +52,7 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
         {/* Logo */}
-        <a href="#" className="flex items-center gap-2.5 group" aria-label="Elevanthe — Tecnologia que Eleva Negócios">
+        <a href="/" className="flex items-center gap-2.5 group" aria-label="Elevanthe — Tecnologia que Eleva Negócios">
           <Image
             src="/logo-icon-light.png"
             alt="Elevanthe"

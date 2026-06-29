@@ -339,10 +339,9 @@ export function QuemSomosContent() {
                 <span style={{ opacity: 0.4 }}>chegou até aqui</span>
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed mb-5">
-                A Elevanthe surgiu da experiência acumulada em mais de três anos de projetos web,
-                com clientes dos mais variados setores. Percebemos que a maioria das empresas
-                enfrentava o mesmo problema: dependência de ferramentas terceiras, código que não
-                pertencia a elas e suporte inexistente após a entrega.
+                A Elevanthe é uma empresa nova, criada com um propósito claro: resolver um problema
+                que vemos repetido em todo tipo de negócio. Muitas empresas dependem de ferramentas
+                terceiras, pagam por código que não pertence a elas e ficam sem suporte depois da entrega.
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed mb-5">
                 Criamos a Elevanthe para mudar esse cenário. Nossa abordagem é simples:{" "}
@@ -352,9 +351,8 @@ export function QuemSomosContent() {
                 , construímos com qualidade técnica e entregamos tudo com código original.
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Hoje, atendemos empresas de diferentes tamanhos — desde empreendedores individuais
-                até organizações com equipes de dezenas de pessoas. O que não muda é o compromisso
-                com a{" "}
+                Já atendemos negócios de diferentes perfis — desde empreendedores individuais até
+                empresas com equipes em crescimento. O que não muda é o compromisso com a{" "}
                 <span className="text-foreground font-medium">autonomia e o sucesso do cliente</span>.
               </p>
             </FadeIn>
