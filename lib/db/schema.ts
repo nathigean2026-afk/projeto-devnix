@@ -122,6 +122,9 @@ export const quotes = pgTable("quotes", {
   globalDiscountType: text("globalDiscountType").notNull().default("fixed"),
   // Formas de pagamento
   paymentMethods: jsonb("paymentMethods").notNull().default([]).$type<QuotePaymentMethod[]>(),
+  // Chave PIX para QR Code
+  pixKeyType: text("pixKeyType"),  // cpf | cnpj | email | telefone | aleatoria
+  pixKey: text("pixKey"),
   // Status
   status: text("status").notNull().default("rascunho"),
   // Link público compartilhável
