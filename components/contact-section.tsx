@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState, useEffect, useCallback } from "react"
 import { motion, useInView } from "framer-motion"
 import {
   Send, Mail, CheckCircle, Loader2,
@@ -69,6 +69,8 @@ type FormData = { name: string; email: string; phone: string; whatsapp: string; 
 type ScheduleData = { name: string; email: string; whatsapp: string; date: Date | null; time: string }
 type TabType = "message" | "schedule"
 
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""
+
 export function ContactSection() {
   const ref = useRef<HTMLElement>(null)
   const inView = useInView(ref, { once: true, margin: "-80px" })
@@ -79,6 +81,39 @@ export function ContactSection() {
   const weekdays = getNextWeekdays(14)
   const [sched, setSched] = useState<ScheduleData>({ name: "", email: "", whatsapp: "", date: null, time: "" })
   const [schedStatus, setSchedStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+
+  // Turnstile
+  const [tsToken, setTsToken] = useState<string | null>(null)
+  const tsContainerRef = useRef<HTMLDivElement>(null)
+  const tsWidgetId = useRef<string | null>(null)
+
+  const renderTurnstile = useCallback(() => {
+    if (!SITE_KEY || !tsContainerRef.current) return
+    if (typeof window === "undefined" || !(window as any).turnstile) return
+    if (tsWidgetId.current) return
+    tsWidgetId.current = (window as any).turnstile.render(tsContainerRef.current, {
+      sitekey: SITE_KEY,
+      callback: (token: string) => setTsToken(token),
+      "expired-callback": () => setTsToken(null),
+      "error-callback": () => setTsToken(null),
+      theme: "dark",
+      size: "normal",
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!SITE_KEY) return
+    if ((window as any).turnstile) { renderTurnstile(); return }
+    const existing = document.querySelector('script[src*="turnstile"]')
+    if (existing) { existing.addEventListener("load", renderTurnstile); return }
+    const s = document.createElement("script")
+    s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js"
+    s.async = true
+    s.defer = true
+    s.onload = renderTurnstile
+    document.head.appendChild(s)
+    return () => { s.onload = null }
+  }, [renderTurnstile])
 
   useEffect(() => {
     const handler = (e: CustomEvent<{ plan: string; subject: string }>) => {
@@ -91,11 +126,20 @@ export function ContactSection() {
 
   const handleMessage = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (SITE_KEY && !tsToken) {
+      setMsgStatus("error")
+      setTimeout(() => setMsgStatus("idle"), 3000)
+      return
+    }
     setMsgStatus("loading")
     try {
-      await submitLead({ name: form.name, email: form.email, phone: form.phone || undefined, whatsapp: form.whatsapp || undefined, subject: form.subject || undefined, message: form.message, plan: form.plan || undefined })
+      await submitLead({ name: form.name, email: form.email, phone: form.phone || undefined, whatsapp: form.whatsapp || undefined, subject: form.subject || undefined, message: form.message, plan: form.plan || undefined, turnstileToken: tsToken || undefined })
       setMsgStatus("success")
       setForm({ name: "", email: "", phone: "", whatsapp: "", subject: "", message: "", plan: "" })
+      setTsToken(null)
+      if (tsWidgetId.current && (window as any).turnstile) {
+        ;(window as any).turnstile.reset(tsWidgetId.current)
+      }
       setTimeout(() => setMsgStatus("idle"), 6000)
     } catch { setMsgStatus("error"); setTimeout(() => setMsgStatus("idle"), 4000) }
   }
@@ -103,12 +147,21 @@ export function ContactSection() {
   const handleSchedule = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!sched.date || !sched.time) return
+    if (SITE_KEY && !tsToken) {
+      setSchedStatus("error")
+      setTimeout(() => setSchedStatus("idle"), 3000)
+      return
+    }
     setSchedStatus("loading")
     const dateStr = `${PT_WEEK[sched.date.getDay()]}, ${sched.date.getDate()} de ${PT_MONTH[sched.date.getMonth()]}`
     try {
-      await submitLead({ name: sched.name, email: sched.email, whatsapp: sched.whatsapp || undefined, subject: `Agendamento de bate-papo — ${dateStr} às ${sched.time}`, message: `Solicitação de bate-papo agendado para ${dateStr} às ${sched.time}.\nContato: ${sched.email}${sched.whatsapp ? ` / WhatsApp: ${sched.whatsapp}` : ""}` })
+      await submitLead({ name: sched.name, email: sched.email, whatsapp: sched.whatsapp || undefined, subject: `Agendamento de bate-papo — ${dateStr} às ${sched.time}`, message: `Solicitação de bate-papo agendado para ${dateStr} às ${sched.time}.\nContato: ${sched.email}${sched.whatsapp ? ` / WhatsApp: ${sched.whatsapp}` : ""}`, turnstileToken: tsToken || undefined })
       setSchedStatus("success")
       setSched({ name: "", email: "", whatsapp: "", date: null, time: "" })
+      setTsToken(null)
+      if (tsWidgetId.current && (window as any).turnstile) {
+        ;(window as any).turnstile.reset(tsWidgetId.current)
+      }
       setTimeout(() => setSchedStatus("idle"), 6000)
     } catch { setSchedStatus("error"); setTimeout(() => setSchedStatus("idle"), 4000) }
   }
@@ -270,10 +323,16 @@ export function ContactSection() {
                         <label className="text-xs font-medium text-white/80">Descreva seu projeto *</label>
                         <textarea required value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="Quanto mais detalhes, melhor a proposta..." rows={5} className={`${inputCls} resize-none`} />
                       </div>
-                      {msgStatus === "error" && (
-                        <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">Erro ao enviar. Tente novamente.</p>
+                      {/* Turnstile widget */}
+                      {SITE_KEY && (
+                        <div ref={tsContainerRef} className="flex justify-start" />
                       )}
-                      <button type="submit" disabled={msgStatus === "loading"}
+                      {msgStatus === "error" && (
+                        <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+                          {SITE_KEY && !tsToken ? "Verificação de segurança pendente. Aguarde o widget carregar." : "Erro ao enviar. Tente novamente."}
+                        </p>
+                      )}
+                      <button type="submit" disabled={msgStatus === "loading" || (!!SITE_KEY && !tsToken)}
                         className="flex items-center justify-center gap-2 py-4 rounded-xl text-[11px] font-bold tracking-widest uppercase transition-all duration-300 hover:opacity-80 disabled:opacity-40 bg-white text-[#080808]"
                       >
                         {msgStatus === "loading" ? <><Loader2 className="size-4 animate-spin" />Enviando...</> : <><Send className="size-3.5" />Enviar Mensagem</>}

@@ -16,7 +16,22 @@ export async function submitLead(data: {
   subject?: string
   message: string
   plan?: string
+  turnstileToken?: string
 }) {
+  // Valida Turnstile se a secret key estiver configurada
+  const secret = process.env.TURNSTILE_SECRET_KEY
+  if (secret && data.turnstileToken) {
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ secret, response: data.turnstileToken }),
+    })
+    const result = await res.json()
+    if (!result.success) throw new Error("Turnstile verification failed")
+  } else if (secret && !data.turnstileToken) {
+    throw new Error("Turnstile token missing")
+  }
+
   await db.insert(leads).values({
     name: data.name,
     email: data.email,
