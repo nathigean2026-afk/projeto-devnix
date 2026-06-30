@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next"
 import { projects } from "@/lib/projects-data"
 
-const BASE_URL = "https://elevanthe.com"
+const BASE_URL = "https://www.elevanthe.com"
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // Rotas estáticas públicas

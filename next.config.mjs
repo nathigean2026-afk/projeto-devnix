@@ -18,6 +18,18 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
+  // Redireciona elevanthe.com → www.elevanthe.com (canonical)
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "elevanthe.com" }],
+        destination: "https://www.elevanthe.com/:path*",
+        permanent: true,
+      },
+    ]
+  },
+
   // Headers de cache e segurança
   async headers() {
     return [

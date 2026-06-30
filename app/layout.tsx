@@ -33,14 +33,14 @@ export const metadata: Metadata = {
   keywords: ['desenvolvimento web', 'software personalizado', 'elevanthe', 'sites profissionais', 'soluções web', 'tecnologia', 'next.js'],
   authors: [{ name: 'Elevanthe' }],
   creator: 'Elevanthe',
-  metadataBase: new URL('https://elevanthe.com'),
+  metadataBase: new URL('https://www.elevanthe.com'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
-    url: 'https://elevanthe.com',
+    url: 'https://www.elevanthe.com',
     title: 'Elevanthe | Tecnologia que Eleva Negócios',
     description:
       'Desenvolvimento de sites, software personalizado, plataformas analíticas e e-commerce sob medida para o seu negócio.',
