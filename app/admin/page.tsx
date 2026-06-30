@@ -4,15 +4,16 @@ import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { authClient } from "@/lib/auth-client"
-import { getLeads, updateLeadStatus, deleteLead } from "@/app/actions/leads"
+import { getLeads, updateLeadStatus, deleteLead, getQuotes } from "@/app/actions/leads"
 import { getProjects } from "@/app/actions/projects"
-import type { Lead, ProjectRow } from "@/lib/db/schema"
+import type { Lead, ProjectRow, Quote } from "@/lib/db/schema"
 import { ProjectsAdmin } from "@/components/admin-projects"
+import { QuotesAdmin } from "@/components/admin-quotes"
 import {
   Mail, Phone, MessageSquare, Trash2, CheckCircle2,
   LogOut, Clock, TrendingUp, Inbox, Search, Sun, Moon,
-  ThumbsUp, ArrowUpRight, RefreshCw, Filter, User, Layers,
-  ChevronLeft, X,
+  ThumbsUp, ArrowUpRight, RefreshCw, User, Layers,
+  ChevronLeft, X, Globe, FileText, MapPin, Wifi,
 } from "lucide-react"
 import { useTheme } from "next-themes"
 
@@ -70,10 +71,12 @@ export default function AdminDashboard() {
   const [leadsLoaded, setLeadsLoaded] = useState(false)
   const [projects, setProjects] = useState<ProjectRow[]>([])
   const [projectsLoaded, setProjectsLoaded] = useState(false)
+  const [quotes, setQuotes] = useState<Quote[]>([])
+  const [quotesLoaded, setQuotesLoaded] = useState(false)
   // On mobile: selected lead opens as a full-screen sheet
   const [selected, setSelected] = useState<Lead | null>(null)
   const [activeTab, setActiveTab] = useState("todos")
-  const [activeSection, setActiveSection] = useState<"leads" | "projetos">("leads")
+  const [activeSection, setActiveSection] = useState<"leads" | "projetos" | "orcamentos">("leads")
   const [search, setSearch] = useState("")
   const [refreshing, setRefreshing] = useState(false)
   const [, startTransition] = useTransition()
@@ -95,6 +98,7 @@ export default function AdminDashboard() {
     }
     if (!leadsLoaded) loadLeads()
     if (!projectsLoaded) loadProjects()
+    if (!quotesLoaded) loadQuotes()
   }, [session, sessionLoading]) // eslint-disable-line
 
   async function loadLeads() {
@@ -112,6 +116,16 @@ export default function AdminDashboard() {
       const data = await getProjects()
       setProjects(data as ProjectRow[])
       setProjectsLoaded(true)
+    } catch {
+      // silently fail
+    }
+  }
+
+  async function loadQuotes() {
+    try {
+      const data = await getQuotes()
+      setQuotes(data as Quote[])
+      setQuotesLoaded(true)
     } catch {
       // silently fail
     }
@@ -218,6 +232,18 @@ export default function AdminDashboard() {
             <Layers className="size-3.5" />
             <span>Projetos</span>
           </button>
+          <button
+            onClick={() => setActiveSection("orcamentos")}
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+              activeSection === "orcamentos"
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <FileText className="size-3.5" />
+            <span className="hidden sm:inline">Orçamentos</span>
+            <span className="sm:hidden">Orç.</span>
+          </button>
         </div>
 
         {/* Right actions */}
@@ -254,6 +280,16 @@ export default function AdminDashboard() {
       {activeSection === "projetos" && (
         <div className="flex-1 overflow-y-auto">
           <ProjectsAdmin initialProjects={projects} />
+        </div>
+      )}
+
+      {/* ── ORÇAMENTOS section ── */}
+      {activeSection === "orcamentos" && (
+        <div className="flex-1 overflow-y-auto">
+          <QuotesAdmin
+            initialQuotes={quotes}
+            onQuotesChange={setQuotes}
+          />
         </div>
       )}
 
@@ -581,6 +617,42 @@ function LeadDetail({
             <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-2">Mensagem</p>
             <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">{lead.message}</p>
           </div>
+
+          {/* Geo / origem */}
+          {(lead.ip || lead.city || lead.isp) && (
+            <div className="rounded-xl border border-border p-4 space-y-3">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Origem da mensagem</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {lead.ip && (
+                  <div className="flex items-center gap-2.5">
+                    <Globe className="size-3.5 text-muted-foreground shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-muted-foreground">IP</p>
+                      <p className="text-xs font-mono font-medium">{lead.ip}</p>
+                    </div>
+                  </div>
+                )}
+                {(lead.city || lead.region || lead.country) && (
+                  <div className="flex items-center gap-2.5">
+                    <MapPin className="size-3.5 text-muted-foreground shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-muted-foreground">Localização</p>
+                      <p className="text-xs font-medium">{[lead.city, lead.region, lead.country].filter(Boolean).join(", ")}</p>
+                    </div>
+                  </div>
+                )}
+                {lead.isp && (
+                  <div className="flex items-center gap-2.5 col-span-full">
+                    <Wifi className="size-3.5 text-muted-foreground shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-muted-foreground">Provedor (ISP)</p>
+                      <p className="text-xs font-medium">{lead.isp}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Status actions */}
           <div className="rounded-xl border border-border p-4">

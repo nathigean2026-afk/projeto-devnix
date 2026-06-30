@@ -1,12 +1,28 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { leads } from "@/lib/db/schema"
+import { leads, quotes } from "@/lib/db/schema"
+import type { Quote, NewQuote, QuoteItem } from "@/lib/db/schema"
 import { auth } from "@/lib/auth"
 import { eq, desc } from "drizzle-orm"
 import { headers } from "next/headers"
 import { revalidatePath } from "next/cache"
 import { Resend } from "resend"
+import { randomBytes } from "crypto"
+
+async function getGeoFromIp(ip: string): Promise<{ city: string; region: string; country: string; isp: string } | null> {
+  try {
+    // ip-api.com: gratuito, sem chave, retorna city/region/country/isp
+    const res = await fetch(`http://ip-api.com/json/${ip}?fields=status,city,regionName,country,isp`, {
+      next: { revalidate: 3600 },
+    })
+    const data = await res.json()
+    if (data.status !== "success") return null
+    return { city: data.city, region: data.regionName, country: data.country, isp: data.isp }
+  } catch {
+    return null
+  }
+}
 
 export async function submitLead(data: {
   name: string
@@ -30,6 +46,14 @@ export async function submitLead(data: {
     if (!result.success) throw new Error("Turnstile verification failed")
   }
 
+  // Captura IP real (Vercel seta x-forwarded-for)
+  const hdrs = await headers()
+  const rawIp = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim()
+    ?? hdrs.get("x-real-ip")
+    ?? null
+  const ip = rawIp && rawIp !== "::1" && rawIp !== "127.0.0.1" ? rawIp : null
+  const geo = ip ? await getGeoFromIp(ip) : null
+
   await db.insert(leads).values({
     name: data.name,
     email: data.email,
@@ -39,6 +63,11 @@ export async function submitLead(data: {
     message: data.message,
     plan: data.plan || null,
     status: "novo",
+    ip,
+    city: geo?.city ?? null,
+    region: geo?.region ?? null,
+    country: geo?.country ?? null,
+    isp: geo?.isp ?? null,
   })
 
   if (process.env.RESEND_API_KEY && process.env.ADMIN_EMAIL) {
@@ -108,5 +137,55 @@ export async function deleteLead(id: number) {
   await requireAdmin()
   await db.delete(leads).where(eq(leads.id, id))
   revalidatePath("/admin")
+}
+
+// ── Quote actions ─────────────────────────────────────────────────────────────
+
+export async function getQuotes() {
+  await requireAdmin()
+  return db.select().from(quotes).orderBy(desc(quotes.createdAt))
+}
+
+export async function createQuote(data: Omit<NewQuote, "id" | "createdAt" | "updatedAt">) {
+  await requireAdmin()
+  const [row] = await db.insert(quotes).values({
+    ...data,
+    updatedAt: new Date(),
+  }).returning()
+  revalidatePath("/admin")
+  return row
+}
+
+export async function updateQuote(id: number, data: Partial<Omit<NewQuote, "id" | "createdAt">>) {
+  await requireAdmin()
+  await db.update(quotes).set({ ...data, updatedAt: new Date() }).where(eq(quotes.id, id))
+  revalidatePath("/admin")
+}
+
+export async function deleteQuote(id: number) {
+  await requireAdmin()
+  await db.delete(quotes).where(eq(quotes.id, id))
+  revalidatePath("/admin")
+}
+
+export async function generateShareLink(id: number, expiresInDays: number) {
+  await requireAdmin()
+  const token = randomBytes(20).toString("hex")
+  const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000)
+  await db.update(quotes).set({
+    shareToken: token,
+    shareExpiresAt: expiresAt,
+    updatedAt: new Date(),
+  }).where(eq(quotes.id, id))
+  revalidatePath("/admin")
+  return token
+}
+
+// Rota pública — sem requireAdmin
+export async function getQuoteByToken(token: string): Promise<Quote | null> {
+  const [row] = await db.select().from(quotes).where(eq(quotes.shareToken, token))
+  if (!row) return null
+  if (row.shareExpiresAt && row.shareExpiresAt < new Date()) return null
+  return row
 }
 

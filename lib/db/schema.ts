@@ -72,10 +72,52 @@ export const leads = pgTable("leads", {
   status: text("status").notNull().default("novo"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   readAt: timestamp("readAt"),
+  // Geolocalização
+  ip: text("ip"),
+  city: text("city"),
+  region: text("region"),
+  country: text("country"),
+  isp: text("isp"),
 })
 
 export type Lead = typeof leads.$inferSelect
 export type NewLead = typeof leads.$inferInsert
+
+// ── Quotes (Orçamentos) ───────────────────────────────────────────────────────
+export type QuoteItem = {
+  id: string
+  name: string
+  description?: string
+  price: number
+  category?: string
+}
+
+export const quotes = pgTable("quotes", {
+  id: serial("id").primaryKey(),
+  // Cliente
+  clientName: text("clientName").notNull(),
+  clientEmail: text("clientEmail"),
+  clientWhatsapp: text("clientWhatsapp"),
+  // Contexto do projeto
+  problem: text("problem"),
+  objective: text("objective"),
+  expectedResult: text("expectedResult"),
+  deadline: text("deadline"),
+  // Itens selecionados (array JSON)
+  items: jsonb("items").notNull().default([]).$type<QuoteItem[]>(),
+  total: integer("total").notNull().default(0),
+  // Status
+  status: text("status").notNull().default("rascunho"),
+  // Link público compartilhável
+  shareToken: text("shareToken").unique(),
+  shareExpiresAt: timestamp("shareExpiresAt"),
+  // Metadados
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+})
+
+export type Quote = typeof quotes.$inferSelect
+export type NewQuote = typeof quotes.$inferInsert
 
 // ── Projects table ───────────────────────────────────────────────────────────
 // Each row stores a full project. JSON columns hold arrays of strings/objects.
