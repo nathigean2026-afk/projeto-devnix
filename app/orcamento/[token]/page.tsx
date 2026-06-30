@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import { getQuoteByToken } from "@/app/actions/leads"
-import type { QuoteItem } from "@/lib/db/schema"
+import type { QuoteItem, QuotePaymentMethod } from "@/lib/db/schema"
 import type { Metadata } from "next"
 
 export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
@@ -21,19 +21,45 @@ function fmtDate(d: Date | string) {
   return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(d))
 }
 
+function itemFinalPrice(item: QuoteItem): number {
+  if (!item.discount || item.discount <= 0) return item.price
+  if (item.discountType === "percent") return Math.max(0, item.price * (1 - item.discount / 100))
+  return Math.max(0, item.price - item.discount)
+}
+
+function calcSubtotal(items: QuoteItem[]): number {
+  return items.reduce((s, i) => s + itemFinalPrice(i), 0)
+}
+
+function calcTotal(items: QuoteItem[], gDiscount: number, gDiscountType: string): number {
+  const sub = calcSubtotal(items)
+  if (!gDiscount || gDiscount <= 0) return sub
+  if (gDiscountType === "percent") return Math.max(0, sub * (1 - gDiscount / 100))
+  return Math.max(0, sub - gDiscount)
+}
+
+const PAYMENT_ICON: Record<string, string> = {
+  pix: "Pix",
+  boleto: "Boleto",
+  cartao: "Cartão",
+  transferencia: "Transferência",
+}
+
 export default async function OrcamentoPublicoPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
   const quote = await getQuoteByToken(token)
   if (!quote) notFound()
 
   const items = quote.items as QuoteItem[]
-  const total = items.reduce((s, i) => s + i.price, 0)
+  const payments = (quote.paymentMethods as QuotePaymentMethod[]) ?? []
+  const subtotal = calcSubtotal(items)
+  const total = calcTotal(items, quote.globalDiscount ?? 0, quote.globalDiscountType ?? "fixed")
+  const globalDiscountValue = subtotal - total
 
   return (
     <div className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-2xl mx-auto space-y-0">
 
-        {/* Documento */}
         <div className="rounded-2xl border border-border overflow-hidden shadow-xl">
 
           {/* Cabeçalho */}
@@ -68,13 +94,13 @@ export default async function OrcamentoPublicoPage({ params }: { params: Promise
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Entendimento do Projeto</p>
                 {quote.problem && (
                   <div className="rounded-xl border border-border p-4 bg-secondary/30">
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1.5 font-semibold">Problema / Necessidade Identificada</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1.5 font-semibold">Problema / Necessidade</p>
                     <p className="text-sm leading-relaxed">{quote.problem}</p>
                   </div>
                 )}
                 {quote.objective && (
                   <div className="rounded-xl border border-border p-4 bg-secondary/30">
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1.5 font-semibold">Objetivo do Projeto</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1.5 font-semibold">Objetivo</p>
                     <p className="text-sm leading-relaxed">{quote.objective}</p>
                   </div>
                 )}
@@ -87,7 +113,7 @@ export default async function OrcamentoPublicoPage({ params }: { params: Promise
               </div>
             )}
 
-            {/* Itens */}
+            {/* Itens + totais */}
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-3 font-semibold">Escopo e Investimento</p>
               <div className="rounded-xl border border-border overflow-hidden">
@@ -99,17 +125,45 @@ export default async function OrcamentoPublicoPage({ params }: { params: Promise
                     </tr>
                   </thead>
                   <tbody>
-                    {items.map((item, i) => (
-                      <tr key={item.id} className={`border-b border-border last:border-0 ${i % 2 === 0 ? "" : "bg-secondary/20"}`}>
-                        <td className="px-5 py-4">
-                          <p className="text-sm font-semibold">{item.name}</p>
-                          {item.description && <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>}
-                        </td>
-                        <td className="px-5 py-4 text-right text-sm font-bold tabular-nums">{fmtBRL(item.price)}</td>
-                      </tr>
-                    ))}
+                    {items.map((item, i) => {
+                      const final = itemFinalPrice(item)
+                      const hasDisc = item.discount && item.discount > 0
+                      return (
+                        <tr key={item.id} className={`border-b border-border last:border-0 ${i % 2 === 0 ? "" : "bg-secondary/20"}`}>
+                          <td className="px-5 py-4">
+                            <p className="text-sm font-semibold">{item.name}</p>
+                            {item.description && <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>}
+                            {hasDisc && (
+                              <p className="text-[10px] text-green-400 mt-0.5 font-medium">
+                                Desconto aplicado: {item.discountType === "percent" ? `${item.discount}%` : fmtBRL(item.discount!)}
+                              </p>
+                            )}
+                          </td>
+                          <td className="px-5 py-4 text-right">
+                            {hasDisc && <p className="text-xs text-muted-foreground line-through tabular-nums">{fmtBRL(item.price)}</p>}
+                            <p className="text-sm font-bold tabular-nums">{fmtBRL(final)}</p>
+                          </td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                   <tfoot>
+                    {subtotal !== total && (
+                      <>
+                        <tr className="border-t border-border">
+                          <td className="px-5 py-2.5 text-sm text-muted-foreground">Subtotal</td>
+                          <td className="px-5 py-2.5 text-right text-sm tabular-nums text-muted-foreground">{fmtBRL(subtotal)}</td>
+                        </tr>
+                        <tr className="border-t border-border">
+                          <td className="px-5 py-2.5 text-sm text-green-400 font-semibold">
+                            Desconto{quote.globalDiscountType === "percent" ? ` (${quote.globalDiscount}%)` : " especial"}
+                          </td>
+                          <td className="px-5 py-2.5 text-right text-sm text-green-400 font-semibold tabular-nums">
+                            -{fmtBRL(globalDiscountValue)}
+                          </td>
+                        </tr>
+                      </>
+                    )}
                     <tr style={{ background: "var(--foreground)", color: "var(--background)" }}>
                       <td className="px-5 py-4 font-bold text-sm uppercase tracking-wide">Investimento Total</td>
                       <td className="px-5 py-4 text-right font-black text-lg tabular-nums">{fmtBRL(total)}</td>
@@ -118,6 +172,39 @@ export default async function OrcamentoPublicoPage({ params }: { params: Promise
                 </table>
               </div>
             </div>
+
+            {/* Formas de pagamento */}
+            {payments.length > 0 && (
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-3 font-semibold">Formas de Pagamento</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {payments.map(p => (
+                    <div key={p.method} className="rounded-xl border border-border p-4 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-wide">{p.label}</span>
+                        {(p.discount ?? 0) > 0 && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-400/10 text-green-400 font-semibold border border-green-400/20">
+                            -{p.discount}% desconto
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-2xl font-black tabular-nums">{fmtBRL(p.value)}</p>
+                      {p.method === "cartao" && p.installments && p.installments > 1 && (
+                        <p className="text-xs text-muted-foreground">
+                          ou {p.installments}x de <strong>{fmtBRL(Math.round(p.value / p.installments))}</strong> sem juros
+                        </p>
+                      )}
+                      {p.method === "cartao" && p.installments === 1 && (
+                        <p className="text-xs text-muted-foreground">à vista no cartão</p>
+                      )}
+                      {p.method === "pix" && <p className="text-xs text-muted-foreground">pagamento instantâneo</p>}
+                      {p.method === "boleto" && <p className="text-xs text-muted-foreground">vencimento em 3 dias úteis</p>}
+                      {p.method === "transferencia" && <p className="text-xs text-muted-foreground">TED / PIX chave CNPJ</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Prazo */}
             {quote.deadline && (
@@ -142,7 +229,7 @@ export default async function OrcamentoPublicoPage({ params }: { params: Promise
                 Alterações de escopo acordadas após o início do projeto poderão gerar valores adicionais, sempre comunicados previamente.
               </p>
               <p className="text-xs text-muted-foreground">
-                Dúvidas ou para aceitar a proposta, entre em contato:{" "}
+                Dúvidas ou para aceitar a proposta:{" "}
                 <strong>contato@elevanthe.com</strong> · WhatsApp <strong>+55 87 98121-5180</strong>
               </p>
             </div>
@@ -156,7 +243,7 @@ export default async function OrcamentoPublicoPage({ params }: { params: Promise
           </div>
         </div>
 
-        {/* CTA de aceite */}
+        {/* CTA */}
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
           <a
             href={`https://wa.me/5587981215180?text=${encodeURIComponent(`Olá! Gostaria de aceitar a proposta ELV-${String(quote.id).padStart(4, "0")}. Podemos avançar?`)}`}
