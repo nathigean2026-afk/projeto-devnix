@@ -189,3 +189,24 @@ export async function getQuoteByToken(token: string): Promise<Quote | null> {
   return row
 }
 
+export async function generateOSShareLink(id: number, expiresInDays: number) {
+  await requireAdmin()
+  const token = randomBytes(20).toString("hex")
+  const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000)
+  await db.update(quotes).set({
+    osShareToken: token,
+    osShareExpiresAt: expiresAt,
+    updatedAt: new Date(),
+  }).where(eq(quotes.id, id))
+  revalidatePath("/admin")
+  return token
+}
+
+// Rota pública — OS — sem requireAdmin
+export async function getOSByToken(token: string): Promise<Quote | null> {
+  const [row] = await db.select().from(quotes).where(eq(quotes.osShareToken, token))
+  if (!row) return null
+  if (row.osShareExpiresAt && row.osShareExpiresAt < new Date()) return null
+  return row
+}
+

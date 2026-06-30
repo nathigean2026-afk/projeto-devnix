@@ -1,18 +1,18 @@
 "use client"
 
 import { use, useEffect, useState } from "react"
-import { getQuoteByToken } from "@/app/actions/leads"
+import { getOSByToken } from "@/app/actions/leads"
 import type { Quote } from "@/lib/db/schema"
 import { QuoteDocument } from "@/components/admin-quotes"
 import { Sun, Moon, Printer } from "lucide-react"
 
-export default function OrcamentoPublicoPage({ params }: { params: Promise<{ token: string }> }) {
+export default function OSPublicaPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = use(params)
   const [quote, setQuote] = useState<Quote | null | "loading">("loading")
   const [theme, setTheme] = useState<"dark" | "light">("light")
 
   useEffect(() => {
-    getQuoteByToken(token).then(q => setQuote(q))
+    getOSByToken(token).then(q => setQuote(q))
   }, [token])
 
   if (quote === "loading") {
@@ -26,7 +26,7 @@ export default function OrcamentoPublicoPage({ params }: { params: Promise<{ tok
   if (!quote) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background px-4">
-        <p className="text-2xl font-black">Proposta não encontrada</p>
+        <p className="text-2xl font-black">Ordem de Serviço não encontrada</p>
         <p className="text-muted-foreground text-sm text-center">
           O link pode ter expirado ou sido removido. Entre em contato com a Elevanthe.
         </p>
@@ -37,15 +37,17 @@ export default function OrcamentoPublicoPage({ params }: { params: Promise<{ tok
     )
   }
 
+  const osRef = `OS-${String(quote.id).padStart(4, "0")}`
+
   return (
     <div
       className="min-h-screen py-8 px-4 transition-colors"
       style={{ background: theme === "dark" ? "#080808" : "#f1f5f9" }}
     >
-      {/* Barra de controles flutuante */}
+      {/* Barra de controles */}
       <div className="max-w-3xl mx-auto mb-4 flex items-center justify-between">
         <p className="text-xs font-mono" style={{ color: theme === "dark" ? "#666" : "#888" }}>
-          Proposta ELV-{String(quote.id).padStart(4, "0")} · elevanthe.com
+          Ordem de Serviço {osRef} · elevanthe.com
         </p>
         <div className="flex items-center gap-2">
           <button
@@ -76,25 +78,25 @@ export default function OrcamentoPublicoPage({ params }: { params: Promise<{ tok
         </div>
       </div>
 
-      {/* Documento */}
+      {/* Documento OS */}
       <div className="max-w-3xl mx-auto">
-        <QuoteDocument quote={quote} mode="orcamento" theme={theme} />
+        <QuoteDocument quote={quote} mode="os" theme={theme} />
 
         {/* CTA */}
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
           <a
             href={`https://wa.me/5587981215180?text=${encodeURIComponent(
-              `Olá! Gostaria de aceitar a proposta ELV-${String(quote.id).padStart(4, "0")}. Podemos avançar?`
+              `Olá! Recebi a Ordem de Serviço ${osRef} e gostaria de confirmar o aceite. Podemos avançar?`
             )}`}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold transition-all hover:opacity-80 active:scale-95"
             style={{ background: "#25d366", color: "#fff" }}
           >
-            Aceitar esta Proposta via WhatsApp
+            Confirmar Aceite via WhatsApp
           </a>
           <a
-            href={`mailto:contato@elevanthe.com?subject=Proposta ELV-${String(quote.id).padStart(4, "0")} — ${quote.clientName}`}
+            href={`mailto:contato@elevanthe.com?subject=OS ${osRef} — ${quote.clientName}`}
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
             style={{
               border: `1px solid ${theme === "dark" ? "#333" : "#d1d5db"}`,
@@ -102,12 +104,12 @@ export default function OrcamentoPublicoPage({ params }: { params: Promise<{ tok
               color: theme === "dark" ? "#fff" : "#111",
             }}
           >
-            Tirar dúvidas por E-mail
+            Contato por E-mail
           </a>
         </div>
 
         <p className="text-center mt-6 pb-4 text-xs" style={{ color: "#666" }}>
-          Proposta gerada por Elevanthe Tecnologia · elevanthe.com
+          Ordem de Serviço gerada por Elevanthe Tecnologia · elevanthe.com
         </p>
       </div>
     </div>

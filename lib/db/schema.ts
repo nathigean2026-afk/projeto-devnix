@@ -127,9 +127,12 @@ export const quotes = pgTable("quotes", {
   pixKey: text("pixKey"),
   // Status
   status: text("status").notNull().default("rascunho"),
-  // Link público compartilhável
+  // Link público compartilhável — orçamento
   shareToken: text("shareToken").unique(),
   shareExpiresAt: timestamp("shareExpiresAt"),
+  // Link público compartilhável — ordem de serviço
+  osShareToken: text("osShareToken").unique(),
+  osShareExpiresAt: timestamp("osShareExpiresAt"),
   // Metadados
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
