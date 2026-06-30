@@ -54,18 +54,17 @@ export function Navbar() {
         {/* Logo */}
         <a href="/" className="flex items-center gap-2.5 group" aria-label="Elevanthe — Tecnologia que Eleva Negócios">
           <Image
-            src="/logo-icon-light.png"
+            src={mounted && !isDark ? "/logo-icon-dark.webp" : "/logo-icon-light.webp"}
             alt="Elevanthe"
             width={88}
             height={88}
             className="object-contain block sm:hidden transition-all duration-300"
-            style={{ width: "auto", height: "auto", maxHeight: "56px", filter: mounted && !isDark ? "invert(1)" : "none" }}
+            style={{ width: "auto", height: "auto", maxHeight: "56px" }}
             priority
             fetchPriority="high"
-            unoptimized
           />
           <Image
-            src="/logo-full-light.png"
+            src={mounted && !isDark ? "/logo-full-dark.webp" : "/logo-full-light.webp"}
             alt="Elevanthe — Tecnologia que Eleva Negócios"
             width={320}
             height={92}
@@ -74,7 +73,6 @@ export function Navbar() {
               width: "auto",
               height: "auto",
               maxHeight: "64px",
-              filter: mounted && !isDark ? "invert(1)" : "none",
             }}
             priority
             fetchPriority="high"
@@ -162,7 +160,7 @@ export function Navbar() {
             <div className="flex items-center justify-between mb-4">
               <a href="/" aria-label="Elevanthe">
                 <Image
-                  src="/logo-icon-light.png"
+                  src={mounted && !isDark ? "/logo-icon-dark.webp" : "/logo-icon-light.webp"}
                   alt="Elevanthe"
                   width={88}
                   height={88}
@@ -171,7 +169,6 @@ export function Navbar() {
                     width: "auto",
                     height: "auto",
                     maxHeight: "36px",
-                    filter: mounted && !isDark ? "invert(1)" : "none",
                   }}
                   loading="lazy"
                   unoptimized

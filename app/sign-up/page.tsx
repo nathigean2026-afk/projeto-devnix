@@ -64,12 +64,12 @@ export default function SignUpPage() {
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-10">
           <Image
-            src="/logo-full-light.png"
+            src={mounted && resolvedTheme !== "dark" ? "/logo-full-dark.webp" : "/logo-full-light.webp"}
             alt="Elevanthe"
             width={140}
             height={40}
             className="object-contain transition-all duration-300"
-            style={{ width: "auto", maxHeight: "40px", filter: mounted && resolvedTheme !== "dark" ? "invert(1)" : "none" }}
+            style={{ width: "auto", maxHeight: "40px" }}
             loading="eager"
             priority
           />

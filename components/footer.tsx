@@ -75,7 +75,7 @@ export function Footer() {
           <div className="lg:col-span-2">
             <a href="#" className="flex items-center gap-2 mb-5 w-fit group" aria-label="Elevanthe">
               <Image
-                src="/logo-full-light.png"
+                src={mounted && !isDark ? "/logo-full-dark.webp" : "/logo-full-light.webp"}
                 alt="Elevanthe — Tecnologia que Eleva Negócios"
                 width={160}
                 height={46}
@@ -84,7 +84,6 @@ export function Footer() {
                   width: "auto",
                   height: "auto",
                   maxHeight: "38px",
-                  filter: mounted && !isDark ? "invert(1)" : "none",
                 }}
                 unoptimized
               />

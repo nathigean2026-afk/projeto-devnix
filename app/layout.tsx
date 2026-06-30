@@ -88,6 +88,9 @@ export default function RootLayout({
         {/* Preconnect para fontes — elimina round-trip extra no LCP */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Preload da logo — elemento LCP no mobile */}
+        <link rel="preload" as="image" href="/logo-icon-light.webp" type="image/webp" />
+        <link rel="preload" as="image" href="/logo-full-light.webp" type="image/webp" />
       </head>
       <body className="font-sans antialiased bg-background text-foreground noise-overlay">
         <Providers>

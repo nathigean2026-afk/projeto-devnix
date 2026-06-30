@@ -252,14 +252,13 @@ export function QuemSomosContent() {
                   title={elephantClicks > 0 ? `${5 - elephantClicks} clique${5 - elephantClicks !== 1 ? "s" : ""} para o segredo…` : "Clique no elefante"}
                 >
                   <Image
-                    src="/logo-icon-light.png"
+                    src={mounted && !isDark ? "/logo-icon-dark.webp" : "/logo-icon-light.webp"}
                     alt="Mascote Elevanthe — elefante tecnológico"
                     width={160}
                     height={160}
                     className="object-contain transition-all duration-300 pointer-events-none"
                     style={{
                       maxWidth: "80%", maxHeight: "80%",
-                      filter: mounted && !isDark ? "invert(1)" : "none",
                       transform: elephantClicks > 0 ? `scale(${1 + elephantClicks * 0.04})` : "scale(1)",
                       transition: "transform 0.15s ease",
                     }}
@@ -289,7 +288,7 @@ export function QuemSomosContent() {
                   O elefante que nunca esquece
                 </h2>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                  O mascote da Elevanthe é um elefante com circuitos tecnológicos — símbolo de força,
+                  O mascote da Elevanthe é um elefante com circuitos tecnológicos — s��mbolo de força,
                   memória e inteligência. Assim como o elefante nunca esquece, a Elevanthe não esquece
                   nenhum detalhe do seu projeto.
                 </p>

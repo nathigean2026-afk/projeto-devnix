@@ -5,7 +5,7 @@ const nextConfig = {
   },
   experimental: {
     // Tree-shake apenas os ícones e variants de motion usados — reduz JS ~30%
-    optimizePackageImports: ["lucide-react", "framer-motion"],
+    optimizePackageImports: ["lucide-react", "framer-motion", "@radix-ui/react-accordion", "@radix-ui/react-dialog"],
   },
   images: {
     // Habilita otimização de imagens (compressão, WebP, AVIF, lazy-load)
@@ -13,6 +13,7 @@ const nextConfig = {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    minimumCacheTTL: 31536000,
   },
   // Remover console.log em produção para reduzir bundle
   compiler: {
@@ -47,7 +48,17 @@ const nextConfig = {
       },
       {
         // Cache longo para assets estáticos
-        source: "/(.*)\\.(png|jpg|jpeg|gif|svg|ico|webp|avif|woff|woff2|ttf|otf)",
+        source: "/(.*)\\.(png|jpg|jpeg|gif|svg|ico|webp|avif|woff|woff2|ttf|otf|mp3|mp4)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        // Cache + stale-while-revalidate para JS e CSS do Next.js
+        source: "/_next/static/(.*)",
         headers: [
           {
             key: "Cache-Control",

@@ -24,34 +24,36 @@ export default async function Home() {
       <CustomCursor />
       <div className="relative z-10 min-h-screen">
         <Navbar />
-        <HeroSection />
-        <CosmicReveal delay={0}>
-          <StatsSection />
-        </CosmicReveal>
-        <CosmicReveal delay={0}>
-          <ServicesSection />
-        </CosmicReveal>
-        <CosmicReveal delay={0}>
-          <ProcessSection />
-        </CosmicReveal>
-        <CosmicReveal delay={0}>
-          <ProjectsSection projects={projects} />
-        </CosmicReveal>
-        <CosmicReveal delay={0}>
-          <GlossaryPreview />
-        </CosmicReveal>
-        <CosmicReveal delay={0}>
-          <TestimonialsSection />
-        </CosmicReveal>
-        <CosmicReveal delay={0}>
-          <PricingSection />
-        </CosmicReveal>
-        <CosmicReveal delay={0}>
-          <FaqSection />
-        </CosmicReveal>
-        <CosmicReveal delay={0}>
-          <ContactSection />
-        </CosmicReveal>
+        <main>
+          <HeroSection />
+          <CosmicReveal delay={0}>
+            <StatsSection />
+          </CosmicReveal>
+          <CosmicReveal delay={0}>
+            <ServicesSection />
+          </CosmicReveal>
+          <CosmicReveal delay={0}>
+            <ProcessSection />
+          </CosmicReveal>
+          <CosmicReveal delay={0}>
+            <ProjectsSection projects={projects} />
+          </CosmicReveal>
+          <CosmicReveal delay={0}>
+            <GlossaryPreview />
+          </CosmicReveal>
+          <CosmicReveal delay={0}>
+            <TestimonialsSection />
+          </CosmicReveal>
+          <CosmicReveal delay={0}>
+            <PricingSection />
+          </CosmicReveal>
+          <CosmicReveal delay={0}>
+            <FaqSection />
+          </CosmicReveal>
+          <CosmicReveal delay={0}>
+            <ContactSection />
+          </CosmicReveal>
+        </main>
         <CosmicReveal delay={0}>
           <Footer />
         </CosmicReveal>
