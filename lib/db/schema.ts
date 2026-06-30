@@ -88,8 +88,19 @@ export type QuoteItem = {
   id: string
   name: string
   description?: string
-  price: number
+  price: number          // preço original
+  discount?: number      // desconto no item (valor em R$ ou %)
+  discountType?: "fixed" | "percent"
   category?: string
+}
+
+export type QuotePaymentMethod = {
+  method: "pix" | "boleto" | "cartao" | "transferencia"
+  label: string
+  value: number           // valor final nessa forma
+  discount?: number       // desconto extra (%) para essa forma
+  installments?: number   // parcelas (cartão)
+  installmentValue?: number
 }
 
 export const quotes = pgTable("quotes", {
@@ -106,6 +117,11 @@ export const quotes = pgTable("quotes", {
   // Itens selecionados (array JSON)
   items: jsonb("items").notNull().default([]).$type<QuoteItem[]>(),
   total: integer("total").notNull().default(0),
+  // Desconto global
+  globalDiscount: integer("globalDiscount").notNull().default(0),
+  globalDiscountType: text("globalDiscountType").notNull().default("fixed"),
+  // Formas de pagamento
+  paymentMethods: jsonb("paymentMethods").notNull().default([]).$type<QuotePaymentMethod[]>(),
   // Status
   status: text("status").notNull().default("rascunho"),
   // Link público compartilhável
