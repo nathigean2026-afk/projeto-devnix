@@ -6,16 +6,6 @@ import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import type { ProjectRow } from "@/lib/db/schema"
 
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.07 } },
-} as const
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0 },
-}
-
 // Gradient covers per project type — vivid and visible in both themes
 const COVERS: Record<string, { gradient: string; icon: React.ReactNode }> = {
   barbearia: {
@@ -161,16 +151,10 @@ export function ProjectsSection({ projects = [] }: { projects?: ProjectRow[] }) 
         </div>
 
         {/* Grid preview — 4 cards, 2×2 on desktop */}
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-border rounded-2xl overflow-hidden"
-          variants={containerVariants}
-          initial="hidden"
-          animate={inView ? "visible" : "hidden"}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-border rounded-2xl overflow-hidden">
           {preview.map((p) => (
-            <motion.article
+            <article
               key={p.slug}
-              variants={cardVariants}
               className="group relative flex flex-col bg-background hover:bg-secondary transition-colors duration-300 overflow-hidden"
             >
               {/* Top accent on hover */}
@@ -215,9 +199,9 @@ export function ProjectsSection({ projects = [] }: { projects?: ProjectRow[] }) 
 
               {/* Clickable overlay */}
               <Link href={`/projetos/${p.slug}`} className="absolute inset-0" aria-label={`Ver projeto: ${p.title}`} />
-            </motion.article>
+            </article>
           ))}
-        </motion.div>
+        </div>
 
         {/* CTA row */}
         <motion.div
