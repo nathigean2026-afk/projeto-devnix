@@ -13,10 +13,10 @@ import { Footer } from "@/components/footer"
 import { AnimatedBackground } from "@/components/animated-background"
 import { CustomCursor } from "@/components/custom-cursor"
 import { CosmicReveal } from "@/components/cosmic-reveal"
-import { getProjects } from "@/app/actions/projects"
+import { queryProjects } from "@/lib/db/queries"
 
 export default async function Home() {
-  const projects = await getProjects()
+  const projects = await queryProjects().catch(() => [])
 
   return (
     <>
