@@ -19,8 +19,7 @@ const footerLinks = {
 
 const socials = [
   { Icon: GitBranch, href: "https://github.com", label: "GitHub" },
-  { Icon: Link2, href: "https://linkedin.com", label: "LinkedIn" },
-  { Icon: AtSign, href: "https://instagram.com", label: "Instagram" },
+  { Icon: AtSign, href: "https://instagram.com/elevanthedev", label: "Instagram" },
   { Icon: Mail, href: "mailto:contato@elevanthe.com", label: "E-mail" },
 ]
 

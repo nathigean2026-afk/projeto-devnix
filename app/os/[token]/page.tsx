@@ -85,7 +85,7 @@ export default function OSPublicaPage({ params }: { params: Promise<{ token: str
         {/* CTA */}
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
           <a
-            href={`https://wa.me/5587981215180?text=${encodeURIComponent(
+            href={`https://wa.me/5587988219342?text=${encodeURIComponent(
               `Olá! Recebi a Ordem de Serviço ${osRef} e gostaria de confirmar o aceite. Podemos avançar?`
             )}`}
             target="_blank"

@@ -956,7 +956,7 @@ export function QuoteDocument({
             </p>
           )}
           <p style={{ fontSize: 11, color: muted, marginTop: 8 }}>
-            Dúvidas ou aceite: <strong style={{ color: fg }}>contato@elevanthe.com</strong> &middot; WhatsApp <strong style={{ color: fg }}>+55 87 98121-5180</strong> &middot; <strong style={{ color: fg }}>elevanthe.com</strong>
+            Dúvidas ou aceite: <strong style={{ color: fg }}>contato@elevanthe.com</strong> &middot; WhatsApp <strong style={{ color: fg }}>+55 87 98821-9342</strong> &middot; <strong style={{ color: fg }}>elevanthe.com</strong>
           </p>
         </div>
       </div>

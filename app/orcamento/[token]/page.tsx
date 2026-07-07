@@ -83,7 +83,7 @@ export default function OrcamentoPublicoPage({ params }: { params: Promise<{ tok
         {/* CTA */}
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
           <a
-            href={`https://wa.me/5587981215180?text=${encodeURIComponent(
+            href={`https://wa.me/5587988219342?text=${encodeURIComponent(
               `Olá! Gostaria de aceitar a proposta ELV-${String(quote.id).padStart(4, "0")}. Podemos avançar?`
             )}`}
             target="_blank"
