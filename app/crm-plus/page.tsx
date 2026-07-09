@@ -70,34 +70,63 @@ const testimonials = [
 ]
 
 const features = [
-  { icon: Users, title: "Gestão de Clientes", desc: "Cadastre e organize todos os seus clientes com histórico completo, contatos e status de relacionamento." },
-  { icon: Wrench, title: "Ordens de Serviço", desc: "Crie, acompanhe e finalize ordens de serviço com controle de status em tempo real." },
-  { icon: FileText, title: "Orçamentos Profissionais", desc: "Gere orçamentos detalhados com itens, valores e envie diretamente para seus clientes." },
-  { icon: DollarSign, title: "Controle Financeiro", desc: "Acompanhe receitas, despesas e lucro do seu negócio com visão clara do fluxo de caixa." },
-  { icon: BarChart3, title: "Relatórios e Métricas", desc: "Dashboards com gráficos e indicadores para você tomar decisões baseadas em dados reais." },
-  { icon: Shield, title: "Dados Seguros", desc: "Banco de dados seguro com acesso protegido por autenticação. Seus dados sempre disponíveis." },
+  { icon: Users, title: "Gestão de Clientes", desc: "Cadastro completo com histórico de OS, orçamentos e financeiro vinculados. Filtro de clientes inativos e painel de aniversariantes." },
+  { icon: Wrench, title: "Ordens de Serviço", desc: "Crie, acompanhe e finalize OS com controle de status. Link público para o cliente visualizar e recibo integrado." },
+  { icon: FileText, title: "Orçamentos Profissionais", desc: "Itens, descontos, Pix com QR Code, parcelamento no cartão, aprovação pelo cliente no link público e tag de envio via WhatsApp." },
+  { icon: DollarSign, title: "Controle Financeiro", desc: "Lançamento de receitas e despesas com categorias, vínculo a cliente, marcar como pago com um clique e saldo em tempo real." },
+  { icon: BarChart3, title: "Relatórios Completos", desc: "Gráficos de faturamento, taxa de conversão, top clientes, top serviços e orçamentos recusados com motivo." },
+  { icon: Shield, title: "Dados Seguros", desc: "Banco de dados seguro com autenticação. Acesso de qualquer dispositivo, funciona como PWA instalável no celular." },
 ]
 
 const plans = [
   {
     id: "start", icon: Zap, label: "Start", duration: "7 dias", price: "R$ 7", priceDetail: "pagamento único",
-    desc: "Experimente a plataforma completa. Ideal para avaliar antes de assinar.", featured: false,
+    desc: "Experimente a plataforma completa sem restrições. Ideal para avaliar antes de assinar.", featured: false,
     badge: null, savings: null,
-    features: ["Acesso completo por 7 dias", "Clientes ilimitados", "Ordens de serviço ilimitadas", "Orçamentos e financeiro", "Suporte por e-mail"],
+    features: [
+      "Acesso completo por 7 dias",
+      "Clientes, OS e orçamentos ilimitados",
+      "Catálogo de serviços",
+      "Controle financeiro",
+      "Relatórios completos",
+      "Documentos públicos (OS e orçamento)",
+      "Suporte por e-mail",
+    ],
   },
   {
     id: "business", icon: CalendarDays, label: "Business", duration: "30 dias", price: "R$ 30", priceDetail: "por mês",
-    desc: "Para profissionais que precisam de marca própria e notificações de orçamento.", featured: true,
+    desc: "Para profissionais que precisam de marca própria e notificações automáticas.", featured: true,
     badge: "Mais popular",
     savings: null,
-    features: ["Acesso completo por 30 dias", "Clientes ilimitados", "Ordens de serviço ilimitadas", "Orçamentos e financeiro", "Relatórios completos", "Marca própria nos documentos", "Suporte prioritário"],
+    features: [
+      "Acesso completo por 30 dias",
+      "Clientes, OS e orçamentos ilimitados",
+      "Catálogo de serviços",
+      "Controle financeiro",
+      "Relatórios completos",
+      "Marca própria nos documentos",
+      "Logo nos PDFs e cor de destaque",
+      "Notificações WhatsApp automáticas",
+      "Suporte prioritário",
+    ],
   },
   {
     id: "enterprise", icon: CalendarRange, label: "Enterprise", duration: "360 dias", price: "R$ 280", priceDetail: "por ano",
-    desc: "Melhor custo-benefício com funcionário auxiliar incluso por 360 dias.", featured: false,
+    desc: "Melhor custo-benefício. Com funcionário auxiliar e permissões por módulo.", featured: false,
     badge: "Melhor valor",
     savings: "Equivale a R$ 23,33/mês · Economia de R$ 80",
-    features: ["Acesso completo por 360 dias", "Clientes ilimitados", "Ordens de serviço ilimitadas", "Orçamentos e financeiro", "Relatórios completos", "Marca própria nos documentos", "1 funcionário auxiliar incluso", "Suporte VIP"],
+    features: [
+      "Acesso completo por 360 dias",
+      "Clientes, OS e orçamentos ilimitados",
+      "Catálogo de serviços",
+      "Controle financeiro",
+      "Relatórios completos",
+      "Marca própria nos documentos",
+      "Notificações WhatsApp automáticas",
+      "1 funcionário auxiliar incluso",
+      "Permissões individuais por módulo",
+      "Suporte VIP",
+    ],
   },
 ]
 

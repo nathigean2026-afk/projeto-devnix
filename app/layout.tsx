@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Geist_Mono } from 'next/font/google'
 import { Providers } from '@/components/providers'
+import { WhatsAppButton } from '@/components/whatsapp-button'
 import './globals.css'
 
 const inter = Inter({
@@ -95,6 +96,7 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-background text-foreground noise-overlay">
         <Providers>
           {children}
+          <WhatsAppButton />
         </Providers>
       </body>
     </html>
