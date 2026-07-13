@@ -83,6 +83,47 @@ export const leads = pgTable("leads", {
 export type Lead = typeof leads.$inferSelect
 export type NewLead = typeof leads.$inferInsert
 
+// ── Client intake (perguntas iniciais do orçamento) ──────────────────────────
+export type ClientIntake = {
+  // Dados da empresa
+  companyName?: string
+  foundedYear?: string
+  city?: string
+  employees?: string
+  sector?: string
+  // Sobre
+  origin?: string
+  motivation?: string
+  problemSolved?: string
+  // Identidade
+  mission?: string
+  vision?: string
+  values?: string
+  // Mercado
+  targetAudience?: string
+  differentials?: string
+  competitors?: string
+  // Presença digital
+  socialMedia?: string
+  // Assets
+  hasLogo?: boolean
+  logoUrl?: string
+  brandColors?: string
+  photos?: string[]
+  // Domínio
+  wantsDomain?: "sim" | "nao" | "ja_tenho" | null
+  domainName?: string
+  domainType?: string   // .com, .com.br, .net etc
+  // Hospedagem
+  hostingOption?: "elevanthe" | "proprio" | "nao_sabe" | null
+  hostingNotes?: string
+  // Manutenção
+  wantsMaintenance?: boolean
+  maintenanceNotes?: string
+  // Obs livres
+  notes?: string
+}
+
 // ── Quotes (Orçamentos) ───────────────────────────────────────────────────────
 export type QuoteItem = {
   id: string
@@ -109,6 +150,8 @@ export const quotes = pgTable("quotes", {
   clientName: text("clientName").notNull(),
   clientEmail: text("clientEmail"),
   clientWhatsapp: text("clientWhatsapp"),
+  // Intake (perguntas iniciais sobre empresa/cliente)
+  clientIntake: jsonb("clientIntake").$type<ClientIntake>(),
   // Contexto do projeto
   problem: text("problem"),
   objective: text("objective"),
@@ -161,6 +204,9 @@ export const projects_db = pgTable("projects", {
   stack: jsonb("stack").notNull().default([]).$type<string[]>(),
   // optional live url
   liveUrl: text("liveUrl"),
+  // Foto de capa personalizada (URL) e modo
+  coverImageUrl: text("coverImageUrl"),
+  coverImageMode: text("coverImageMode").default("single"), // "single" | "before_after"
   // before/after: stored as JSON { before: url, after: url } or null
   beforeAfter: jsonb("beforeAfter").$type<{ before: string; after: string } | null>(),
   // gallery screenshots: [{ src, caption }]
@@ -175,3 +221,46 @@ export const projects_db = pgTable("projects", {
 
 export type ProjectRow = typeof projects_db.$inferSelect
 export type NewProject = typeof projects_db.$inferInsert
+
+// ── Clients (cadastro de clientes fechados) ───────────────────────────────────
+export const clients = pgTable("clients", {
+  id: serial("id").primaryKey(),
+  // Dados pessoais
+  name: text("name").notNull(),
+  email: text("email"),
+  phone: text("phone"),
+  whatsapp: text("whatsapp"),
+  cpf: text("cpf"),
+  // Dados da empresa
+  companyName: text("companyName"),
+  cnpj: text("cnpj"),
+  foundedYear: text("foundedYear"),
+  city: text("city"),
+  state: text("state"),
+  sector: text("sector"),
+  employees: text("employees"),
+  // Identidade da empresa
+  mission: text("mission"),
+  vision: text("vision"),
+  values: text("values"),
+  targetAudience: text("targetAudience"),
+  differentials: text("differentials"),
+  competitors: text("competitors"),
+  socialMedia: text("socialMedia"),
+  // Branding
+  logoUrl: text("logoUrl"),
+  brandColors: text("brandColors"),
+  // Status de aprovação
+  status: text("status").notNull().default("pendente"), // pendente | aprovado | rejeitado
+  // Link público de preenchimento
+  fillToken: text("fillToken").unique(),
+  fillExpiresAt: timestamp("fillExpiresAt"),
+  // Obs do admin
+  adminNotes: text("adminNotes"),
+  // Metadados
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+})
+
+export type Client = typeof clients.$inferSelect
+export type NewClient = typeof clients.$inferInsert

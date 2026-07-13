@@ -35,7 +35,7 @@ export function WhatsAppButton() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-white leading-none">Elevanthe Tec</p>
+                <p className="text-xs font-bold text-white leading-none">Elevanthe</p>
                 <p className="text-[10px] text-white/60 mt-0.5 flex items-center gap-1">
                   <span className="size-1.5 rounded-full bg-green-400 inline-block" />
                   Online agora
