@@ -46,10 +46,15 @@ export async function submitLead(data: {
     if (!result.success) throw new Error("Turnstile verification failed")
   }
 
-  // Captura IP real (Vercel seta x-forwarded-for)
+  // Captura IP real do visitante.
+  // Quando atrás do Cloudflare, o header cf-connecting-ip contém o IP real;
+  // x-forwarded-for pode conter IPs de edge da CF (ex: 172.71.x.x) no início.
   const hdrs = await headers()
-  const rawIp = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim()
-    ?? hdrs.get("x-real-ip")
+  const rawIp =
+    hdrs.get("cf-connecting-ip")?.trim()       // Cloudflare: IP real do visitante
+    ?? hdrs.get("true-client-ip")?.trim()      // Cloudflare Enterprise
+    ?? hdrs.get("x-forwarded-for")?.split(",").at(-1)?.trim() // último da cadeia = origem real
+    ?? hdrs.get("x-real-ip")?.trim()
     ?? null
   const ip = rawIp && rawIp !== "::1" && rawIp !== "127.0.0.1" ? rawIp : null
   const geo = ip ? await getGeoFromIp(ip) : null
