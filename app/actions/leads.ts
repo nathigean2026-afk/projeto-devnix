@@ -1,8 +1,8 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { leads, quotes } from "@/lib/db/schema"
-import type { Quote, NewQuote, QuoteItem } from "@/lib/db/schema"
+import { leads, quotes, clients } from "@/lib/db/schema"
+import type { Quote, NewQuote, Client, NewClient } from "@/lib/db/schema"
 import { auth } from "@/lib/auth"
 import { eq, desc } from "drizzle-orm"
 import { headers } from "next/headers"
@@ -208,5 +208,68 @@ export async function getOSByToken(token: string): Promise<Quote | null> {
   if (!row) return null
   if (row.osShareExpiresAt && row.osShareExpiresAt < new Date()) return null
   return row
+}
+
+// ── Clients actions ──────────────────────────────────────────────────────────
+
+export async function getClients() {
+  await requireAdmin()
+  return db.select().from(clients).orderBy(desc(clients.createdAt))
+}
+
+export async function createClient(data: Partial<Omit<NewClient, "id" | "createdAt" | "updatedAt">>) {
+  await requireAdmin()
+  const [row] = await db.insert(clients).values({
+    name: data.name ?? "Cliente",
+    ...data,
+    status: "pendente",
+    updatedAt: new Date(),
+  }).returning()
+  revalidatePath("/admin")
+  return row
+}
+
+export async function updateClient(id: number, data: Partial<Omit<NewClient, "id" | "createdAt">>) {
+  await requireAdmin()
+  await db.update(clients).set({ ...data, updatedAt: new Date() }).where(eq(clients.id, id))
+  revalidatePath("/admin")
+}
+
+export async function deleteClient(id: number) {
+  await requireAdmin()
+  await db.delete(clients).where(eq(clients.id, id))
+  revalidatePath("/admin")
+}
+
+export async function generateClientFillLink(id: number, expiresInDays = 7) {
+  await requireAdmin()
+  const token = randomBytes(20).toString("hex")
+  const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000)
+  await db.update(clients).set({
+    fillToken: token,
+    fillExpiresAt: expiresAt,
+    updatedAt: new Date(),
+  }).where(eq(clients.id, id))
+  revalidatePath("/admin")
+  return token
+}
+
+// Pública — sem requireAdmin
+export async function getClientByFillToken(token: string): Promise<Client | null> {
+  const [row] = await db.select().from(clients).where(eq(clients.fillToken, token))
+  if (!row) return null
+  if (row.fillExpiresAt && row.fillExpiresAt < new Date()) return null
+  return row
+}
+
+export async function submitClientForm(token: string, data: Partial<Omit<NewClient, "id" | "createdAt" | "status">>) {
+  const [row] = await db.select().from(clients).where(eq(clients.fillToken, token))
+  if (!row) throw new Error("Link inválido ou expirado")
+  if (row.fillExpiresAt && row.fillExpiresAt < new Date()) throw new Error("Link expirado")
+  await db.update(clients).set({
+    ...data,
+    updatedAt: new Date(),
+  }).where(eq(clients.id, row.id))
+  return true
 }
 

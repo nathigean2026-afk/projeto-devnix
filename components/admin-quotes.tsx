@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react"
 import Image from "next/image"
 import { QRCodeSVG } from "qrcode.react"
-import type { Quote, QuoteItem, QuotePaymentMethod } from "@/lib/db/schema"
+import type { Quote, QuoteItem, QuotePaymentMethod, ClientIntake } from "@/lib/db/schema"
 import {
   createQuote, updateQuote, deleteQuote, generateShareLink, generateOSShareLink,
 } from "@/app/actions/leads"
@@ -12,7 +12,7 @@ import {
   Copy, Link2, X, Pencil, Clock, Send, CheckCircle2,
   Package, Server, Globe, Code, Smartphone, ShoppingCart,
   Wrench, MessageSquare, Tag, CreditCard, Percent, QrCode,
-  ClipboardList, Sun, Moon, Printer,
+  ClipboardList, Sun, Moon, Printer, Building2, ChevronUp, Info,
 } from "lucide-react"
 
 // ── Catálogo ──────────────────────────────────────────────────────────────────
@@ -123,6 +123,266 @@ function calcTotal(items: QuoteItem[], gDiscount: number, gDiscountType: string)
   return Math.max(0, sub - gDiscount)
 }
 
+// ── QuoteIntakePanel ──────────────────────────────────────────────────────────
+// Perguntas iniciais sobre o negócio do cliente, domínio e hospedagem
+function QuoteIntakePanel({ intake, onChange }: {
+  intake: ClientIntake
+  onChange: (v: ClientIntake) => void
+}) {
+  const set = <K extends keyof ClientIntake>(k: K, v: ClientIntake[K]) =>
+    onChange({ ...intake, [k]: v })
+
+  const INPUT = "w-full px-3 py-2 rounded-lg border border-border bg-secondary text-sm outline-none focus:border-foreground/30 transition"
+  const LABEL = "text-[10px] text-muted-foreground uppercase tracking-wide block mb-1"
+  const TA = INPUT + " resize-none"
+
+  // Tooltips de ajuda
+  const DOMAIN_TIPS: Record<string, { title: string; desc: string }> = {
+    sim: {
+      title: "Domínio próprio",
+      desc: "O endereço do seu site na internet, ex: suaempresa.com ou suaempresa.com.br. Com domínio próprio você também pode ter e-mail profissional como contato@suaempresa.com.br, o que passa muito mais credibilidade para seus clientes.",
+    },
+    nao: {
+      title: "Sem domínio por enquanto",
+      desc: "O site ficará disponível num endereço provisório (ex: suaempresa.vercel.app). Você pode adicionar um domínio próprio depois.",
+    },
+    ja_tenho: {
+      title: "Já possui domínio",
+      desc: "Ótimo! Vamos configurar o seu domínio existente para apontar para o novo site.",
+    },
+  }
+
+  const HOSTING_TIPS: Record<string, { title: string; desc: string }> = {
+    elevanthe: {
+      title: "Hospedagem gerenciada pela Elevanthe",
+      desc: "A Elevanthe cuida de tudo: servidor, backups, atualizações e segurança. Há um custo mensal pago diretamente para a Elevanthe. Recomendado para quem não quer se preocupar com infraestrutura.",
+    },
+    proprio: {
+      title: "Hospedagem por conta do cliente",
+      desc: "Você contrata e paga diretamente um provedor (ex: Hostinger, AWS, etc). A Elevanthe configura tudo e te orienta. Você tem controle total, mas é responsável pela renovação e manutenção do servidor.",
+    },
+    nao_sabe: {
+      title: "Ainda não decidi",
+      desc: "Sem problema! Conversamos sobre as opções e custos durante o processo.",
+    },
+  }
+
+  const [domainTip, setDomainTip] = useState<string | null>(null)
+  const [hostingTip, setHostingTip] = useState<string | null>(null)
+
+  return (
+    <div className="rounded-xl border border-border overflow-hidden">
+      <div className="px-4 py-3 border-b border-border bg-secondary/30 flex items-center gap-2">
+        <Building2 className="size-3.5 text-muted-foreground" />
+        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Perguntas Iniciais — Conhecendo o Cliente</p>
+        <span className="ml-auto text-[10px] text-muted-foreground">Campos opcionais — pule e preencha depois se preferir</span>
+      </div>
+
+      <div className="p-4 space-y-5">
+
+        {/* Dados da empresa */}
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mb-3">Dados da Empresa</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="col-span-2 sm:col-span-3">
+              <label className={LABEL}>Nome da empresa</label>
+              <input value={intake.companyName ?? ""} onChange={e => set("companyName", e.target.value)} className={INPUT} placeholder="Barbearia Maktub" />
+            </div>
+            <div>
+              <label className={LABEL}>Ano de fundação</label>
+              <input value={intake.foundedYear ?? ""} onChange={e => set("foundedYear", e.target.value)} className={INPUT} placeholder="2018" />
+            </div>
+            <div>
+              <label className={LABEL}>Cidade</label>
+              <input value={intake.city ?? ""} onChange={e => set("city", e.target.value)} className={INPUT} placeholder="Juazeiro do Norte" />
+            </div>
+            <div>
+              <label className={LABEL}>Funcionários</label>
+              <input value={intake.employees ?? ""} onChange={e => set("employees", e.target.value)} className={INPUT} placeholder="1-5" />
+            </div>
+            <div className="col-span-2 sm:col-span-3">
+              <label className={LABEL}>Ramo / Setor</label>
+              <input value={intake.sector ?? ""} onChange={e => set("sector", e.target.value)} className={INPUT} placeholder="Beleza, Serviços, Alimentação..." />
+            </div>
+          </div>
+        </div>
+
+        {/* Identidade */}
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mb-3">Identidade do Negócio</p>
+          <div className="space-y-2">
+            <div><label className={LABEL}>Como surgiu a empresa?</label>
+              <textarea value={intake.origin ?? ""} onChange={e => set("origin", e.target.value)} rows={2} className={TA} placeholder="Conte a história..." /></div>
+            <div><label className={LABEL}>O que motivou a criação?</label>
+              <textarea value={intake.motivation ?? ""} onChange={e => set("motivation", e.target.value)} rows={2} className={TA} placeholder="Qual foi o gatilho?" /></div>
+            <div><label className={LABEL}>Quais problemas a empresa resolve?</label>
+              <textarea value={intake.problemSolved ?? ""} onChange={e => set("problemSolved", e.target.value)} rows={2} className={TA} placeholder="O que o cliente resolve ao contratar vocês?" /></div>
+          </div>
+        </div>
+
+        {/* Missão / Visão / Valores */}
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mb-3">Missão, Visão e Valores</p>
+          <div className="space-y-2">
+            <div><label className={LABEL}>Missão — qual o propósito da empresa?</label>
+              <textarea value={intake.mission ?? ""} onChange={e => set("mission", e.target.value)} rows={2} className={TA} placeholder="Por que vocês existem?" /></div>
+            <div><label className={LABEL}>Visão — onde deseja chegar?</label>
+              <textarea value={intake.vision ?? ""} onChange={e => set("vision", e.target.value)} rows={2} className={TA} placeholder="Como se vê daqui a 5 anos?" /></div>
+            <div><label className={LABEL}>Valores — o que é inegociável?</label>
+              <textarea value={intake.values ?? ""} onChange={e => set("values", e.target.value)} rows={2} className={TA} placeholder="Transparência, qualidade, pontualidade..." /></div>
+          </div>
+        </div>
+
+        {/* Mercado */}
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mb-3">Mercado e Posicionamento</p>
+          <div className="space-y-2">
+            <div><label className={LABEL}>Público-alvo — quem são seus clientes?</label>
+              <textarea value={intake.targetAudience ?? ""} onChange={e => set("targetAudience", e.target.value)} rows={2} className={TA} placeholder="Homens 25-45 anos, donos de pequenos negócios..." /></div>
+            <div><label className={LABEL}>Diferenciais — o que faz vocês serem melhores?</label>
+              <textarea value={intake.differentials ?? ""} onChange={e => set("differentials", e.target.value)} rows={2} className={TA} placeholder="Atendimento personalizado, entrega em 24h..." /></div>
+            <div><label className={LABEL}>Concorrentes</label>
+              <input value={intake.competitors ?? ""} onChange={e => set("competitors", e.target.value)} className={INPUT} placeholder="Empresa X, Empresa Y..." /></div>
+            <div><label className={LABEL}>Redes sociais</label>
+              <input value={intake.socialMedia ?? ""} onChange={e => set("socialMedia", e.target.value)} className={INPUT} placeholder="@empresa no Instagram, Facebook.com/empresa..." /></div>
+          </div>
+        </div>
+
+        {/* Branding */}
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mb-3">Branding e Assets</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={LABEL}>Possui logotipo?</label>
+              <div className="flex gap-2 mt-1">
+                {[{v: true, l: "Sim"}, {v: false, l: "Não"}].map(opt => (
+                  <button key={String(opt.v)} type="button"
+                    onClick={() => set("hasLogo", opt.v)}
+                    className={`flex-1 py-2 rounded-lg border text-xs font-semibold transition-all ${intake.hasLogo === opt.v ? "border-foreground bg-foreground text-background" : "border-border hover:bg-secondary"}`}
+                  >{opt.l}</button>
+                ))}
+              </div>
+            </div>
+            <div><label className={LABEL}>Cores da marca (hex ou nomes)</label>
+              <input value={intake.brandColors ?? ""} onChange={e => set("brandColors", e.target.value)} className={INPUT} placeholder="#1a1a1a, dourado, azul navy" /></div>
+          </div>
+          {intake.hasLogo && (
+            <div className="mt-3"><label className={LABEL}>URL do logotipo</label>
+              <input value={intake.logoUrl ?? ""} onChange={e => set("logoUrl", e.target.value)} className={INPUT} placeholder="https://drive.google.com/... ou /logo.png" /></div>
+          )}
+        </div>
+
+        {/* Domínio */}
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mb-3">Domínio</p>
+          <p className="text-xs text-muted-foreground mb-3">
+            O senhor gostaria de ter um domínio próprio para o site?
+          </p>
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            {(["sim", "nao", "ja_tenho"] as const).map(opt => {
+              const labels: Record<typeof opt, string> = { sim: "Sim, quero", nao: "Não agora", ja_tenho: "Já tenho" }
+              return (
+                <div key={opt} className="relative">
+                  <button type="button"
+                    onClick={() => { set("wantsDomain", opt); setDomainTip(domainTip === opt ? null : opt) }}
+                    className={`w-full flex items-center justify-between gap-1 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all ${intake.wantsDomain === opt ? "border-foreground bg-foreground text-background" : "border-border hover:bg-secondary"}`}
+                  >
+                    {labels[opt]}
+                    <Info className={`size-3 ${intake.wantsDomain === opt ? "opacity-60" : "text-muted-foreground"}`} />
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+          {/* Tooltip explicativo */}
+          {intake.wantsDomain && DOMAIN_TIPS[intake.wantsDomain] && (
+            <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/20 text-xs text-foreground/80 space-y-1">
+              <p className="font-semibold text-blue-400">{DOMAIN_TIPS[intake.wantsDomain!].title}</p>
+              <p className="leading-relaxed">{DOMAIN_TIPS[intake.wantsDomain!].desc}</p>
+            </div>
+          )}
+          {intake.wantsDomain === "sim" && (
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <div><label className={LABEL}>Nome desejado</label>
+                <input value={intake.domainName ?? ""} onChange={e => set("domainName", e.target.value)} className={INPUT} placeholder="suaempresa" /></div>
+              <div><label className={LABEL}>Extensão</label>
+                <select value={intake.domainType ?? ".com.br"} onChange={e => set("domainType", e.target.value)} className={INPUT}>
+                  {[".com.br", ".com", ".net", ".org", ".io", ".app", ".dev"].map(ext => (
+                    <option key={ext} value={ext}>{ext}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+          {intake.wantsDomain === "ja_tenho" && (
+            <div className="mt-3"><label className={LABEL}>Qual é o domínio atual?</label>
+              <input value={intake.domainName ?? ""} onChange={e => set("domainName", e.target.value)} className={INPUT} placeholder="suaempresa.com.br" /></div>
+          )}
+        </div>
+
+        {/* Hospedagem */}
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mb-3">Hospedagem</p>
+          <p className="text-xs text-muted-foreground mb-3">
+            O senhor prefere que a Elevanthe cuide da hospedagem, ou prefere contratar por conta própria?
+          </p>
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            {(["elevanthe", "proprio", "nao_sabe"] as const).map(opt => {
+              const labels: Record<typeof opt, string> = { elevanthe: "Elevanthe cuida", proprio: "Faço eu mesmo", nao_sabe: "Não sei ainda" }
+              return (
+                <button key={opt} type="button"
+                  onClick={() => set("hostingOption", opt)}
+                  className={`flex flex-col gap-0.5 items-center justify-center px-2 py-3 rounded-xl border text-center text-xs font-semibold transition-all ${intake.hostingOption === opt ? "border-foreground bg-foreground text-background" : "border-border hover:bg-secondary"}`}
+                >
+                  {labels[opt]}
+                </button>
+              )
+            })}
+          </div>
+          {intake.hostingOption && HOSTING_TIPS[intake.hostingOption] && (
+            <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 text-xs text-foreground/80 space-y-1">
+              <p className="font-semibold text-amber-400">{HOSTING_TIPS[intake.hostingOption].title}</p>
+              <p className="leading-relaxed">{HOSTING_TIPS[intake.hostingOption].desc}</p>
+            </div>
+          )}
+          <div className="mt-3"><label className={LABEL}>Observações sobre hospedagem</label>
+            <textarea value={intake.hostingNotes ?? ""} onChange={e => set("hostingNotes", e.target.value)} rows={2} className={TA} placeholder="Alguma preferência ou dúvida?" />
+          </div>
+        </div>
+
+        {/* Manutenção */}
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mb-3">Manutenção</p>
+          <p className="text-xs text-muted-foreground mb-3">O senhor gostaria de contratar manutenção mensal para o site?</p>
+          <div className="flex gap-2 mb-3">
+            {[{v: true, l: "Sim, quero"}, {v: false, l: "Não agora"}].map(opt => (
+              <button key={String(opt.v)} type="button"
+                onClick={() => set("wantsMaintenance", opt.v)}
+                className={`flex-1 py-2.5 rounded-xl border text-xs font-semibold transition-all ${intake.wantsMaintenance === opt.v ? "border-foreground bg-foreground text-background" : "border-border hover:bg-secondary"}`}
+              >{opt.l}</button>
+            ))}
+          </div>
+          {intake.wantsMaintenance && (
+            <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-xs mb-3">
+              <p className="font-semibold text-emerald-400 mb-1">Planos de manutenção disponíveis</p>
+              <p className="text-foreground/70 leading-relaxed">Suporte básico (5h/mês) a partir de R$450/mês — ajustes, atualizações e correções de bugs. Suporte avançado (15h/mês) a partir de R$1.100/mês — novas funcionalidades e manutenção completa.</p>
+            </div>
+          )}
+          <div><label className={LABEL}>Observações</label>
+            <textarea value={intake.maintenanceNotes ?? ""} onChange={e => set("maintenanceNotes", e.target.value)} rows={2} className={TA} placeholder="Alguma preferência de plano ou dúvida?" /></div>
+        </div>
+
+        {/* Notas gerais */}
+        <div>
+          <label className={LABEL}>Anotações livres / feedback do cliente</label>
+          <textarea value={intake.notes ?? ""} onChange={e => set("notes", e.target.value)} rows={3} className={TA} placeholder="Qualquer observação adicional sobre a conversa..." />
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
 // ── QuoteBuilder ──────────────────────────────────────────────────────────────
 function QuoteBuilder({ initial, onSave, onCancel }: {
   initial?: Quote
@@ -150,6 +410,8 @@ function QuoteBuilder({ initial, onSave, onCancel }: {
   )
   const [pixKeyType, setPixKeyType] = useState(initial?.pixKeyType ?? "")
   const [pixKey, setPixKey] = useState(initial?.pixKey ?? "")
+  const [clientIntake, setClientIntake] = useState<ClientIntake>((initial?.clientIntake as ClientIntake) ?? {})
+  const [showIntake, setShowIntake] = useState(false)
   const [saving, startSave] = useTransition()
 
   const subtotal = calcSubtotal(items)
@@ -219,6 +481,7 @@ function QuoteBuilder({ initial, onSave, onCancel }: {
         clientName, clientEmail: clientEmail || null, clientWhatsapp: clientWhatsapp || null,
         problem: problem || null, objective: objective || null,
         expectedResult: expectedResult || null, deadline: deadline || null,
+        clientIntake: Object.keys(clientIntake).length > 0 ? clientIntake : null,
         items, total: Math.round(total),
         globalDiscount: gDiscount, globalDiscountType: gDiscountType,
         paymentMethods: payments,
@@ -251,7 +514,25 @@ function QuoteBuilder({ initial, onSave, onCancel }: {
 
         {/* Cliente */}
         <div className="rounded-xl border border-border p-4 space-y-3">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Cliente</p>
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Cliente</p>
+            <button
+              type="button"
+              onClick={() => setShowIntake(v => !v)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                showIntake ? "border-foreground bg-foreground text-background" : "border-border hover:bg-secondary"
+              }`}
+            >
+              <Building2 className="size-3.5" />
+              Perguntas iniciais
+              {Object.keys(clientIntake).filter(k => (clientIntake as Record<string,unknown>)[k]).length > 0 && (
+                <span className="size-4 rounded-full bg-emerald-500 text-white text-[9px] flex items-center justify-center font-bold">
+                  {Object.keys(clientIntake).filter(k => (clientIntake as Record<string,unknown>)[k]).length}
+                </span>
+              )}
+              {showIntake ? <ChevronUp className="size-3" /> : <ChevronRight className="size-3" />}
+            </button>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div><label className={LABEL}>Nome *</label>
               <input value={clientName} onChange={e => setClientName(e.target.value)} className={INPUT} placeholder="João Silva" /></div>
@@ -261,6 +542,11 @@ function QuoteBuilder({ initial, onSave, onCancel }: {
               <input value={clientWhatsapp} onChange={e => setClientWhatsapp(e.target.value)} className={INPUT} placeholder="+55 87 99999-9999" /></div>
           </div>
         </div>
+
+        {/* Intake (perguntas iniciais) */}
+        {showIntake && (
+          <QuoteIntakePanel intake={clientIntake} onChange={setClientIntake} />
+        )}
 
         {/* Contexto */}
         <div className="rounded-xl border border-border p-4 space-y-3">

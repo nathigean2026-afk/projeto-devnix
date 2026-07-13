@@ -137,6 +137,8 @@ function blankForm(): ProjectFormState {
     screenshots: [],
     beforeAfter: null,
     useBeforeAfter: false,
+    coverImageUrl: "",
+    coverImageMode: "none",
     published: true,
   }
 }
@@ -148,10 +150,14 @@ type ProjectFormState = {
   screenshots: Screenshot[];
   beforeAfter: BeforeAfter | null;
   useBeforeAfter: boolean;
+  coverImageUrl: string;
+  coverImageMode: "none" | "single" | "before_after";
   published: boolean;
 }
 
 function rowToForm(p: ProjectRow): ProjectFormState {
+  const hasCoverImg = !!p.coverImageUrl
+  const mode = hasCoverImg ? ((p.coverImageMode ?? "single") as "single" | "before_after") : "none"
   return {
     slug: p.slug, title: p.title, category: p.category, desc: p.desc,
     cover: p.cover, col: p.col ?? "",
@@ -164,6 +170,8 @@ function rowToForm(p: ProjectRow): ProjectFormState {
     screenshots: (p.screenshots as Screenshot[]) ?? [],
     beforeAfter: (p.beforeAfter as BeforeAfter | null) ?? null,
     useBeforeAfter: !!(p.beforeAfter as BeforeAfter | null)?.before,
+    coverImageUrl: p.coverImageUrl ?? "",
+    coverImageMode: mode,
     published: p.published,
   }
 }
@@ -196,6 +204,8 @@ function ProjectFormModal({
       return
     }
     setError("")
+    const isSingle = form.coverImageMode === "single"
+    const isBA = form.coverImageMode === "before_after"
     const payload = {
       slug: form.slug,
       title: form.title,
@@ -211,7 +221,9 @@ function ProjectFormModal({
       duration: form.duration || null,
       stack: form.stack,
       screenshots: form.screenshots,
-      beforeAfter: form.useBeforeAfter && form.beforeAfter?.before ? form.beforeAfter : null,
+      coverImageUrl: isSingle ? (form.coverImageUrl || null) : null,
+      coverImageMode: form.coverImageMode === "none" ? "single" : form.coverImageMode,
+      beforeAfter: isBA && form.beforeAfter?.before ? form.beforeAfter : (form.useBeforeAfter && form.beforeAfter?.before ? form.beforeAfter : null),
       published: form.published,
     }
     startTransition(async () => {
@@ -373,40 +385,83 @@ function ProjectFormModal({
 
           {section === "media" && (
             <>
-              {/* Before / After toggle */}
-              <div className="p-4 rounded-xl border border-border bg-secondary/20">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="text-sm font-semibold">Antes & Depois (slider)</p>
-                    <p className="text-xs text-muted-foreground">Ative para comparar o projeto antes e depois</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => set("useBeforeAfter", !form.useBeforeAfter)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.useBeforeAfter ? "bg-blue-500" : "bg-muted"}`}
-                  >
-                    <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform ${form.useBeforeAfter ? "translate-x-6" : "translate-x-1"}`} />
-                  </button>
+              {/* ── Foto de capa ─────────────────────────────── */}
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-3">Foto de Capa</p>
+                {/* Mode selector */}
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {[
+                    { value: "none",         label: "Sem foto",      desc: "Usa gradiente/ícone" },
+                    { value: "single",       label: "Imagem única",  desc: "Uma foto de capa" },
+                    { value: "before_after", label: "Antes & Depois", desc: "Slider comparativo" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => set("coverImageMode", opt.value as ProjectFormState["coverImageMode"])}
+                      className={`flex flex-col gap-0.5 items-center justify-center p-3 rounded-xl border-2 text-center transition-all ${
+                        form.coverImageMode === opt.value
+                          ? "border-foreground bg-foreground/5"
+                          : "border-border hover:border-foreground/30"
+                      }`}
+                    >
+                      <span className="text-xs font-semibold">{opt.label}</span>
+                      <span className="text-[10px] text-muted-foreground">{opt.desc}</span>
+                    </button>
+                  ))}
                 </div>
-                {form.useBeforeAfter && (
-                  <div className="grid grid-cols-2 gap-3">
+
+                {/* Single image */}
+                {form.coverImageMode === "single" && (
+                  <div className="p-4 rounded-xl border border-border bg-secondary/20 space-y-3">
                     <div>
-                      <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Antes (URL)</label>
+                      <label className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">URL da imagem</label>
                       <input
-                        value={form.beforeAfter?.before ?? ""}
-                        onChange={(e) => set("beforeAfter", { before: e.target.value, after: form.beforeAfter?.after ?? "" })}
-                        placeholder="/images/projeto-before.png"
-                        className="w-full mt-1 px-3 py-2 rounded-lg border border-border text-xs bg-background focus:outline-none"
+                        value={form.coverImageUrl}
+                        onChange={(e) => set("coverImageUrl", e.target.value)}
+                        placeholder="https://... ou /images/projeto-capa.png"
+                        className="w-full px-3 py-2 rounded-lg border border-border text-xs bg-background focus:outline-none focus:border-foreground/30"
                       />
                     </div>
-                    <div>
-                      <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Depois (URL)</label>
-                      <input
-                        value={form.beforeAfter?.after ?? ""}
-                        onChange={(e) => set("beforeAfter", { before: form.beforeAfter?.before ?? "", after: e.target.value })}
-                        placeholder="/images/projeto-after.png"
-                        className="w-full mt-1 px-3 py-2 rounded-lg border border-border text-xs bg-background focus:outline-none"
+                    {form.coverImageUrl && (
+                      <img
+                        src={form.coverImageUrl}
+                        alt="Preview da capa"
+                        className="w-full h-40 object-cover rounded-lg border border-border"
                       />
+                    )}
+                  </div>
+                )}
+
+                {/* Before / After */}
+                {form.coverImageMode === "before_after" && (
+                  <div className="p-4 rounded-xl border border-border bg-secondary/20 space-y-3">
+                    <p className="text-xs text-muted-foreground">As duas imagens serão exibidas num slider de comparação.</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">Antes (URL)</label>
+                        <input
+                          value={form.beforeAfter?.before ?? ""}
+                          onChange={(e) => set("beforeAfter", { before: e.target.value, after: form.beforeAfter?.after ?? "" })}
+                          placeholder="/images/antes.png"
+                          className="w-full px-3 py-2 rounded-lg border border-border text-xs bg-background focus:outline-none"
+                        />
+                        {form.beforeAfter?.before && (
+                          <img src={form.beforeAfter.before} alt="Antes" className="mt-2 w-full h-24 object-cover rounded-lg border border-border" />
+                        )}
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">Depois (URL)</label>
+                        <input
+                          value={form.beforeAfter?.after ?? ""}
+                          onChange={(e) => set("beforeAfter", { before: form.beforeAfter?.before ?? "", after: e.target.value })}
+                          placeholder="/images/depois.png"
+                          className="w-full px-3 py-2 rounded-lg border border-border text-xs bg-background focus:outline-none"
+                        />
+                        {form.beforeAfter?.after && (
+                          <img src={form.beforeAfter.after} alt="Depois" className="mt-2 w-full h-24 object-cover rounded-lg border border-border" />
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
