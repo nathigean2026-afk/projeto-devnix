@@ -310,7 +310,17 @@ function ClientDetail({
 
   function copyLink() {
     if (!fillUrl) return
-    navigator.clipboard.writeText(fillUrl)
+    try {
+      navigator.clipboard.writeText(fillUrl)
+    } catch {
+      const el = document.createElement("textarea")
+      el.value = fillUrl
+      el.style.cssText = "position:fixed;opacity:0"
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand("copy")
+      document.body.removeChild(el)
+    }
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

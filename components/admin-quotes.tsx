@@ -1267,7 +1267,7 @@ export function QuoteDocument({
   )
 }
 
-// ── SharePanel — painel de link compartilhável ─────────────────────────────
+// ── SharePanel — painel de link compartilhável ─────────────────���───────────
 function SharePanel({
   label,
   token,
@@ -1291,7 +1291,17 @@ function SharePanel({
 }) {
   const [copied, setCopied] = useState(false)
   function handleCopy() {
-    navigator.clipboard.writeText(shareUrl)
+    try {
+      navigator.clipboard.writeText(shareUrl)
+    } catch {
+      const el = document.createElement("textarea")
+      el.value = shareUrl
+      el.style.cssText = "position:fixed;opacity:0"
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand("copy")
+      document.body.removeChild(el)
+    }
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
