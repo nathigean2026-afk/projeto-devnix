@@ -4,16 +4,17 @@ import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { authClient } from "@/lib/auth-client"
-import { getLeads, updateLeadStatus, deleteLead, getQuotes } from "@/app/actions/leads"
+  import { getLeads, updateLeadStatus, deleteLead, getQuotes, getClients } from "@/app/actions/leads"
 import { getProjects } from "@/app/actions/projects"
-import type { Lead, ProjectRow, Quote } from "@/lib/db/schema"
+import type { Lead, ProjectRow, Quote, Client } from "@/lib/db/schema"
 import { ProjectsAdmin } from "@/components/admin-projects"
 import { QuotesAdmin } from "@/components/admin-quotes"
+import { ClientsAdmin } from "@/components/admin-clients"
 import {
   Mail, Phone, MessageSquare, Trash2, CheckCircle2,
   LogOut, Clock, TrendingUp, Inbox, Search, Sun, Moon,
   ThumbsUp, ArrowUpRight, RefreshCw, User, Layers,
-  ChevronLeft, X, Globe, FileText, MapPin, Wifi,
+  ChevronLeft, X, Globe, FileText, MapPin, Wifi, Users,
 } from "lucide-react"
 import { useTheme } from "next-themes"
 
@@ -73,10 +74,12 @@ export default function AdminDashboard() {
   const [projectsLoaded, setProjectsLoaded] = useState(false)
   const [quotes, setQuotes] = useState<Quote[]>([])
   const [quotesLoaded, setQuotesLoaded] = useState(false)
+  const [clients, setClients] = useState<Client[]>([])
+  const [clientsLoaded, setClientsLoaded] = useState(false)
   // On mobile: selected lead opens as a full-screen sheet
   const [selected, setSelected] = useState<Lead | null>(null)
   const [activeTab, setActiveTab] = useState("todos")
-  const [activeSection, setActiveSection] = useState<"leads" | "projetos" | "orcamentos">("leads")
+  const [activeSection, setActiveSection] = useState<"leads" | "projetos" | "orcamentos" | "clientes">("leads")
   const [search, setSearch] = useState("")
   const [refreshing, setRefreshing] = useState(false)
   const [, startTransition] = useTransition()
@@ -99,6 +102,7 @@ export default function AdminDashboard() {
     if (!leadsLoaded) loadLeads()
     if (!projectsLoaded) loadProjects()
     if (!quotesLoaded) loadQuotes()
+    if (!clientsLoaded) loadClients()
   }, [session, sessionLoading]) // eslint-disable-line
 
   async function loadLeads() {
@@ -126,6 +130,16 @@ export default function AdminDashboard() {
       const data = await getQuotes()
       setQuotes(data as Quote[])
       setQuotesLoaded(true)
+    } catch {
+      // silently fail
+    }
+  }
+
+  async function loadClients() {
+    try {
+      const data = await getClients()
+      setClients(data as Client[])
+      setClientsLoaded(true)
     } catch {
       // silently fail
     }
@@ -244,6 +258,23 @@ export default function AdminDashboard() {
             <span className="hidden sm:inline">Orçamentos</span>
             <span className="sm:hidden">Orç.</span>
           </button>
+          <button
+            onClick={() => setActiveSection("clientes")}
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+              activeSection === "clientes"
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Users className="size-3.5" />
+            <span className="hidden sm:inline">Clientes</span>
+            <span className="sm:hidden">Cli.</span>
+            {clients.filter(c => c.status === "pendente").length > 0 && activeSection !== "clientes" && (
+              <span className="size-4 rounded-full bg-amber-400 text-white text-[9px] font-bold flex items-center justify-center">
+                {clients.filter(c => c.status === "pendente").length}
+              </span>
+            )}
+          </button>
         </div>
 
         {/* Right actions */}
@@ -289,6 +320,16 @@ export default function AdminDashboard() {
           <QuotesAdmin
             initialQuotes={quotes}
             onQuotesChange={setQuotes}
+          />
+        </div>
+      )}
+
+      {/* ── CLIENTES section ── */}
+      {activeSection === "clientes" && (
+        <div className="flex-1 overflow-hidden">
+          <ClientsAdmin
+            initialClients={clients}
+            onClientsChange={setClients}
           />
         </div>
       )}
