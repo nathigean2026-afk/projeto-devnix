@@ -273,3 +273,28 @@ export async function submitClientForm(token: string, data: Partial<Omit<NewClie
   return true
 }
 
+// ── wame (WhatsApp API) ───────────────────────────────────────────────────────
+export async function sendWameMessage(phone: string, message: string): Promise<{ ok: boolean; error?: string }> {
+  await requireAdmin()
+  const server = process.env.WAME_SERVER
+  const key = process.env.WAME_KEY
+  if (!server || !key) return { ok: false, error: "Credenciais wame não configuradas" }
+  // Normaliza número: remove tudo que não for dígito, adiciona 55 se não tiver
+  const digits = phone.replace(/\D/g, "")
+  const normalized = digits.startsWith("55") ? digits : `55${digits}`
+  try {
+    const res = await fetch(`${server}/message/sendText/${key}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ number: normalized, textMessage: { text: message } }),
+    })
+    if (!res.ok) {
+      const body = await res.text().catch(() => res.statusText)
+      return { ok: false, error: `wame erro ${res.status}: ${body}` }
+    }
+    return { ok: true }
+  } catch (err: unknown) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) }
+  }
+}
+

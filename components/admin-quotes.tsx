@@ -5,7 +5,8 @@ import Image from "next/image"
 import { QRCodeSVG } from "qrcode.react"
 import type { Quote, QuoteItem, QuotePaymentMethod, ClientIntake } from "@/lib/db/schema"
 import {
-  createQuote, updateQuote, deleteQuote, generateShareLink, generateOSShareLink,
+  getQuotes, createQuote, updateQuote, deleteQuote,
+  generateShareLink, generateOSShareLink, sendWameMessage,
 } from "@/app/actions/leads"
 import {
   Plus, Trash2, FileText, Check, ChevronRight, ChevronDown,
@@ -272,7 +273,7 @@ function QuoteIntakePanel({ intake, onChange }: {
           )}
         </div>
 
-        {/* Domínio */}
+        {/* Dom��nio */}
         <div>
           <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/60 mb-3">Domínio</p>
           <p className="text-xs text-muted-foreground mb-3">
@@ -1338,16 +1339,151 @@ function SharePanel({
   )
 }
 
+// ── IntakeReadView — exibe intake salvo em modo somente leitura ───────────────
+function IntakeReadView({ intake }: { intake: ClientIntake }) {
+  const ROW = ({ label, value }: { label: string; value?: string | boolean | null }) => {
+    if (value === undefined || value === null || value === "" || value === false) return null
+    const display = value === true ? "Sim" : String(value)
+    return (
+      <div className="flex flex-col gap-0.5">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+        <span className="text-sm leading-relaxed">{display}</span>
+      </div>
+    )
+  }
+
+  const DOMAIN_LABELS: Record<string, string> = { sim: "Sim, quer domínio", nao: "Não por enquanto", ja_tenho: "Já possui domínio" }
+  const HOSTING_LABELS: Record<string, string> = { elevanthe: "Elevanthe gerencia", proprio: "Cliente gerencia próprio", nao_sabe: "Ainda não decidiu" }
+
+  return (
+    <div className="rounded-xl border border-border overflow-hidden">
+      <div className="px-4 py-3 border-b border-border bg-secondary/30 flex items-center gap-2">
+        <Building2 className="size-3.5 text-muted-foreground" />
+        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Perguntas Iniciais — Dados do Cliente</p>
+      </div>
+      <div className="p-4 space-y-5">
+
+        {/* Empresa */}
+        {(intake.companyName || intake.sector || intake.city || intake.foundedYear || intake.employees) && (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-3">Empresa</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <ROW label="Nome" value={intake.companyName} />
+              <ROW label="Setor" value={intake.sector} />
+              <ROW label="Cidade" value={intake.city} />
+              <ROW label="Fundação" value={intake.foundedYear} />
+              <ROW label="Funcionários" value={intake.employees} />
+            </div>
+          </div>
+        )}
+
+        {/* Identidade */}
+        {(intake.origin || intake.motivation || intake.problemSolved) && (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-3">Identidade</p>
+            <div className="space-y-2">
+              <ROW label="Como surgiu" value={intake.origin} />
+              <ROW label="Motivação" value={intake.motivation} />
+              <ROW label="Problema que resolve" value={intake.problemSolved} />
+            </div>
+          </div>
+        )}
+
+        {/* Missão / Visão / Valores */}
+        {(intake.mission || intake.vision || intake.values) && (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-3">Missão / Visão / Valores</p>
+            <div className="space-y-2">
+              <ROW label="Missão" value={intake.mission} />
+              <ROW label="Visão" value={intake.vision} />
+              <ROW label="Valores" value={intake.values} />
+            </div>
+          </div>
+        )}
+
+        {/* Mercado */}
+        {(intake.targetAudience || intake.differentials || intake.competitors || intake.socialMedia) && (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-3">Mercado</p>
+            <div className="space-y-2">
+              <ROW label="Público-alvo" value={intake.targetAudience} />
+              <ROW label="Diferenciais" value={intake.differentials} />
+              <ROW label="Concorrentes" value={intake.competitors} />
+              <ROW label="Redes sociais" value={intake.socialMedia} />
+            </div>
+          </div>
+        )}
+
+        {/* Branding */}
+        {(intake.hasLogo !== undefined || intake.brandColors || intake.logoUrl) && (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-3">Branding</p>
+            <div className="grid grid-cols-2 gap-3">
+              <ROW label="Possui logotipo" value={intake.hasLogo} />
+              <ROW label="Cores da marca" value={intake.brandColors} />
+              {intake.logoUrl && <ROW label="URL do logo" value={intake.logoUrl} />}
+            </div>
+          </div>
+        )}
+
+        {/* Domínio */}
+        {intake.wantsDomain && (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-3">Domínio</p>
+            <div className="grid grid-cols-2 gap-3">
+              <ROW label="Decisão" value={DOMAIN_LABELS[intake.wantsDomain] ?? intake.wantsDomain} />
+              {intake.domainName && <ROW label="Nome/domínio" value={intake.domainName + (intake.domainType ?? "")} />}
+            </div>
+          </div>
+        )}
+
+        {/* Hospedagem */}
+        {intake.hostingOption && (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-3">Hospedagem</p>
+            <div className="space-y-2">
+              <ROW label="Opção" value={HOSTING_LABELS[intake.hostingOption] ?? intake.hostingOption} />
+              <ROW label="Observações" value={intake.hostingNotes} />
+            </div>
+          </div>
+        )}
+
+        {/* Manutenção */}
+        {intake.wantsMaintenance !== undefined && (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-3">Manutenção</p>
+            <div className="space-y-2">
+              <ROW label="Quer manutenção" value={intake.wantsMaintenance} />
+              <ROW label="Observações" value={intake.maintenanceNotes} />
+            </div>
+          </div>
+        )}
+
+        {intake.notes && (
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/50 mb-2">Anotações livres</p>
+            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{intake.notes}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── QuotePreview ──────────────────────────────────────────────────────────────
 function QuotePreview({ quote, onClose }: { quote: Quote; onClose: () => void }) {
   const [docMode, setDocMode] = useState<"orcamento" | "os">("orcamento")
   const [docTheme, setDocTheme] = useState<"dark" | "light">("dark")
 
-  const [shareToken, setShareToken] = useState(quote.shareToken ?? "")
+  // Se já tem token e não expirou, inicializa direto — sem precisar gerar
+  const shareTokenValid = quote.shareToken && (!quote.shareExpiresAt || new Date(quote.shareExpiresAt) > new Date())
+  const osTokenValid = quote.osShareToken && (!quote.osShareExpiresAt || new Date(quote.osShareExpiresAt) > new Date())
+
+  const [shareToken, setShareToken] = useState(shareTokenValid ? (quote.shareToken ?? "") : "")
   const [shareExpiryDays, setShareExpiryDays] = useState(7)
   const [generatingShare, startShare] = useTransition()
 
-  const [osToken, setOsToken] = useState(quote.osShareToken ?? "")
+  const [osToken, setOsToken] = useState(osTokenValid ? (quote.osShareToken ?? "") : "")
   const [osExpiryDays, setOsExpiryDays] = useState(7)
   const [generatingOS, startOS] = useTransition()
 
@@ -1369,11 +1505,32 @@ function QuotePreview({ quote, onClose }: { quote: Quote; onClose: () => void })
     })
   }
 
-  function sendWhatsApp(url: string, docLabel: string) {
+  const [wameSending, setWameSending] = useState(false)
+  const [wameStatus, setWameStatus] = useState<"idle" | "ok" | "error">("idle")
+  const [wameError, setWameError] = useState("")
+
+  async function sendWhatsApp(url: string, docLabel: string) {
     const wa = quote.clientWhatsapp?.replace(/\D/g, "") ?? ""
-    const text = encodeURIComponent(`Olá ${quote.clientName}! Preparei ${docLabel} para o seu projeto. Acesse aqui: ${url}`)
-    const href = wa ? `https://wa.me/${wa}?text=${text}` : `https://wa.me/?text=${text}`
-    try { (window.top ?? window).open(href, "_blank") } catch { window.open(href, "_blank") }
+    const message = `Olá ${quote.clientName}! Preparei ${docLabel} para o seu projeto. Acesse aqui: ${url}`
+    if (wa) {
+      setWameSending(true)
+      setWameStatus("idle")
+      const result = await sendWameMessage(wa, message)
+      setWameSending(false)
+      if (result.ok) {
+        setWameStatus("ok")
+        setTimeout(() => setWameStatus("idle"), 3000)
+      } else {
+        setWameStatus("error")
+        setWameError(result.error ?? "Erro desconhecido")
+        // fallback: abre wa.me
+        const href = `https://wa.me/${wa}?text=${encodeURIComponent(message)}`
+        try { (window.top ?? window).open(href, "_blank") } catch { window.open(href, "_blank") }
+      }
+    } else {
+      const href = `https://wa.me/?text=${encodeURIComponent(message)}`
+      try { (window.top ?? window).open(href, "_blank") } catch { window.open(href, "_blank") }
+    }
   }
 
   return (
@@ -1413,6 +1570,24 @@ function QuotePreview({ quote, onClose }: { quote: Quote; onClose: () => void })
 
           {/* Links compartilháveis */}
           <div className="rounded-xl border border-border p-4 space-y-5">
+            {/* Feedback wame */}
+            {wameSending && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse">
+                <span className="size-1.5 rounded-full bg-[#25d366] animate-pulse" />
+                Enviando via WhatsApp...
+              </div>
+            )}
+            {wameStatus === "ok" && (
+              <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-lg px-3 py-2">
+                <Check className="size-3.5" />Mensagem enviada com sucesso via WhatsApp!
+              </div>
+            )}
+            {wameStatus === "error" && (
+              <div className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+                <p className="font-semibold">Erro ao enviar pelo wame — abrindo wa.me como fallback</p>
+                <p className="opacity-70 mt-0.5">{wameError}</p>
+              </div>
+            )}
             <SharePanel
               label="Link do Orçamento"
               token={shareToken}
@@ -1437,6 +1612,11 @@ function QuotePreview({ quote, onClose }: { quote: Quote; onClose: () => void })
               onWhatsApp={() => sendWhatsApp(osUrl, "uma Ordem de Serviço")}
             />
           </div>
+
+          {/* Perguntas iniciais (intake) — visualização somente leitura */}
+          {quote.clientIntake && Object.keys(quote.clientIntake as object).some(k => (quote.clientIntake as Record<string,unknown>)[k]) && (
+            <IntakeReadView intake={quote.clientIntake as ClientIntake} />
+          )}
         </div>
       </div>
     </div>
