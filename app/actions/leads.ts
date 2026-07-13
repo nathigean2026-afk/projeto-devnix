@@ -274,27 +274,45 @@ export async function submitClientForm(token: string, data: Partial<Omit<NewClie
 }
 
 // ── wame (WhatsApp API) ───────────────────────────────────────────────────────
-export async function sendWameMessage(phone: string, message: string): Promise<{ ok: boolean; error?: string }> {
-  await requireAdmin()
-  const server = process.env.WAME_SERVER
+// Implementação via HTTP direto seguindo o padrão do SDK:
+// POST {server}/{key}/message/send  — body: { type: "TEXT", body: { to, text } }
+async function wameSend(phone: string, text: string): Promise<{ ok: boolean; error?: string }> {
+  const server = (process.env.WAME_SERVER ?? "").replace(/\/$/, "")
   const key = process.env.WAME_KEY
-  if (!server || !key) return { ok: false, error: "Credenciais wame não configuradas" }
-  // Normaliza número: remove tudo que não for dígito, adiciona 55 se não tiver
+  if (!server || !key) return { ok: false, error: "Credenciais wame não configuradas (WAME_SERVER / WAME_KEY)" }
+
+  // Normaliza: remove não-dígitos, garante prefixo 55
   const digits = phone.replace(/\D/g, "")
-  const normalized = digits.startsWith("55") ? digits : `55${digits}`
+  const to = digits.startsWith("55") ? digits : `55${digits}`
+
+  const url = `${server}/${key}/message/send`
   try {
-    const res = await fetch(`${server}/message/sendText/${key}`, {
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ number: normalized, textMessage: { text: message } }),
+      body: JSON.stringify({ type: "TEXT", body: { to, text } }),
     })
+    const responseText = await res.text().catch(() => "")
     if (!res.ok) {
-      const body = await res.text().catch(() => res.statusText)
-      return { ok: false, error: `wame erro ${res.status}: ${body}` }
+      return { ok: false, error: `wame erro ${res.status}: ${responseText}` }
     }
     return { ok: true }
   } catch (err: unknown) {
     return { ok: false, error: err instanceof Error ? err.message : String(err) }
   }
+}
+
+// Chamada pública (requer admin)
+export async function sendWameMessage(phone: string, message: string): Promise<{ ok: boolean; error?: string }> {
+  await requireAdmin()
+  return wameSend(phone, message)
+}
+
+// Notifica a Elevanthe (número fixo) quando cliente assina a OS
+// Esta é pública pois é chamada pelo cliente na página pública da OS
+export async function notifyElevantheOSSigned(osRef: string, clientName: string): Promise<{ ok: boolean; error?: string }> {
+  const ELEVANTHE_WA = "5587988219342"
+  const msg = `Novo aceite de Ordem de Serviço!\n\nCliente: ${clientName}\nOS: ${osRef}\n\nO cliente acabou de assinar digitalmente esta Ordem de Serviço. Acesse o painel para confirmar.`
+  return wameSend(ELEVANTHE_WA, msg)
 }
 
